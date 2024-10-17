@@ -1,7 +1,13 @@
 import pandas as pd
 
+idx = 2
+
 # Reading the CSV file
-df = pd.read_csv('data/MA200.csv')
+try:
+    df = pd.read_csv(f'data/MA200_{idx}.csv')
+except FileNotFoundError:
+    df = pd.read_excel(f'data/MA200_{idx}.xlsx')
+
 
 df_cols_to_keep = pd.read_csv('data/Columns_to_keep.csv')
 
@@ -21,7 +27,7 @@ df.columns = df.columns.str.rstrip('_')
 
 print(df.dtypes)
 
-df.to_csv('data/MA200_filtered.csv')
+df.to_csv(f'data/MA200_filtered_{idx}.csv')
 
 '''families = {'flows': ['flow_setpoint', 'flow_total', 'flow1', 'flow2'],
             'sample': ['sample_temp', 'sample_rh', 'sample_dewpoint'],
@@ -34,7 +40,7 @@ df.to_csv('data/MA200_filtered.csv')
             'internal': ['internal_pressure', 'internal_temp']}'''
 
 
-families = {'flows': ['flow_setpoint', 'flow_total', 'flow1', 'flow2'],
+'''families = {'flows': ['flow_setpoint', 'flow_total', 'flow1', 'flow2'],
             'sample': ['sample_temp', 'sample_rh', 'sample_dewpoint'],
             'uv': ['uv_bc1', 'uv_bc2', 'uv_bcc', 'uv_atn1'],
             'ir': ['ir_atn1',  'ir_bc1', 'ir_bc2', 'ir_bcc'],
@@ -44,7 +50,17 @@ families = {'flows': ['flow_setpoint', 'flow_total', 'flow1', 'flow2'],
             'info': ['gps_lat', 'gps_long', 'status', 'battery_remaining', 'tape_position'],
             'internal': ['internal_pressure', 'internal_temp'],
             'string_values': ['uv_atn2', 'uv_k', 'blue_atn2', 'blue_k', 'green_atn2', 'green_k', 'red_atn2', 'red_k',
-                              'ir_atn2', 'ir_k', 'readable_status']}
+                              'ir_atn2', 'ir_k', 'readable_status']}'''
+
+families = {'flows': ['flow_setpoint', 'flow_total', 'flow1', 'flow2'],#
+            'internal_info': ['sample_temp', 'sample_rh', 'sample_dewpoint', 'internal_pressure', 'internal_temp'],#
+            'atn': ['uv_atn1', 'ir_atn1', 'blue_atn1', 'green_atn1', 'red_atn1', 'uv_atn2', 'blue_atn2', 'green_atn2',
+                     'red_atn2', 'ir_atn2'],#
+            'ebc': ['uv_bc1', 'uv_bc2', 'uv_bcc', 'ir_bc1', 'ir_bc2', 'ir_bcc', 'blue_bc1', 'blue_bc2', 'blue_bcc',
+                    'green_bc1', 'green_bc2', 'green_bcc', 'red_bc1', 'red_bc2', 'red_bcc'],#
+            'status': ['gps_lat', 'gps_long', 'status', 'battery_remaining', 'tape_position'],#
+            'compensation_parameter': [ 'uv_k',  'blue_k',  'green_k',  'red_k', 'ir_k'],#
+            'readable_status': ['readable_status']}#
 
 
 influx_lines = []
@@ -71,8 +87,8 @@ print("\nInfluxDB Line Protocol Format:")
 '''for line in influx_lines:
     print(line)'''
 
-with open('data/influx_csv.txt', 'w', newline='') as file:
+with open(f'data/influx_csv_{idx}.txt', 'w', newline='') as file:
     for line in influx_lines:
         file.write(f"{line}\n")
 
-print("Data written to data.txt")
+print("Data written.")
