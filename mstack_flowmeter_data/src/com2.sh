@@ -3,9 +3,20 @@
 mitrap_station=$1
 BUCKET=$2
 
-DIRECTORY="/mnt/incoming/$mitrap_station"
+DIRECTORY="/mnt/incoming/$mitrap_station/MStack_Flow_Meter_Valve_RHT"
 
 valid_files=()
+
+# Get all text files
+for file in "$DIRECTORY"/*.txt
+do
+  # Check if it is not an event file
+  if [[ ! "$(basename "$file")" == *Event* ]]; then
+    valid_files+=("$file")
+  fi
+done
+
+echo $valid_files
 
 # DO NOT STORE DOUBLE ENTRIES IN THE DB
 
