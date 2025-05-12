@@ -16,8 +16,6 @@ do
   fi
 done
 
-echo $valid_files
-
 # DO NOT STORE DOUBLE ENTRIES IN THE DB
 
 # Start writing to influx
@@ -51,7 +49,6 @@ for file in "${valid_files[@]}"; do
 
         else
             echo "NaN value=$value"
-            #echo
         fi
 
         sleep 1
