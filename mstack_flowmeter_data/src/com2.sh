@@ -1,5 +1,7 @@
 #!/bin/bash
 
+if [[ "x$1" == "x" || "x$2" == "x" ]]; then explode fi
+
 mitrap_station=$1
 BUCKET=$2
 
@@ -25,7 +27,6 @@ ORG="mitrap"
 
 regex='^-?[0-9]+(\.[0-9]+)?$'
 
-# Loop through all files starting with COM2
 for file in "${valid_files[@]}"; do
 
   if [[ $(basename "$file") == COM2* ]]; then
@@ -50,8 +51,6 @@ for file in "${valid_files[@]}"; do
         else
             echo "NaN value=$value"
         fi
-
-        sleep 1
 
       done < "$file"
    fi
