@@ -5,7 +5,7 @@ if [[ x"$1" == x || x"$2" == x ]]; then explode; fi
 mitrap_station=$1
 BUCKET=$2
 
-DIRECTORY="/mnt/incoming/$mitrap_station/sambashare/AE31"
+DIRECTORY="/mnt/incoming/$mitrap_station/sambashare/AE31/mitrap"
 
 files=("$DIRECTORY"/*.csv)
 
