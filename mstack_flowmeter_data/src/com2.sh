@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ "x$1" == "x" || "x$2" == "x" ]]; then explode fi
+if [[ x"$1" == x || x"$2" == x ]]; then explode; fi
 
 mitrap_station=$1
 BUCKET=$2

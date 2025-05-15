@@ -25,8 +25,6 @@ done
 #TOKEN=TBD
 ORG="mitrap"
 
-regex='^-?[0-9]+(\.[0-9]+)?$'
-
 for file in "${valid_files[@]}"; do
 
   if [[ $(basename "$file") == COM1* ]]; then
