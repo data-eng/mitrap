@@ -18,12 +18,12 @@ ORG="mitrap"
 
 for file in "${files[@]}"; do
 
-  while IFS=',' read -r timestamp datestr timestr nm370 nm450 nm520 nm590 nm660 nm880 nm950 flow; do
+  while IFS=',' read -r timestamp datestr timestr nm370 nm450 nm520 nm590 nm660 nm880 nm950 flow rest; do
 
     timestamp="$date $time"
     timestamp_unix=$(date -d "$timestamp" +%s)
 
-    write_query="metrics date_str=$datestr,time_str=$timestr nm370=$nm370,nm450=$nm450,nm520=$nm520,nm590=$nm590,nm660=$nm660,nm880=$nm880,v7=$v7,nm950=$nm950 $flow"
+    write_query="ae31 date_str=$datestr,time_str=$timestr nm370=$nm370,nm450=$nm450,nm520=$nm520,nm590=$nm590,nm660=$nm660,nm880=$nm880,nm950=$nm950,flow=$flow $timestamp_unix"
 
     echo $write_query
 
