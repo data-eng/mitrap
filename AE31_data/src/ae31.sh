@@ -7,7 +7,7 @@ BUCKET=$2
 
 DIRECTORY="/mnt/incoming/$mitrap_station/sambashare/AE31"
 
-files=("$DIRECTORY"/*.txt)
+files=("$DIRECTORY"/*.csv)
 
 # DO NOT STORE DOUBLE ENTRIES IN THE DB
 
