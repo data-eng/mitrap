@@ -13,7 +13,8 @@ for file in "${valid_files[@]}"; do
   tail -n +2 "$file" | while IFS=',' read -r datetime concentration dead_time pulses sat_temp condenser_temp optics_temp cabin_temp inlet_p crit_orifice_p nozzle_p liquid_level pulse_ratio total_errors status_error; do
 
 
-    timestamp_unix=$(date -d "$datetime" +%s)000000000
+    datetime_fixed="${datetime//./-}"
+    timestamp_unix=$(date -d "$datetime_fixed" +%s)000000000
 
     status_error=$(echo "$status_error" | tr -d '\n' | tr -d '\r')
     status_error_dec=$((16#${status_error#0x}))
