@@ -36,7 +36,7 @@ clean_nm() {
 }
 
 
-if [[ x"$1" == x || x"$2" == x ]]; then explode; fi
+if [[ x"$1" == x || x"$2" == x ]]; then exit 1; fi
 
 mitrap_station=$1
 BUCKET=$2
