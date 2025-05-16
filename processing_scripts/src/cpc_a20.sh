@@ -7,15 +7,8 @@ BUCKET=$2
 
 DIRECTORY="/mnt/incoming/$mitrap_station/sambashare/cpc_A20"
 
-valid_files=()
+valid_files=("$DIRECTORY"/*.dat)
 
-for file in "$DIRECTORY"/*.csv; do
-  if [[ "$(basename "$file")" == *.dat ]]; then
-    valid_files+=("$file")
-  fi
-done
-
-# Process each valid file
 for file in "${valid_files[@]}"; do
   tail -n +2 "$file" | while IFS=',' read -r datetime concentration dead_time pulses sat_temp condenser_temp optics_temp cabin_temp inlet_p crit_orifice_p nozzle_p liquid_level pulse_ratio total_errors status_error; do
 
