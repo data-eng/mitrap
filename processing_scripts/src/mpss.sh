@@ -1,3 +1,6 @@
+#!/bin/bash
+
+
 convert_custom_time_to_unix_ns() {
   local base_date="$1"
   local float_time="$2"
