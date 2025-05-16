@@ -1,100 +1,42 @@
-convert_custom_time_to_unix_ns() {
-  local base_date="$1"
-  local float_time="$2"
-
-  local hour=$(awk -v t="$float_time" 'BEGIN { printf "%d", int(t) }')
-  local min_fraction=$(awk -v t="$float_time" 'BEGIN { printf "%.6f", t - int(t) }')
-  local minutes=$(awk -v f="$min_fraction" 'BEGIN { printf "%d", f * 60 }')
-  local seconds_fraction=$(awk -v f="$min_fraction" 'BEGIN { printf "%.6f", (f * 60) - int(f * 60) }')
-  local seconds=$(awk -v f="$seconds_fraction" 'BEGIN { printf "%d", f * 60 }')
-
-  local datetime="${base_date} $(printf "%02d:%02d:%02d" "$hour" "$minutes" "$seconds")"
-
-  epoch=$(date -d "$datetime" +%s)
-
-  echo "${epoch}000000000"
-}
-
-clean_nm() {
-  local raw_val="$1"
-
-  # Normalize to numeric, trim trailing zeros but keep at least one decimal digit
-  awk -v val="$raw_val" '
-  BEGIN {
-    split(val, parts, ".")
-    int_part = parts[1]
-    frac_part = parts[2]
-
-    sub(/0+$/, "", frac_part)
-
-    if (frac_part == "") {
-      frac_part = "0"
-    }
-
-    printf "nm%s_%s\n", int_part, frac_part
-  }'
-}
-
+#!/bin/bash
 
 if [[ x"$1" == x || x"$2" == x ]]; then explode; fi
 
 mitrap_station=$1
 BUCKET=$2
 
-DIRECTORY="/mnt/incoming/$mitrap_station/sambashare/MPSS_ATH/inverted"
+DIRECTORY="/mnt/incoming/$mitrap_station/sambashare/cpc_A20"
 
-for file in "$DIRECTORY"/*.inv; do
-  filename=$(basename "$file")
-  date_str=$(echo "$filename" | grep -oP '\d{8}')  # Extract YYYYMMDD
-  date_fmt="${date_str:0:4}-${date_str:4:2}-${date_str:6:2}"
+valid_files=("$DIRECTORY"/*.dat)
 
-  exec 3< "$file" 
+for file in "${valid_files[@]}"; do
+  tail -n +2 "$file" | while IFS=',' read -r datetime concentration dead_time pulses sat_temp condenser_temp optics_temp cabin_temp inlet_p crit_orifice_p nozzle_p liquid_level pulse_ratio total_errors status_error; do
 
-  while true; do
-    read -r line1 <&3 || break
-    read -r line2 <&3 || break
 
-    # Parse line 1 nanometer (nm) headers
-    read -ra fields1 <<< "$line1"
-    read -ra fields2 <<< "$line2"
+    datetime_fixed="${datetime//./-}"
+    timestamp_unix=$(date -d "$datetime_fixed" +%s)000000000
 
-    # Both lines should have the same number of columns
-    if [[ ${#fields1[@]} -ne ${#fields2[@]} ]]; then
-      continue
-    fi
+    status_error=$(echo "$status_error" | tr -d '\n' | tr -d '\r')
+    status_error_dec=$((16#${status_error#0x}))
 
-    # Extract fixed columns
-    time1="${fields1[0]}"; time2="${fields2[0]}"
-    temp1="${fields1[1]}"; temp2="${fields2[1]}"
-    press1="${fields1[2]}"; press2="${fields2[2]}"
-    other1="${fields1[3]}"; other2="${fields2[3]}"
+    write_query="cpc_data \
+concentration_cc=${concentration},\
+dead_time_us=${dead_time},\
+pulses=${pulses},\
+saturator_temp_C=${sat_temp},\
+condenser_temp_C=${condenser_temp},\
+optics_temp_C=${optics_temp},\
+cabin_temp_C=${cabin_temp},\
+inlet_pressure_kPa=${inlet_p},\
+critical_orifice_pressure_kPa=${crit_orifice_p},\
+nozzle_pressure_kPa=${nozzle_p},\
+liquid_level=${liquid_level},\
+pulse_ratio=${pulse_ratio},\
+total_errors=${total_errors},\
+status_error=${status_error_dec} \
+$timestamp_unix"
 
-    # Assert common columns match
-    if [[ "$time1" != "$time2" || "$temp1" != "$temp2" || "$press1" != "$press2" || "$other1" != "$other2" ]]; then
-      continue
-    fi
+    echo $write_query
 
-    timestamp_unix=$(convert_custom_time_to_unix_ns "$date_fmt" "$time1")
-
-    fields="temp_C=${temp1},pressure_hPa=${press1},other=${other1}"
-
-    # Loop over nm fields
-    for ((i = 4; i < ${#fields1[@]}; i++)); do
-
-      nm_raw="${fields1[$i]}"
-      val="${fields2[$i]}"
-
-      nm_raw=$(echo "$nm_raw" | tr -d '\n' | tr -d '\r')
-      val=$(echo "$val" | tr -d '\n' | tr -d '\r')
-
-      nm_name=$(clean_nm "$nm_raw")
-      fields="${fields},${nm_name}=${val}"
-    done
-
-    write_query="smps_data ${fields} ${timestamp_unix}"
-    echo "$write_query"
-    
   done
-
-  exec 3<&-
 done
