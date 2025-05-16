@@ -56,7 +56,7 @@ for file in "${valid_files[@]}"; do
 
         pres_kPA=$(echo "$pres_kPA" | tr -d '\n' | tr -d '\r')
 
-        line_protocol="li_cor co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp"
+        write_query="li_cor co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp"
 
         echo $write_query
 
