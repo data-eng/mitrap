@@ -9,17 +9,23 @@ DIRECTORY="/mnt/incoming/$mitrap_station/sambashare/MPSS_ATH/inverted"
 
 for file in "$DIRECTORY"/*.inv; do
 
+  echo $file
+
   filename=$(basename "$file")
   date_str=$(echo "$filename" | grep -oP '\d{8}')  # Extract YYYYMMDD
   date_fmt="${date_str:0:4}-${date_str:4:2}-${date_str:6:2}"
-
-  echo $date_fmt
 
   # Read lines in pairs
   paste - - < "$file" | while IFS=$'\t' read -r line1 line2; do
     # Read first 4 common values
     read -r time1 temp1 press1 other1 rest1 <<<"$(echo "$line1" | awk '{print $1, $2, $3, $4, substr($0, index($0,$5))}')"
     read -r time2 temp2 press2 other2 rest2 <<<"$(echo "$line2" | awk '{print $1, $2, $3, $4, substr($0, index($0,$5))}')"
+
+    echo $time1, $temp1, $press1
+    echo $time2, $temp2, $press2
+    echo ----
+
+    exit 0
 
     # Assert equality
     if [[ "$time1" != "$time2" || "$temp1" != "$temp2" || "$press1" != "$press2" || "$other1" != "$other2" ]]; then
