@@ -26,6 +26,8 @@ for file in "$DIRECTORY"/*.inv; do
       continue
     fi
 
+    echo $time1, $temp1, $press2
+
     # Convert time_frac to UNIX timestamp
     day_seconds=$(awk -v f="$time1" 'BEGIN {printf "%.0f", f * 86400}')
     timestamp_unix=$(date -d "$date_fmt 00:00:00 + $day_seconds seconds" +%s)000000000
@@ -44,9 +46,9 @@ for file in "$DIRECTORY"/*.inv; do
       fields="${fields},${key_fixed}=${val}"
     done
 
-    influx_line="mpss ${fields} ${timestamp_unix}"
+    write_query="mpss ${fields} ${timestamp_unix}"
 
-    echo "$influx_line"
+    echo "$write_query"
 
   done
 done
