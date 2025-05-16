@@ -63,8 +63,3 @@ for file in "${valid_files[@]}"; do
     done < "$file"
 
 done
-
-echo "Data processing completed."
-
-
-

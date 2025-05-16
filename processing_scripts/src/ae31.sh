@@ -29,5 +29,3 @@ for file in "${files[@]}"; do
 
   done < "$file"
 done
-
-echo "Data processing completed."
