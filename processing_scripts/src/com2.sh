@@ -34,7 +34,7 @@ for file in "${valid_files[@]}"; do
       while IFS=',' read -r date time value; do
 
         timestamp="$date $time"
-        timestamp_unix=$(date -d "$timestamp" +%s)
+        timestamp_unix=$(date -d "$timestamp" +%s)000000000
 
         value=$(echo "$value" | tr -d '\n' | tr -d '\r')
 
@@ -46,7 +46,7 @@ for file in "${valid_files[@]}"; do
 
             write_query="com2 value=$value $timestamp_unix"
             echo $write_query
-            #echo "$write_query" | influx write --org "$ORG" --bucket "$BUCKET" --token "$TOKEN" --precision s
+            #echo "$write_query" | influx write --org "$ORG" --bucket "$BUCKET" --token "$TOKEN"
 
         else
             echo "NaN value=$value"

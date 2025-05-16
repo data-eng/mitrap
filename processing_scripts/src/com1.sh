@@ -32,7 +32,7 @@ for file in "${valid_files[@]}"; do
     while IFS=',' read -r date time p_psi unit1 p_pa unit2 p_kpa unit3 p_torr unit4 p_inhg unit5 p_atm unit6 p_bar unit7 conc_3_percent label1 conc_c3 label2 conc_5_percent label3 conc_c5 label4 valve_state valve_label; do
 
         timestamp="$date $time"
-        timestamp_unix=$(date -d "$timestamp" +%s)
+        timestamp_unix=$(date -d "$timestamp" +%s)000000000
 
         # Unix Timestamp: $timestamp_unix
         # Pressure: PSI, Pa, kPa, Torr, inHg, atm, bar

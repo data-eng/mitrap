@@ -52,7 +52,7 @@ for file in "${valid_files[@]}"; do
         previous_hour=$hour
 
         timestamp="$current_date $time"
-        timestamp_unix=$(date -d "$timestamp" +%s)
+        timestamp_unix=$(date -d "$timestamp" +%s)000000000
 
         pres_kPA=$(echo "$pres_kPA" | tr -d '\n' | tr -d '\r')
 
