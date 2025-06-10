@@ -4,25 +4,27 @@ if [[ x"$1" == x || x"$2" == x ]]; then
   echo "Missing arguments [file_to_process] or [file_influx_log]."; exit 1
 fi
 
-file_to_process=$1
-file_influx_log=$2
+station=$1
+file_to_process=$2
+dir_influx_log="~/src/mitrap/influx_log/$station"
+mkdir -p $dir_influx_log
 
-if [[ ! "$(basename "$file_influx_log")" == *.txt ]]; then
-    echo "Write file must be .txt ."; exit 1
-fi
-
-# The following lines are expected to be moved to parcer
 if [[ "$(basename "$file_to_process")" == *Event* ]]; then
     echo "We do not process Event files."; exit 1
 fi
 
-if [[ ! "$(basename "$file_to_process")" == COM2* ]]; then
+if [[ ! "$(basename "$file_to_process")" == *COM2* ]]; then
     echo "COM1 are processed from other script."; exit 1
 fi
 
 regex='^-?[0-9]+(\.[0-9]+)?$'
 
 while IFS=',' read -r date time value; do
+
+  if [[ "$date" == "+ "* ]]; then
+    date="${date:2}"
+  fi
+
 
   timestamp="$date $time"
   timestamp_unix=$(date -d "$timestamp" +%s)000000000
@@ -36,7 +38,7 @@ while IFS=',' read -r date time value; do
       fi
 
       write_query="com2 value=$value $timestamp_unix"
-      echo $write_query > file_influx_log
+      echo $write_query >> "$dir_influx_log/com2.txt"
 
   else
       echo "NaN value=$value"

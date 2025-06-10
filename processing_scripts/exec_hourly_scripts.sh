@@ -8,7 +8,7 @@ chron_defined_pth="/mnt/diff/$timestamp/"
 
 echo $chron_defined_pth
 
-key="mitrap006/sambashare/AE31/mitrap"
+key="mitrap006/MStack_Flow_Meter_Valve_RHT"
 
 # Check and run the command
 if [[ -n "${command_map[$key]}" ]]; then
