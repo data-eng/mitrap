@@ -6,7 +6,7 @@ fi
 
 station=$1
 file_to_process=$2
-dir_influx_log="~/src/mitrap/influx_log/$station"
+dir_influx_log="/home/debian/src/mitrap/influx_log/$station"
 mkdir -p $dir_influx_log
 
 if [[ "$(basename "$file_to_process")" == *Event* ]]; then
