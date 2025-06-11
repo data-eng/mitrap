@@ -1,14 +1,7 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x ]]; then exit 1; fi
-
-mitrap_station=$1
-BUCKET=$2
-
-DIRECTORY="/mnt/incoming/$mitrap_station/sambashare/AE31/mitrap"
-
 if [[ x"$1" == x || x"$2" == x ]]; then
-  echo "Missing arguments [file_to_process] or [file_influx_log]."; exit 1
+  echo "Missing arguments [station] or [file_to_process]."; exit 1
 fi
 
 station=$1
@@ -30,4 +23,3 @@ while IFS=',' read -r timestamp datestr timestr nm370 nm450 nm520 nm590 nm660 nm
     echo $write_query >> "$dir_influx_log/ae31.txt"
 
  done < "$file_to_process"
- 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x ]]; then 
-  echo "Missing arguments [file_to_process] or [file_influx_log]."; exit 1
+if [[ x"$1" == x || x"$2" == x ]]; then
+  echo "Missing arguments [station] or [file_to_process]."; exit 1
 fi
 
 station=$1
