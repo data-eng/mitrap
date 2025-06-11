@@ -13,7 +13,7 @@ mkdir -p $dir_influx_log
 
 tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dead_time pulses sat_temp condenser_temp optics_temp cabin_temp inlet_p crit_orifice_p nozzle_p liquid_level pulse_ratio total_errors status_error; do
 
-    if [[ "$datetime" == "+ "* ]]; then
+    if [[ "$datetime" == "! "* ]]; then
       datetime="${datetime:2}"
     fi
 
