@@ -37,15 +37,15 @@ clean_nm() {
   }'
 }
 
-
-if [[ x"$1" == x || x"$2" == x ]]; then
-  echo "Missing arguments [station] or [file_to_process]."; exit 1
+if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
+  echo "Missing arguments [station], [timestamp_DD] or [file_to_process]."; exit 1
 fi
 
 station=$1
 file_to_process=$2
-dir_influx_log="/home/debian/src/mitrap/influx_log/$station"
-mkdir -p $dir_influx_log 
+timestamp_DD=$3
+dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
+mkdir -p $dir_influx_log
 
 filename=$(basename "$file_to_process")
 date_str=$(echo "$filename" | grep -oP '\d{8}')  # Extract YYYYMMDD
@@ -56,14 +56,6 @@ exec 3< "$file_to_process"
 while true; do
   read -r line1 <&3 || break
   read -r line2 <&3 || break
-
-  if [[ "$line1" == "+ "* ]]; then
-    line1="${line1:2}"
-  fi
-
-  if [[ "$line2" == "+ "* ]]; then
-    line2="${line2:2}"
-  fi
  
   # Parse line 1 nanometer (nm) headers
   read -ra fields1 <<< "$line1"

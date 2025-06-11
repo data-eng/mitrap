@@ -1,12 +1,13 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x ]]; then
-  echo "Missing arguments [station] or [file_to_process]."; exit 1
+if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
+  echo "Missing arguments [station], [timestamp_DD] or [file_to_process]."; exit 1
 fi
 
 station=$1
 file_to_process=$2
-dir_influx_log="/home/debian/src/mitrap/influx_log/$station"
+timestamp_DD=$3
+dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
 mkdir -p $dir_influx_log
 
 if [[ "$(basename "$file_to_process")" == *Event* ]]; then
@@ -18,10 +19,6 @@ if [[ ! "$(basename "$file_to_process")" == *COM1* ]]; then
 fi
 
 while IFS=',' read -r date time p_psi unit1 p_pa unit2 p_kpa unit3 p_torr unit4 p_inhg unit5 p_atm unit6 p_bar unit7 conc_3_percent label1 conc_c3 label2 conc_5_percent label3 conc_c5 label4 valve_state valve_label; do
-
-    if [[ "$date" == "+ "* ]]; then
-      date="${date:2}"
-    fi
 
     timestamp="$date $time"
     timestamp_unix=$(date -d "$timestamp" +%s)000000000

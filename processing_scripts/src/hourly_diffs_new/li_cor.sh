@@ -1,15 +1,14 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x ]]; then
-  echo "Missing arguments [station] or [file_to_process]."; exit 1
+if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
+  echo "Missing arguments [station], [timestamp_DD] or [file_to_process]."; exit 1
 fi
 
 station=$1
 file_to_process=$2
-dir_influx_log="/home/debian/src/mitrap/influx_log/$station"
+timestamp_DD=$3
+dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
 mkdir -p $dir_influx_log
-
-DIRECTORY="/mnt/incoming/$mitrap_station/sambashare/Li_Cor"
 
 current_date=""
 previous_hour=0

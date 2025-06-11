@@ -1,20 +1,16 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x ]]; then
-  echo "Missing arguments [station] or [file_to_process]."; exit 1
+if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
+  echo "Missing arguments [station], [timestamp_DD] or [file_to_process]."; exit 1
 fi
 
 station=$1
 file_to_process=$2
-dir_influx_log="/home/debian/src/mitrap/influx_log/$station"
-
+timestamp_DD=$3
+dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
 mkdir -p $dir_influx_log
 
 while IFS=',' read -r timestamp datestr timestr nm370 nm450 nm520 nm590 nm660 nm880 nm950 flow rest; do
-
-    if [[ "$timestamp" == "+ "* ]]; then
-        timestamp="${timestamp:2}"
-    fi
 
     timestamp_unix=$(date -d "$timestamp" +%s)000000000
 
