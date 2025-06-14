@@ -53,10 +53,9 @@ for INST in ${INSTALLATIONS}; do
 				mkdir -p ${DIR}
 
 				if [[ -f /mnt/backup/$F ]]; then
-					if [[ $(cat /mnt/incoming/$F | tail -c1  | wc -l) -gt 0 ]] ; then
-						echo "" >> "/mnt/incoming/$F"
-					fi
-					echo "DIFF -c0 /mnt/backup/$F /mnt/incoming/$F > /mnt/new/${DD}/$F" >> ${LOGFILE}
+					#if [[ $(cat /mnt/incoming/$F | tail -c1  | wc -l) -gt 0 ]] ; then
+					#	echo "" >> "/mnt/incoming/$F"
+					#fi
 					mykey="${INST}.${TYPE}.head"
 					HEADER=${toml[$mykey]}
 					# Copy HEADER starting lines
@@ -64,20 +63,26 @@ for INST in ${INSTALLATIONS}; do
 						echo "CP HEADER $HEADER"
 						head -n ${HEADER} "/mnt/incoming/$F" > "/mnt/new/${DD}/$F"
 					fi
-					diff -c0 "/mnt/backup/$F" "/mnt/incoming/$F" |\
-						tail -n +6 | sed 's/^\+ //' >> "/mnt/new/${DD}/$F"
-					if [ ! -s "/mnt/new/${DD}/${F}" ]; then
-						echo EMPTY >> ${LOGFILE}
-						rm "/mnt/new/${DD}/${F}"
+					OLDLINES=$(cat "/mnt/backup/$F" | wc -l)
+					NEWLINES=$(cat "/mnt/incoming/$F" | wc -l)
+					echo "LINES $F: $OLDLINES $NEWLINES" >> ${LOGFILE}
+					if [[ ${NEWLINES} -gt ${OLDLINES} ]]; then
+						# There are more lines now.
+						# Only put the new lines in new/
+						tail -n +$((OLDLINES + 1)) "/mnt/incoming/$F" >> "/mnt/new/${DD}/$F"
 					fi
+					# Note that unterminated lines at EOF are ignored by wc
+					# So half-written lines are left behind for the next round.
 
 				else
 					echo "CP -p /mnt/incoming/$F ${DIR}" >> ${LOGFILE}
 					cp -p /mnt/incoming/$F ${DIR}
 				fi
 
-				echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD}" >> ${LOGFILE}
-				sh ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD}
+				if [[ -s "/mnt/new/${DD}/${F}" ]]; then
+					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD}" >> ${LOGFILE}
+					sh ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD}
+				fi
 			done
 		else
 			echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less." >> ${LOGFILE}
