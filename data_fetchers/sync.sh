@@ -82,7 +82,7 @@ for INST in ${INSTALLATIONS}; do
 
 				if [[ -s "/mnt/new/${DD}/${F}" ]]; then
 					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD}"
-					sh ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD}
+					bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD}
 				fi
 			done
 		else
