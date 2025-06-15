@@ -21,9 +21,6 @@ done
 KEYS="${!toml[@]}"
 INSTALLATIONS=$(echo ${KEYS} | tr ' ' '\n' | sed 's/\..*$//' | sort | uniq)
 
-echo "===== NEW RUN ${DD} INSTALLATIONS: ${INSTALLATIONS}"
-
-
 # fetch data
 
 for inst in ${INSTALLATIONS}; do
@@ -34,7 +31,7 @@ done
 # Process files
 
 for INST in ${INSTALLATIONS}; do
-	echo "XXX $INST"
+	echo "===== RUN ${DD} INSTALLATION ${INST}"
 	# Find all sub-keys under $INST that have sub-sub-keys (have a dot)
 	# The first level under $INST is ignored.
 	# The second level must have 'file', 'proc' third-levels.
@@ -54,26 +51,26 @@ for INST in ${INSTALLATIONS}; do
 				mkdir -p ${DIR}
 
 				if [[ -f /mnt/backup/$F ]]; then
-					#if [[ $(cat /mnt/incoming/$F | tail -c1  | wc -l) -gt 0 ]] ; then
-					#	echo "" >> "/mnt/incoming/$F"
-					#fi
-					mykey="${INST}.${TYPE}.head"
-					HEADER=${toml[$mykey]}
-					# Copy HEADER starting lines
-					if [[ $HEADER -gt 0 ]]; then
-						echo "CP HEADER $HEADER"
-						head -n ${HEADER} "/mnt/incoming/$F" > "/mnt/new/${DD}/$F"
-					fi
 					OLDLINES=$(cat "/mnt/backup/$F" | wc -l)
 					NEWLINES=$(cat "/mnt/incoming/$F" | wc -l)
 					echo "LINES $F: $OLDLINES $NEWLINES"
-					if [[ ${NEWLINES} -gt ${OLDLINES} ]]; then
-						# There are more lines now.
-						# Only put the new lines in new/
-						tail -n +$((OLDLINES + 1)) "/mnt/incoming/$F" >> "/mnt/new/${DD}/$F"
-					fi
 					# Note that unterminated lines at EOF are ignored by wc
 					# So half-written lines are left behind for the next round.
+
+					if [[ ${NEWLINES} -gt ${OLDLINES} ]]; then
+						# There are more lines now.
+						
+						# First, copy the header
+						mykey="${INST}.${TYPE}.head"
+						HEADER=${toml[$mykey]}
+						if [[ $HEADER -gt 0 ]]; then
+							echo "CP HEADER $HEADER"
+							head -n ${HEADER} "/mnt/incoming/$F" > "/mnt/new/${DD}/$F"
+						fi
+
+						# Then put the new lines in new/
+						tail -n +$((OLDLINES + 1)) "/mnt/incoming/$F" >> "/mnt/new/${DD}/$F"
+					fi
 
 				else
 					echo "CP -p /mnt/incoming/$F ${DIR}"
