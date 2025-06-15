@@ -1,5 +1,10 @@
 #!/bin/bash
 
+DD=$(date +%s)
+# Redirect all stdout/stderr to logfile
+exec &>> /home/mitrap/log/sync.${DD}.log
+
+
 BINDIR=/home/debian/src/mitrap
 PROCDIR=${BINDIR}/processing_scripts/src/hourly_diffs_new/
 CONFIG=/mnt/installations.toml
@@ -16,24 +21,20 @@ done
 KEYS="${!toml[@]}"
 INSTALLATIONS=$(echo ${KEYS} | tr ' ' '\n' | sed 's/\..*$//' | sort | uniq)
 
-DD=$(date +%s)
-LOGFILE=/home/mitrap/log/sync.${DD}.log
+echo "===== NEW RUN ${DD} INSTALLATIONS: ${INSTALLATIONS}"
 
 
 # fetch data
 
-echo "INSTALLATIONS: ${INSTALLATIONS}" >> ${LOGFILE}
-
 for inst in ${INSTALLATIONS}; do
-	rsync -av --delete ${inst}@mitrap-pc.ipta.demokritos.gr:/sensor_data/MITRAP-DATA/${inst} /mnt/incoming/ > ${LOGFILE} 2>&1
-	echo "rsync $inst" >> ${LOGFILE}
+	rsync -av --delete ${inst}@mitrap-pc.ipta.demokritos.gr:/sensor_data/MITRAP-DATA/${inst} /mnt/incoming/
 done
 
 
 # Process files
 
 for INST in ${INSTALLATIONS}; do
-	echo "XXX $INST" >> ${LOGFILE}
+	echo "XXX $INST"
 	# Find all sub-keys under $INST that have sub-sub-keys (have a dot)
 	# The first level under $INST is ignored.
 	# The second level must have 'file', 'proc' third-levels.
@@ -44,12 +45,12 @@ for INST in ${INSTALLATIONS}; do
 		if [[ "${FIELDS}" == "file_head_proc_" ]]; then
 			mykey="${INST}.${TYPE}.file"
 			FILES=$(ls -d /mnt/incoming/${INST}/${toml[$mykey]} 2>/dev/null | sed "s#/mnt/incoming/##")
-			echo "FILES $FILES from ${toml[$mykey]} for key $mykey" >> ${LOGFILE}
+			echo "FILES $FILES from ${toml[$mykey]} for key $mykey"
 			mykey="${INST}.${TYPE}.proc"
 			PROC=${toml[$mykey]}
 			for F in $FILES; do
 				DIR="/mnt/new/${DD}/"$(dirname "$F")
-				echo "FILE $F DIR ${DIR}" >> ${LOGFILE}
+				echo "FILE $F DIR ${DIR}"
 				mkdir -p ${DIR}
 
 				if [[ -f /mnt/backup/$F ]]; then
@@ -59,13 +60,13 @@ for INST in ${INSTALLATIONS}; do
 					mykey="${INST}.${TYPE}.head"
 					HEADER=${toml[$mykey]}
 					# Copy HEADER starting lines
-					if $((HEADER > 0)); then
+					if [[ $HEADER -gt 0 ]]; then
 						echo "CP HEADER $HEADER"
 						head -n ${HEADER} "/mnt/incoming/$F" > "/mnt/new/${DD}/$F"
 					fi
 					OLDLINES=$(cat "/mnt/backup/$F" | wc -l)
 					NEWLINES=$(cat "/mnt/incoming/$F" | wc -l)
-					echo "LINES $F: $OLDLINES $NEWLINES" >> ${LOGFILE}
+					echo "LINES $F: $OLDLINES $NEWLINES"
 					if [[ ${NEWLINES} -gt ${OLDLINES} ]]; then
 						# There are more lines now.
 						# Only put the new lines in new/
@@ -75,17 +76,17 @@ for INST in ${INSTALLATIONS}; do
 					# So half-written lines are left behind for the next round.
 
 				else
-					echo "CP -p /mnt/incoming/$F ${DIR}" >> ${LOGFILE}
+					echo "CP -p /mnt/incoming/$F ${DIR}"
 					cp -p /mnt/incoming/$F ${DIR}
 				fi
 
 				if [[ -s "/mnt/new/${DD}/${F}" ]]; then
-					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD}" >> ${LOGFILE}
+					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD}"
 					sh ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD}
 				fi
 			done
 		else
-			echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less." >> ${LOGFILE}
+			echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
 		fi
 	done
 done
