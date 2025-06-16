@@ -10,12 +10,6 @@ timestamp_DD=$3
 dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
 mkdir -p $dir_influx_log
 
-station=$1
-file_to_process=$2
-dir_influx_log="/home/debian/src/mitrap/influx_log/$station"
-
-mkdir -p $dir_influx_log
-
 tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dead_time pulses sat_temp condenser_temp optics_temp cabin_temp inlet_p crit_orifice_p nozzle_p liquid_level pulse_ratio total_errors status_error; do
 
     datetime_fixed="${datetime//./-}"
