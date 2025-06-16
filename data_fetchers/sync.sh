@@ -90,3 +90,5 @@ for INST in ${INSTALLATIONS}; do
 done
 
 
+rsync -av --delete /mnt/incoming/ /mnt/backup
+exit 0
