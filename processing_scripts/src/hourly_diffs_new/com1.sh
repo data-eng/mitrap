@@ -1,12 +1,14 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
-  echo "Missing arguments [station], [timestamp_DD] or [file_to_process]."; exit 1
+if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+  echo "Missing arguments [station], [file_to_process], [timestamp_DD] or [file_to_store]." >> /home/mitrap/log/ae31.log
+  exit 1
 fi
 
 station=$1
 file_to_process=$2
 timestamp_DD=$3
+file_to_store=$4
 dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
 mkdir -p $dir_influx_log
 
@@ -29,6 +31,6 @@ while IFS=',' read -r date time p_psi unit1 p_pa unit2 p_kpa unit3 p_torr unit4 
     # Valve state [0/1]
 
     write_query="com1 pressure_psi=$p_psi,pressure_pa=$p_pa,pressure_kpa=$p_kpa,pressure_torr=$p_torr,pressure_inhg=$p_inhg,pressure_atm=$p_atm,pressure_bar=$p_bar,conc_3_percent=$conc_3_percent,c3=$conc_c3,conc_5_percent=$conc_5_percent,conc_c5=$conc_c5,valve_state=$valve_state $timestamp_unix"
-    echo $write_query >> "$dir_influx_log/com1.txt"
+    echo $write_query >> "$dir_influx_log/$file_to_store.txt"
 
 done < "$file_to_process"

@@ -37,15 +37,19 @@ clean_nm() {
   }'
 }
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
-  echo "Missing arguments [station], [timestamp_DD] or [file_to_process]."; exit 1
+
+if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+  echo "Missing arguments [station], [file_to_process], [timestamp_DD] or [file_to_store]." >> /home/mitrap/log/mpss.log
+  exit 1
 fi
 
 station=$1
 file_to_process=$2
 timestamp_DD=$3
+file_to_store=$4
 dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
 mkdir -p $dir_influx_log
+
 
 filename=$(basename "$file_to_process")
 date_str=$(echo "$filename" | grep -oP '\d{8}')  # Extract YYYYMMDD
@@ -95,7 +99,7 @@ while true; do
   done
 
   write_query="smps_data ${fields} ${timestamp_unix}"
-  echo "$write_query" >> "$dir_influx_log/mpss.txt"
+  echo $write_query >> "$dir_influx_log/$file_to_store.txt"
 
   done
 

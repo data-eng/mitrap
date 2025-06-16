@@ -1,14 +1,17 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
-  echo "Missing arguments [station], [timestamp_DD] or [file_to_process]."; exit 1
+if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+  echo "Missing arguments [station], [file_to_process], [timestamp_DD] or [file_to_store]." >> /home/mitrap/log/ae31.log
+  exit 1
 fi
 
 station=$1
 file_to_process=$2
 timestamp_DD=$3
+file_to_store=$4
 dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
 mkdir -p $dir_influx_log
+
 
 current_date=""
 previous_hour=0
@@ -45,6 +48,6 @@ while IFS= read -r line; do
 
     write_query="li_cor co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp_unix"
 
-    echo $write_query >> "$dir_influx_log/li_cor.txt"
+    echo $write_query >> "$dir_influx_log/$file_to_store.txt"
 
 done < "$file_to_process"
