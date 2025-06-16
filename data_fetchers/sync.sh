@@ -78,8 +78,8 @@ for INST in ${INSTALLATIONS}; do
 				fi
 
 				if [[ -s "/mnt/new/${DD}/${F}" ]]; then
-					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD}"
-					bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD}
+					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD} ${PROC}"
+					bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD} ${PROC}
 				fi
 			done
 		else
