@@ -45,6 +45,7 @@ for INST in ${INSTALLATIONS}; do
 			echo "FILES $FILES from ${toml[$mykey]} for key $mykey"
 			mykey="${INST}.${TYPE}.proc"
 			PROC=${toml[$mykey]}
+			i=0
 			for F in $FILES; do
 				DIR="/mnt/new/${DD}/"$(dirname "$F")
 				echo "FILE $F DIR ${DIR}"
@@ -78,9 +79,11 @@ for INST in ${INSTALLATIONS}; do
 				fi
 
 				if [[ -s "/mnt/new/${DD}/${F}" ]]; then
-					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD}"
-					bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD}
+					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD} ${PROC}_$i"
+					bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD} "${PROC}_$i"
 				fi
+
+				((i++))
 			done
 		else
 			echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
