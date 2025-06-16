@@ -31,64 +31,62 @@ done
 # Process files
 
 for INST in ${INSTALLATIONS}; do
-	echo "===== RUN ${DD} INSTALLATION ${INST}"
+ 	echo "===== RUN ${DD} INSTALLATION ${INST}"
 	# Find all sub-keys under $INST that have sub-sub-keys (have a dot)
 	# The first level under $INST is ignored.
 	# The second level must have 'file', 'proc' third-levels.
 	# The actual key second level is not important.
 	TYPES=$(echo $KEYS | tr ' ' '\n' | grep $INST | sed "s/^$INST\.//" | grep -F '.' | sed 's/\..*$//' | sort | uniq) 
 	for TYPE in $TYPES; do
-		FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
-		if [[ "${FIELDS}" == "file_head_proc_" ]]; then
-			mykey="${INST}.${TYPE}.file"
-			FILES=$(ls -d /mnt/incoming/${INST}/${toml[$mykey]} 2>/dev/null | sed "s#/mnt/incoming/##")
-			echo "FILES $FILES from ${toml[$mykey]} for key $mykey"
-			mykey="${INST}.${TYPE}.proc"
-			PROC=${toml[$mykey]}
-			for F in $FILES; do
-				DIR="/mnt/new/${DD}/"$(dirname "$F")
-				echo "FILE $F DIR ${DIR}"
-				mkdir -p ${DIR}
+        FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
+        if [[ "${FIELDS}" == "file_head_proc_" ]]; then
+            mykey="${INST}.${TYPE}.file"
+            FILES=$(ls -d /mnt/incoming/${INST}/${toml[$mykey]} 2>/dev/null | sed "s#/mnt/incoming/##")
+            echo "FILES $FILES from ${toml[$mykey]} for key $mykey"
+            mykey="${INST}.${TYPE}.proc"
+            PROC=${toml[$mykey]}
+            for F in $FILES; do
+                DIR="/mnt/new/${DD}/"$(dirname "$F")
+                echo "FILE $F DIR ${DIR}"
+                mkdir -p ${DIR}
 
-				if [[ -f /mnt/backup/$F ]]; then
-					OLDLINES=$(cat "/mnt/backup/$F" | wc -l)
-					NEWLINES=$(cat "/mnt/incoming/$F" | wc -l)
-					echo "LINES $F: $OLDLINES $NEWLINES"
-					# Note that unterminated lines at EOF are ignored by wc
-					# So half-written lines are left behind for the next round.
+                if [[ -f /mnt/backup/$F ]]; then
+                    OLDLINES=$(cat "/mnt/backup/$F" | wc -l)
+                    NEWLINES=$(cat "/mnt/incoming/$F" | wc -l)
+                    echo "LINES $F: $OLDLINES $NEWLINES"
+                    # Note that unterminated lines at EOF are ignored by wc
+                    # So half-written lines are left behind for the next round.
 
-					if [[ ${NEWLINES} -gt ${OLDLINES} ]]; then
-						# There are more lines now.
-						
-						# First, copy the header
-						mykey="${INST}.${TYPE}.head"
-						HEADER=${toml[$mykey]}
-						if [[ $HEADER -gt 0 ]]; then
-							echo "CP HEADER $HEADER"
-							head -n ${HEADER} "/mnt/incoming/$F" > "/mnt/new/${DD}/$F"
-						fi
+                    if [[ ${NEWLINES} -gt ${OLDLINES} ]]; then
+                        # There are more lines now.
 
-						# Then put the new lines in new/
-						tail -n +$((OLDLINES + 1)) "/mnt/incoming/$F" >> "/mnt/new/${DD}/$F"
-					fi
+                        # First, copy the header
+                        mykey="${INST}.${TYPE}.head"
+                        HEADER=${toml[$mykey]}
+                        if [[ $HEADER -gt 0 ]]; then
+                                echo "CP HEADER $HEADER"
+                                head -n ${HEADER} "/mnt/incoming/$F" > "/mnt/new/${DD}/$F"
+                        fi
 
-				else
-					echo "CP -p /mnt/incoming/$F ${DIR}"
-					cp -p /mnt/incoming/$F ${DIR}
-				fi
+                        # Then put the new lines in new/
+                        tail -n +$((OLDLINES + 1)) "/mnt/incoming/$F" >> "/mnt/new/${DD}/$F"
+                    fi
+
+                else
+                    echo "CP -p /mnt/incoming/$F ${DIR}"
+                    cp -p /mnt/incoming/$F ${DIR}
+                fi
+
 
 				if [[ -s "/mnt/new/${DD}/${F}" ]]; then
-					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD} ${PROC}"
-					bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD} ${PROC}
-				fi
-			done
-		else
-			echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
-		fi
-	done
+                    echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD} ${PROC}"
+                    bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD} ${PROC}
+                fi
+            done
+        else
+                echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
+        fi
+    done
 done
 
-
-rsync -av --delete /mnt/incoming/ /mnt/backup
-exit 0
 
