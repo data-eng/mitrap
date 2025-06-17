@@ -38,17 +38,18 @@ for INST in ${INSTALLATIONS}; do
 	# The actual key second level is not important.
 	TYPES=$(echo $KEYS | tr ' ' '\n' | grep $INST | sed "s/^$INST\.//" | grep -F '.' | sed 's/\..*$//' | sort | uniq) 
 	for TYPE in $TYPES; do
-        FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
-        if [[ "${FIELDS}" == "file_head_proc_" ]]; then
-            mykey="${INST}.${TYPE}.file"
-            FILES=$(ls -d /mnt/incoming/${INST}/${toml[$mykey]} 2>/dev/null | sed "s#/mnt/incoming/##")
-            echo "FILES $FILES from ${toml[$mykey]} for key $mykey"
-            mykey="${INST}.${TYPE}.proc"
-            PROC=${toml[$mykey]}
-            for F in $FILES; do
-                DIR="/mnt/new/${DD}/"$(dirname "$F")
-                echo "FILE $F DIR ${DIR}"
-                mkdir -p ${DIR}
+		FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
+		if [[ "${FIELDS}" == "file_head_proc_" ]]; then
+			mykey="${INST}.${TYPE}.file"
+			FILES=$(ls -d /mnt/incoming/${INST}/${toml[$mykey]} 2>/dev/null | sed "s#/mnt/incoming/##")
+			echo "FILES $FILES from ${toml[$mykey]} for key $mykey"
+			mykey="${INST}.${TYPE}.proc"
+			PROC=${toml[$mykey]}
+			i=0
+			for F in $FILES; do
+				DIR="/mnt/new/${DD}/"$(dirname "$F")
+				echo "FILE $F DIR ${DIR}"
+				mkdir -p ${DIR}
 
                 if [[ -f /mnt/backup/$F ]]; then
                     OLDLINES=$(cat "/mnt/backup/$F" | wc -l)
@@ -79,14 +80,16 @@ for INST in ${INSTALLATIONS}; do
 
 
 				if [[ -s "/mnt/new/${DD}/${F}" ]]; then
-                    echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD} ${PROC}"
-                    bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD} ${PROC}
-                fi
-            done
-        else
-                echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
-        fi
-    done
+					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD} ${PROC}_$i"
+					bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD} "${PROC}_$i"
+				fi
+
+				((i++))
+			done
+		else
+			echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
+		fi
+	done
 done
 
 
