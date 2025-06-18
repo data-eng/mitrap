@@ -28,12 +28,8 @@ mkdir -p $dir_influx_log
 
 PLINES=$(grep -n '^P' $file_to_process | cut -d: -f 1)
 
-echo $PLINES
-
 FIRSTPLINE=$(echo $PLINES | tr ' ' '\n' | head -n 1)
 LASTPLINE=$(echo $PLINES | tr ' ' '\n' | tail -n 1)
-
-echo "$FIRSTPLINE $LASTPLINE"
 
 # Sanity check: all PLINES diffs must be 41, except for the first one
 PDIFF=$(echo $PLINES | awk 'BEGIN { RS=" "; PREV=0 } { print $0-PREV; PREV=$0 }' | tail -n +2 | uniq)
@@ -48,10 +44,9 @@ fi
 
 cat $file_to_process | head -n $((FIRSTPLINE - 1)) >> ${SPOOL}/grim
 if [[ $(cat ${SPOOL}/grim | wc -l) == 41 ]]; then
-    echo "Spool looks good. Kept."
     mv ${SPOOL}/grim ${file_to_process}.temp
 else
-    echo "Bad spool. Deleted."
+    echo "WARNING: Bad spool, deleted."
     rm ${SPOOL}/grim
     rm -f ${file_to_process}.temp
 fi
@@ -102,11 +97,12 @@ while IFS= read -r line; do
       cname=${values[0]}
       values=("${values[@]:1}")
 
-      fields=""
+      fields1=""
       for i in "${!values[@]}"; do
         val="${values[i]}"; col="${cols[i]}";
-        fields+=",${col}=${val}"
+        fields1+="${col}=${val},"
       done
+      fields=$(echo $fields1|sed 's/,$//')
 
       # Influx line
       write_query="grimm,name=${cname} ${fields} ${timestamp_unix}"
@@ -117,6 +113,6 @@ while IFS= read -r line; do
 done < <( cat $file_to_process | gawk '/P/ { Q=0; print; } /^[Cc]/ { if (Q%4 == 0) { MYLINE = $1; for (i=2; i<NF; i++) MYLINE = MYLINE " " $i ; Q=Q+1 ; } else if  (Q%4==1) { for (i=2; i<NF; i++) MYLINE = MYLINE " " $i ; Q=Q+1; print MYLINE } else if  (Q%4==2) { MYLINE = $1; for (i=2; i<NF-1; i++) MYLINE = MYLINE FS $i ; Q=Q+1 } else if  (Q%4==3) { for (i=2; i<NF; i++) MYLINE= MYLINE " " $i ; Q=Q+1; print MYLINE } } ' )
 
 # The awk script (a) lets P lines fall through (b) collects pairs of Cc lines into one line
-# (c) drop the last element of the first line of a c pair (TODO: sanity check, must be 160)
+# (c) drops the last element of the first line of a c pair (TODO: sanity check, must be 160)
 
 
