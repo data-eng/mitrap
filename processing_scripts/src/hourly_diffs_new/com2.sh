@@ -1,16 +1,13 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
-  echo "Missing arguments [station], [file_to_process], [timestamp_DD] or [file_to_store]." >> /home/mitrap/log/com2.log
+if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
+  echo "Missing arguments [station], [file_to_process] or [file_to_store]."
   exit 1
 fi
 
 station=$1
 file_to_process=$2
-timestamp_DD=$3
-file_to_store=$4
-dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
-mkdir -p $dir_influx_log
+file_to_store=$3
 
 if [[ "$(basename "$file_to_process")" == *Event* ]]; then
     echo "We do not process Event files."; exit 1
@@ -36,7 +33,7 @@ while IFS=',' read -r date time value; do
       fi
 
       write_query="com2 value=$value $timestamp_unix"
-      echo $write_query >> "$dir_influx_log/$file_to_store.txt"
+      echo $write_query >> "$file_to_store"
 
   else
       echo "NaN value=$value"

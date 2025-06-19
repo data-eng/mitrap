@@ -1,45 +1,42 @@
 
 [mitrap000]
 
-city = "Athens"
+city = "Piraeus"
 
 
 [mitrap006]
 
-city = "Agrilia"
+city = "Patission"
 
-[mitrap006.flowmeter_com2]
+com1 = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0 }
+
+[mitrap006.com2]
+name = "Flow Meter Valve COM2"
 file = "MStack_Flow_Meter_Valve_RHT/COM2_Log_*"
 head = 0
-proc = "com2"
-
-[mitrap006.flowmeter_com1]
-file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*"
-head = 0
-proc = "com1"
 
 [mitrap006.ae31]
+name = "AE 31" 
 file = "sambashare/AE31/mitrap/*.csv"
 head = 0
-proc = "ae31" 
 
 [mitrap006.mpss]
+name = "MPSS" 
 file = "sambashare/MPSS_ATH/inverted/*.inv"
 head = 0
-proc = "mpss" 
 
 [mitrap006.cpc_a20]
+name = "CPC A20"
 file = "sambashare/cpc_A20/*.dat"
 head = 0
-proc = "cpc_a20"
 
 [mitrap006.li_cor]
+proc = "LiCor"
 file = "sambashare/Li_Cor/*.txt"
 head = 2
-proc = "li_cor"
 
 [mitrap006.grimm]
+proc = "Grimm OPC"
 file = "sambashare/GrimmOPC107/*"
 head = 0
-proc = "grimm"
 
