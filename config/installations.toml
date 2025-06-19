@@ -31,12 +31,12 @@ file = "sambashare/cpc_A20/*.dat"
 head = 0
 
 [mitrap006.li_cor]
-proc = "LiCor"
+name = "LiCor"
 file = "sambashare/Li_Cor/*.txt"
 head = 2
 
 [mitrap006.grimm]
-proc = "Grimm OPC"
+name = "Grimm OPC"
 file = "sambashare/GrimmOPC107/*"
 head = 0
 
