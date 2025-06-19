@@ -19,7 +19,7 @@ tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dea
     status_error=$(echo "$status_error" | tr -d '\n' | tr -d '\r')
     status_error_dec=$((16#${status_error#0x}))
 
-    write_query="cpc_data,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" \
+    write_query='cpc_data,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" \
 concentration_cc=${concentration},\
 dead_time_us=${dead_time},\
 pulses=${pulses},\

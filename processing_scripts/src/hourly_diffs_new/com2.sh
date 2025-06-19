@@ -33,7 +33,7 @@ while IFS=',' read -r date time value; do
           value="${value}.0"  # Make integers float to avoid flux being quirky
       fi
 
-      write_query="com2,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" value=$value $timestamp_unix"
+      write_query='com2,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" value=$value $timestamp_unix"
       echo $write_query >> "$file_to_store"
 
   else

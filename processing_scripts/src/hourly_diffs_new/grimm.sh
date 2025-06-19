@@ -103,7 +103,7 @@ while IFS= read -r line; do
       fields=$(echo $fields1|sed 's/,$//')
 
       # Influx line
-      write_query="grimm,name=${cname},installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" ${fields} ${timestamp_unix}"
+      write_query='grimm,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'",name=${cname} ${fields} ${timestamp_unix}"
       echo $write_query >> "$file_to_store"
 
     fi

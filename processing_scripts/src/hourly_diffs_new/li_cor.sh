@@ -43,7 +43,7 @@ while IFS= read -r line; do
 
     pres_kPA=$(echo "$pres_kPA" | tr -d '\n' | tr -d '\r')
 
-    write_query="li_cor,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp_unix"
+    write_query='li_cor,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp_unix"
 
     echo $write_query >> "$file_to_store"
 
