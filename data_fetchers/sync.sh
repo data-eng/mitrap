@@ -82,8 +82,8 @@ for INST in ${INSTALLATIONS}; do
 		    # The TYPE in the TOML must be identical to the respective processot script
 		    INFLUXDIR="/mnt/influxlines/${DD}/${INST}"
 		    mkdir -p ${INFLUXDIR}
-		    echo "EXEC $PROCDIR/${TYPE}.sh $INST ${OUTDIR}/${DD}/$F ${INFLUXDIR}/${PROC}_${i}.lp"
-		    bash ${PROCDIR}/${TYPE}.sh $INST "${OUTDIR}/${DD}/$F" "${INFLUXDIR}/${PROC}_${i}.lp"
+		    echo "EXEC $PROCDIR/${TYPE}.sh $INST ${OUTDIR}/${DD}/$F ${INFLUXDIR}/${TYPE}_${i}.lp"
+		    bash ${PROCDIR}/${TYPE}.sh $INST "${OUTDIR}/${DD}/$F" "${INFLUXDIR}/${TYPE}_${i}.lp"
 		fi
 
 		((i++))
