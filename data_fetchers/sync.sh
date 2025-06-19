@@ -32,7 +32,9 @@ done
 # Process files
 
 for INST in ${INSTALLATIONS}; do
-    echo "===== RUN ${DD} INSTALLATION ${INST}"
+    mykey="${INST}.city"
+    INSTNAME=${toml[$mykey]}
+    echo "===== RUN ${DD} INSTALLATION ${INST} ${INSTNAME}"
     # Find all sub-keys under $INST that have sub-sub-keys (have a dot)
     # The level under $INST is the name of the processor
     # The next level must have 'name', 'file', 'head' third-levels.
@@ -40,9 +42,11 @@ for INST in ${INSTALLATIONS}; do
     for TYPE in $TYPES; do
 	FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
 	if [[ "${FIELDS}" == "file_head_name_" ]]; then
+	    mykey="${INST}.${TYPE}.name"
+	    INSTRUMENT=${toml[$mykey]}
 	    mykey="${INST}.${TYPE}.file"
 	    FILES=$(ls -d /mnt/incoming/${INST}/${toml[$mykey]} 2>/dev/null | sed "s#/mnt/incoming/##")
-	    echo "FILES $FILES from ${toml[$mykey]} for key $mykey"
+	    echo "INSTRUMENT ${INSTRUMENT} FILES $FILES from ${toml[$mykey]} for key $mykey"
 	    i=0
 	    for F in $FILES; do
 		DIR="${OUTDIR}/${DD}/"$(dirname "$F")
