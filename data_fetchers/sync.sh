@@ -87,7 +87,7 @@ for INST in ${INSTALLATIONS}; do
 		    INFLUXDIR="/mnt/influxlines/${DD}/${INST}"
 		    mkdir -p ${INFLUXDIR}
 		    echo "EXEC $PROCDIR/${TYPE}.sh $INST ${OUTDIR}/${DD}/$F ${INFLUXDIR}/${TYPE}_${i}.lp"
-		    bash ${PROCDIR}/${TYPE}.sh $INST "${OUTDIR}/${DD}/$F" "${INFLUXDIR}/${TYPE}_${i}.lp"
+		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXDIR}/${TYPE}_${i}.lp" "${INSTNAME}" "${INSTRUMENT}"
 		fi
 
 		((i++))

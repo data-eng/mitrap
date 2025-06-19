@@ -1,9 +1,14 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
-  echo "Missing arguments [station], [file_to_process] or [file_to_store]."
+if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+  echo "Missing arguments: $*"
   exit 1
 fi
+
+file_to_process=$1
+file_to_store=$2
+installation_name=$3
+instrument_name=$4
 
 # Grimm data comes in chunks of 6sec, where each chunk starts with a P line
 # followed up by 40 C/c lines. But sync'ing is not aligned with chinks,
@@ -18,10 +23,6 @@ fi
 # decide what to transfer to new/
 
 SPOOL=/mnt/spool
-
-station=$1
-file_to_process=$2
-file_to_store=$3
 
 PLINES=$(grep -n '^P' $file_to_process | cut -d: -f 1)
 
@@ -102,7 +103,7 @@ while IFS= read -r line; do
       fields=$(echo $fields1|sed 's/,$//')
 
       # Influx line
-      write_query="grimm,name=${cname} ${fields} ${timestamp_unix}"
+      write_query="grimm,name=${cname},installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" ${fields} ${timestamp_unix}"
       echo $write_query >> "$file_to_store"
 
     fi

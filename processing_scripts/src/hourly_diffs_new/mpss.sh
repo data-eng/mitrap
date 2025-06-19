@@ -38,14 +38,15 @@ clean_nm() {
 }
 
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
-  echo "Missing arguments [station], [file_to_process] or [file_to_store]."
+if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+  echo "Missing arguments: $*"
   exit 1
 fi
 
-station=$1
-file_to_process=$2
-file_to_store=$3
+file_to_process=$1
+file_to_store=$2
+installation_name=$3
+instrument_name=$4
 
 
 filename=$(basename "$file_to_process")
@@ -95,7 +96,7 @@ while true; do
     fields="${fields},${nm_name}=${val}"
   done
 
-  write_query="smps_data ${fields} ${timestamp_unix}"
+  write_query='smps_data,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" ${fields} ${timestamp_unix}"
   echo $write_query >> "$file_to_store"
 
   done

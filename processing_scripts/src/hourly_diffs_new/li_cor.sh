@@ -1,13 +1,14 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
-  echo "Missing arguments [station], [file_to_process] or [file_to_store]."
+if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+  echo "Missing arguments: $*"
   exit 1
 fi
 
-station=$1
-file_to_process=$2
-file_to_store=$3
+file_to_process=$1
+file_to_store=$2
+installation_name=$3
+instrument_name=$4
 
 current_date=""
 previous_hour=0
@@ -42,7 +43,7 @@ while IFS= read -r line; do
 
     pres_kPA=$(echo "$pres_kPA" | tr -d '\n' | tr -d '\r')
 
-    write_query="li_cor co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp_unix"
+    write_query="li_cor,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp_unix"
 
     echo $write_query >> "$file_to_store"
 

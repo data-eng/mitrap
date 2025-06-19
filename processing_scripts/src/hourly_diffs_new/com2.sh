@@ -1,13 +1,14 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
-  echo "Missing arguments [station], [file_to_process] or [file_to_store]."
+if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+  echo "Missing arguments: $*"
   exit 1
 fi
 
-station=$1
-file_to_process=$2
-file_to_store=$3
+file_to_process=$1
+file_to_store=$2
+installation_name=$3
+instrument_name=$4
 
 if [[ "$(basename "$file_to_process")" == *Event* ]]; then
     echo "We do not process Event files."; exit 1
@@ -32,7 +33,7 @@ while IFS=',' read -r date time value; do
           value="${value}.0"  # Make integers float to avoid flux being quirky
       fi
 
-      write_query="com2 value=$value $timestamp_unix"
+      write_query="com2,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" value=$value $timestamp_unix"
       echo $write_query >> "$file_to_store"
 
   else

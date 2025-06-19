@@ -1,13 +1,14 @@
 #!/bin/bash
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x ]]; then
-  echo "Missing arguments [station], [file_to_process] or [file_to_store]."
+if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+  echo "Missing arguments: $*"
   exit 1
 fi
 
-station=$1
-file_to_process=$2
-file_to_store=$3
+file_to_process=$1
+file_to_store=$2
+installation_name=$3
+instrument_name=$4
 
 
 tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dead_time pulses sat_temp condenser_temp optics_temp cabin_temp inlet_p crit_orifice_p nozzle_p liquid_level pulse_ratio total_errors status_error; do
@@ -18,7 +19,7 @@ tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dea
     status_error=$(echo "$status_error" | tr -d '\n' | tr -d '\r')
     status_error_dec=$((16#${status_error#0x}))
 
-    write_query="cpc_data \
+    write_query="cpc_data,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" \
 concentration_cc=${concentration},\
 dead_time_us=${dead_time},\
 pulses=${pulses},\
