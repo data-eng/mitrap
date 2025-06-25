@@ -18,6 +18,11 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
+# The installation name and instrument may include spaces and other invalid
+# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+# to clean them
+installation_name=$(escape_tag_value "$installation_name")
+instrument_name=$(escape_tag_value "$instrument_name")
 
 tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dead_time pulses sat_temp condenser_temp optics_temp cabin_temp inlet_p crit_orifice_p nozzle_p liquid_level pulse_ratio total_errors status_error; do
 
@@ -26,13 +31,6 @@ tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dea
 
     status_error=$(echo "$status_error" | tr -d '\n' | tr -d '\r')
     status_error_dec=$((16#${status_error#0x}))
-
-
-    # The installation name and instrument may include spaces and other invalid
-    # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-    # to clean them
-    installation_name=$(escape_tag_value "$installation_name")
-    instrument_name=$(escape_tag_value "$instrument_name")
 
     write_query="cpc_data,installation=${installation_name},instrument=${instrument_name} \
 concentration_cc=${concentration},\

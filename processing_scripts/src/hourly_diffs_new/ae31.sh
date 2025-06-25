@@ -18,6 +18,12 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
+# The installation name and instrument may include spaces and other invalid
+# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+# to clean them
+installation_name=$(escape_tag_value "$installation_name")
+instrument_name=$(escape_tag_value "$instrument_name")
+
 regex='^-?[0-9]+(\.[0-9]+)?$'
 
 while IFS=',' read -r timestamp datestr timestr nm370 nm450 nm520 nm590 nm660 nm880 nm950 flow rest; do
@@ -30,12 +36,6 @@ while IFS=',' read -r timestamp datestr timestr nm370 nm450 nm520 nm590 nm660 nm
         printf -v "$var" '%s.0' "${!var}"
       fi
     done
-
-    # The installation name and instrument may include spaces and other invalid
-    # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-    # to clean them
-    installation_name=$(escape_tag_value "$installation_name")
-    instrument_name=$(escape_tag_value "$instrument_name")
 
     write_query="ae31,installation=${installation_name},instrument=${instrument_name} date_str=$datestr,time_str=$timestr,nm370=$nm370,nm450=$nm450,nm520=$nm520,nm590=$nm590,nm660=$nm660,nm880=$nm880,nm950=$nm950,flow=$flow $timestamp_unix"
 

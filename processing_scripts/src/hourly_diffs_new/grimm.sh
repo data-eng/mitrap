@@ -18,6 +18,12 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
+# The installation name and instrument may include spaces and other invalid
+# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+# to clean them
+installation_name=$(escape_tag_value "$installation_name")
+instrument_name=$(escape_tag_value "$instrument_name")
+
 # Grimm data comes in chunks of 6sec, where each chunk starts with a P line
 # followed up by 40 C/c lines. But sync'ing is not aligned with chinks,
 # but happens in the middle of chunks and even lines.
@@ -109,13 +115,6 @@ while IFS= read -r line; do
         fields1+="${col}=${val},"
       done
       fields=$(echo $fields1|sed 's/,$//')
-
-
-      # The installation name and instrument may include spaces and other invalid
-      # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-      # to clean them
-      installation_name=$(escape_tag_value "$installation_name")
-      instrument_name=$(escape_tag_value "$instrument_name")
 
       # Influx line
       write_query="grimm,installation=${installation_name},instrument=${instrument_name},name=${cname} ${fields} ${timestamp_unix}"

@@ -56,6 +56,12 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
+# The installation name and instrument may include spaces and other invalid
+# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+# to clean them
+installation_name=$(escape_tag_value "$installation_name")
+instrument_name=$(escape_tag_value "$instrument_name")
+
 
 filename=$(basename "$file_to_process")
 date_str=$(echo "$filename" | grep -oP '\d{8}')  # Extract YYYYMMDD
@@ -103,13 +109,6 @@ while true; do
     nm_name=$(clean_nm "$nm_raw")
     fields="${fields},${nm_name}=${val}"
   done
-
-
-  # The installation name and instrument may include spaces and other invalid
-  # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-  # to clean them
-  installation_name=$(escape_tag_value "$installation_name")
-  instrument_name=$(escape_tag_value "$instrument_name")
 
   write_query="smps_data,installation=${installation_name},instrument=${instrument_name} ${fields} ${timestamp_unix}"
   echo $write_query >> "$file_to_store"

@@ -18,6 +18,12 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
+# The installation name and instrument may include spaces and other invalid
+# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+# to clean them
+installation_name=$(escape_tag_value "$installation_name")
+instrument_name=$(escape_tag_value "$instrument_name")
+
 if [[ "$(basename "$file_to_process")" == *Event* ]]; then
     echo "We do not process Event files."; exit 1
 fi
@@ -40,12 +46,6 @@ while IFS=',' read -r date time value; do
       if [[ "$value" =~ ^-?[0-9]+$ ]]; then
           value="${value}.0"  # Make integers float to avoid flux being quirky
       fi
-
-      # The installation name and instrument may include spaces and other invalid
-      # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-      # to clean them
-      installation_name=$(escape_tag_value "$installation_name")
-      instrument_name=$(escape_tag_value "$instrument_name")
 
       write_query="com2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
       echo $write_query >> "$file_to_store"

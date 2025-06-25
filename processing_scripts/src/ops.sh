@@ -20,6 +20,12 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
+# The installation name and instrument may include spaces and other invalid
+# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+# to clean them
+installation_name=$(escape_tag_value "$installation_name")
+instrument_name=$(escape_tag_value "$instrument_name")
+
 declare -A metadata
 declare -a midpoints
 declare -a headers
@@ -91,13 +97,6 @@ while IFS= read -r line; do
       [[ "$value" == "" || "$value" == "NA" ]] && continue
       fields+=",nm_${midpoint}=${value}"
     done
-
-
-    # The installation name and instrument may include spaces and other invalid
-    # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-    # to clean them
-    installation_name=$(escape_tag_value "$installation_name")
-    instrument_name=$(escape_tag_value "$instrument_name")
 
     write_query="ops,installation=${installation_name},instrument=${instrument_name} ${tags} ${fields} $timestamp_unix"
     echo $write_query >> "$file_to_store"

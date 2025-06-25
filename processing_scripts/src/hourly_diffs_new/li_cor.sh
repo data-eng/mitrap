@@ -18,6 +18,12 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
+# The installation name and instrument may include spaces and other invalid
+# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+# to clean them
+installation_name=$(escape_tag_value "$installation_name")
+instrument_name=$(escape_tag_value "$instrument_name")
+
 current_date=""
 previous_hour=0
 
@@ -50,13 +56,6 @@ while IFS= read -r line; do
     timestamp_unix=$(date -d "$timestamp" +%s)000000000
 
     pres_kPA=$(echo "$pres_kPA" | tr -d '\n' | tr -d '\r')
-
-
-    # The installation name and instrument may include spaces and other invalid
-    # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-    # to clean them
-    installation_name=$(escape_tag_value "$installation_name")
-    instrument_name=$(escape_tag_value "$instrument_name")
 
     write_query="li_cor,installation=${installation_name},instrument=${instrument_name} co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp_unix"
 

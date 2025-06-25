@@ -20,6 +20,12 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
+# The installation name and instrument may include spaces and other invalid
+# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+# to clean them
+installation_name=$(escape_tag_value "$installation_name")
+instrument_name=$(escape_tag_value "$instrument_name")
+
 while IFS=',' read -r date time value; do
 
   timestamp="$date $time"
@@ -31,12 +37,6 @@ while IFS=',' read -r date time value; do
 
   echo "Timestamp : $timestamp_unix"
   echo "Value     : $value"
-
-  # The installation name and instrument may include spaces and other invalid
-  # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-  # to clean them
-  installation_name=$(escape_tag_value "$installation_name")
-  instrument_name=$(escape_tag_value "$instrument_name")
 
   write_query="co2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
   echo $write_query >> "$file_to_store"
