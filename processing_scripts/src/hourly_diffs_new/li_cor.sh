@@ -1,5 +1,13 @@
 #!/bin/bash
 
+escape_tag_value() {
+  local val="$1"
+  val="${val//\\/\\\\}"   # escape backslashes
+  val="${val//,/\\,}"     # escape commas
+  val="${val// /\\ }"     # escape spaces
+  echo "$val"
+}
+
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
@@ -43,7 +51,14 @@ while IFS= read -r line; do
 
     pres_kPA=$(echo "$pres_kPA" | tr -d '\n' | tr -d '\r')
 
-    write_query='li_cor,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp_unix"
+
+    # The installation name and instrument may include spaces and other invalid
+    # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+    # to clean them
+    installation_name=$(escape_tag_value "$installation_name")
+    instrument_name=$(escape_tag_value "$instrument_name")
+
+    write_query="li_cor,installation=${installation_name},instrument=${instrument_name} co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp_unix"
 
     echo $write_query >> "$file_to_store"
 

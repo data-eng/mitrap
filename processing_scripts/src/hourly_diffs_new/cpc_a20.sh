@@ -1,5 +1,13 @@
 #!/bin/bash
 
+escape_tag_value() {
+  local val="$1"
+  val="${val//\\/\\\\}"   # escape backslashes
+  val="${val//,/\\,}"     # escape commas
+  val="${val// /\\ }"     # escape spaces
+  echo "$val"
+}
+
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
@@ -19,7 +27,14 @@ tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dea
     status_error=$(echo "$status_error" | tr -d '\n' | tr -d '\r')
     status_error_dec=$((16#${status_error#0x}))
 
-    write_query='cpc_data,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" \
+
+    # The installation name and instrument may include spaces and other invalid
+    # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+    # to clean them
+    installation_name=$(escape_tag_value "$installation_name")
+    instrument_name=$(escape_tag_value "$instrument_name")
+
+    write_query="cpc_data,installation=${installation_name},instrument=${instrument_name} \
 concentration_cc=${concentration},\
 dead_time_us=${dead_time},\
 pulses=${pulses},\

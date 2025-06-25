@@ -1,5 +1,13 @@
 #!/bin/bash
 
+escape_tag_value() {
+  local val="$1"
+  val="${val//\\/\\\\}"   # escape backslashes
+  val="${val//,/\\,}"     # escape commas
+  val="${val// /\\ }"     # escape spaces
+  echo "$val"
+}
+
 convert_custom_time_to_unix_ns() {
   local base_date="$1"
   local float_time="$2"
@@ -96,7 +104,14 @@ while true; do
     fields="${fields},${nm_name}=${val}"
   done
 
-  write_query='smps_data,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" ${fields} ${timestamp_unix}"
+
+  # The installation name and instrument may include spaces and other invalid
+  # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+  # to clean them
+  installation_name=$(escape_tag_value "$installation_name")
+  instrument_name=$(escape_tag_value "$instrument_name")
+
+  write_query="smps_data,installation=${installation_name},instrument=${instrument_name} ${fields} ${timestamp_unix}"
   echo $write_query >> "$file_to_store"
 
   done

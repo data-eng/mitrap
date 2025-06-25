@@ -1,5 +1,12 @@
 #!/bin/bash
 
+escape_tag_value() {
+  local val="$1"
+  val="${val//\\/\\\\}"   # escape backslashes
+  val="${val//,/\\,}"     # escape commas
+  val="${val// /\\ }"     # escape spaces
+  echo "$val"
+}
 
 # /mnt/incoming/mitrap000/CO2/Data/COM2_Log_*.txt
 
@@ -25,7 +32,13 @@ while IFS=',' read -r date time value; do
   echo "Timestamp : $timestamp_unix"
   echo "Value     : $value"
 
-  write_query='co2,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" value=$value $timestamp_unix"
+  # The installation name and instrument may include spaces and other invalid
+  # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+  # to clean them
+  installation_name=$(escape_tag_value "$installation_name")
+  instrument_name=$(escape_tag_value "$instrument_name")
+
+  write_query="co2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
   echo $write_query >> "$file_to_store"
 
  done < "$file_to_process"

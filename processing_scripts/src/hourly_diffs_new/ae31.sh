@@ -1,5 +1,13 @@
 #!/bin/bash
 
+escape_tag_value() {
+  local val="$1"
+  val="${val//\\/\\\\}"   # escape backslashes
+  val="${val//,/\\,}"     # escape commas
+  val="${val// /\\ }"     # escape spaces
+  echo "$val"
+}
+
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
@@ -23,7 +31,13 @@ while IFS=',' read -r timestamp datestr timestr nm370 nm450 nm520 nm590 nm660 nm
       fi
     done
 
-    write_query='ae31,installation="'"$installation_name"'",instrument="'"${instrument_name}"'"'" date_str=$datestr,time_str=$timestr,nm370=$nm370,nm450=$nm450,nm520=$nm520,nm590=$nm590,nm660=$nm660,nm880=$nm880,nm950=$nm950,flow=$flow $timestamp_unix"
+    # The installation name and instrument may include spaces and other invalid
+    # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+    # to clean them
+    installation_name=$(escape_tag_value "$installation_name")
+    instrument_name=$(escape_tag_value "$instrument_name")
+
+    write_query="ae31,installation=${installation_name},instrument=${instrument_name} date_str=$datestr,time_str=$timestr,nm370=$nm370,nm450=$nm450,nm520=$nm520,nm590=$nm590,nm660=$nm660,nm880=$nm880,nm950=$nm950,flow=$flow $timestamp_unix"
 
     echo $write_query >> "$file_to_store"
 
