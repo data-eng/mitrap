@@ -40,8 +40,10 @@ do
     fi
   done
 
-  write_query="ma200,installation=$installation_name,instrument=$instrument_name date_str=\"$date\",time_str=\"$time\",nm370=$uvbc1,nm450=$uvbc2,nm520=$uvbcc,nm590=$bluebc1,nm660=$bluebc2,nm880=$bluebcc,nm950=$greenbc1,flow=$flow1 $timestamp_unix"
+  write_query="ma200,installation=$installation_name,instrument=$instrument_name uv1=$uv1,uv2=$uv2,uvref=$uvref,uvatn1=$uvatn1,uvatn2=$uvatn2,uvk=$uvk,blue1=$blue1,blue2=$blue2,blueref=$blueref,blueatn1=$blueatn1,blueatn2=$blueatn2,bluek=$bluek,green1=$green1,green2=$green2,greenref=$greenref,greenatn1=$greenatn1,greenatn2=$greenatn2,greenk=$greenk,red1=$red1,red2=$red2,redref=$redref,redatn1=$redatn1,redatn2=$redatn2,redk=$redk,ir1=$ir1,ir2=$ir2,irref=$irref,iratn1=$iratn1,iratn2=$iratn2,irk=$irk,uvbc1=$uvbc1,uvbc2=$uvbc2,uvbcc=$uvbcc,bluebc1=$bluebc1,bluebc2=$bluebc2,bluebcc=$bluebcc,greenbc1=$greenbc1,greenbc2=$greenbc2,greenbcc=$greenbcc,redbc1=$redbc1,redbc2=$redbc2,redbcc=$redbcc,irbc1=$irbc1,irbc2=$irbc2,irbcc=$irbcc  $timestamp_unix"
 
   echo "$write_query" >> "$file_to_store"
 
 done < "$file_to_process"
+
+  
