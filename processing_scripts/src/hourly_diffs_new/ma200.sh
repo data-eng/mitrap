@@ -33,6 +33,8 @@ do
 
   timestamp_unix=$(date -d "$date $time" +%s)000000000
 
+  irbcc=$(printf "%d\n" "$irbcc")
+
   # Force integer-looking numbers to floats
   for var in uvbc1 uvbc2 uvbcc bluebc1 bluebc2 bluebcc greenbc1 greenbc2 greenbcc redbc1 redbc2 redbcc irbc1 irbc2 irbcc; do
     if [[ "${!var}" =~ ^-?[0-9]+$ ]]; then
