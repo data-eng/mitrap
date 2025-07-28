@@ -61,7 +61,7 @@ for INST in ${INSTALLATIONS}; do
 done
 
 # Prepare condensed format
-python3 ${BINDIR}/condense.py ${OUTFILE} ${OUTFILE%._univar.csv}.csv
+python3 ${BINDIR}/condense.py ${OUTFILE} ${OUTDIR}/counts_${DISPLAY_DATE}.csv
 
 # Send to mitrap-pc
 rsync -av ${OUTDIR}/ vima@mitrap-pc.ipta.demokritos.gr:
