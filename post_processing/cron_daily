@@ -1,0 +1,3 @@
+#!/bin/sh
+
+su mitrap -c /home/debian/src/count.sh 
