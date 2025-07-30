@@ -8,6 +8,7 @@ exec &>> /home/mitrap/log/sync.${DD}.log
 BINDIR=/home/debian/src/mitrap
 PROCDIR=${BINDIR}/processing_scripts/src/hourly_diffs_new/
 CONFIG=/mnt/installations.toml
+OUTDIR=/mnt/new
 
 # Read in installations config
 
@@ -31,25 +32,26 @@ done
 # Process files
 
 for INST in ${INSTALLATIONS}; do
- 	echo "===== RUN ${DD} INSTALLATION ${INST}"
-	# Find all sub-keys under $INST that have sub-sub-keys (have a dot)
-	# The first level under $INST is ignored.
-	# The second level must have 'file', 'proc' third-levels.
-	# The actual key second level is not important.
-	TYPES=$(echo $KEYS | tr ' ' '\n' | grep $INST | sed "s/^$INST\.//" | grep -F '.' | sed 's/\..*$//' | sort | uniq) 
-	for TYPE in $TYPES; do
-		FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
-		if [[ "${FIELDS}" == "file_head_proc_" ]]; then
-			mykey="${INST}.${TYPE}.file"
-			FILES=$(ls -d /mnt/incoming/${INST}/${toml[$mykey]} 2>/dev/null | sed "s#/mnt/incoming/##")
-			echo "FILES $FILES from ${toml[$mykey]} for key $mykey"
-			mykey="${INST}.${TYPE}.proc"
-			PROC=${toml[$mykey]}
-			i=0
-			for F in $FILES; do
-				DIR="/mnt/new/${DD}/"$(dirname "$F")
-				echo "FILE $F DIR ${DIR}"
-				mkdir -p ${DIR}
+    mykey="${INST}.city"
+    INSTNAME=${toml[$mykey]}
+    echo "===== RUN ${DD} INSTALLATION ${INST} ${INSTNAME}"
+    # Find all sub-keys under $INST that have sub-sub-keys (have a dot)
+    # The level under $INST is the name of the processor
+    # The next level must have 'name', 'file', 'head' third-levels.
+    TYPES=$(echo $KEYS | tr ' ' '\n' | grep $INST | sed "s/^$INST\.//" | grep -F '.' | sed 's/\..*$//' | sort | uniq) 
+    for TYPE in $TYPES; do
+	FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
+	if [[ "${FIELDS}" == "file_head_name_" ]]; then
+	    mykey="${INST}.${TYPE}.name"
+	    INSTRUMENT=${toml[$mykey]}
+	    mykey="${INST}.${TYPE}.file"
+	    FILES=$(ls -d /mnt/incoming/${INST}/${toml[$mykey]} 2>/dev/null | sed "s#/mnt/incoming/##")
+	    echo "INSTRUMENT ${INSTRUMENT} FILES $FILES from ${toml[$mykey]} for key $mykey"
+	    i=0
+	    for F in $FILES; do
+		DIR="${OUTDIR}/${DD}/"$(dirname "$F")
+		echo "FILE $F DIR ${DIR}"
+		mkdir -p ${DIR}
 
                 if [[ -f /mnt/backup/$F ]]; then
                     OLDLINES=$(cat "/mnt/backup/$F" | wc -l)
@@ -66,30 +68,34 @@ for INST in ${INSTALLATIONS}; do
                         HEADER=${toml[$mykey]}
                         if [[ $HEADER -gt 0 ]]; then
                                 echo "CP HEADER $HEADER"
-                                head -n ${HEADER} "/mnt/incoming/$F" > "/mnt/new/${DD}/$F"
+                                head -n ${HEADER} "/mnt/incoming/$F" > "${OUTDIR}/${DD}/$F"
                         fi
 
                         # Then put the new lines in new/
-                        tail -n +$((OLDLINES + 1)) "/mnt/incoming/$F" >> "/mnt/new/${DD}/$F"
+                        tail -n +$((OLDLINES + 1)) "/mnt/incoming/$F" >> "${OUTDIR}/${DD}/$F"
                     fi
 
                 else
+		    # New file, just copy
                     echo "CP -p /mnt/incoming/$F ${DIR}"
                     cp -p /mnt/incoming/$F ${DIR}
                 fi
 
 
-				if [[ -s "/mnt/new/${DD}/${F}" ]]; then
-					echo "EXEC $PROCDIR/${PROC}.sh $INST /mnt/new/${DD}/$F ${DD} ${PROC}_$i"
-					bash ${PROCDIR}/${PROC}.sh $INST "/mnt/new/${DD}/$F" ${DD} "${PROC}_$i"
-				fi
-
-				((i++))
-			done
-		else
-			echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
+		if [[ -s "${OUTDIR}/${DD}/${F}" ]]; then
+		    # The TYPE in the TOML must be identical to the respective processot script
+		    INFLUXDIR="/mnt/influxlines/${DD}/${INST}"
+		    mkdir -p ${INFLUXDIR}
+		    echo "EXEC $PROCDIR/${TYPE}.sh $INST ${OUTDIR}/${DD}/$F ${INFLUXDIR}/${TYPE}_${i}.lp"
+		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXDIR}/${TYPE}_${i}.lp" "${INSTNAME}" "${INSTRUMENT}"
 		fi
-	done
+
+		((i++))
+	    done
+	else
+	    echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
+	fi
+    done
 done
 
 

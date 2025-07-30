@@ -8,6 +8,8 @@ escape_tag_value() {
   echo "$val"
 }
 
+# /mnt/incoming/mitrap000/CO2/Data/COM2_Log_*.txt
+
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
@@ -24,34 +26,19 @@ instrument_name=$4
 installation_name=$(escape_tag_value "$installation_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
-if [[ "$(basename "$file_to_process")" == *Event* ]]; then
-    echo "We do not process Event files."; exit 1
-fi
-
-if [[ ! "$(basename "$file_to_process")" == *COM2* ]]; then
-    echo "COM1 are processed from other script."; exit 1
-fi
-
-regex='^-?[0-9]+(\.[0-9]+)?$'
-
 while IFS=',' read -r date time value; do
 
   timestamp="$date $time"
   timestamp_unix=$(date -d "$timestamp" +%s)000000000
 
-  value=$(echo "$value" | tr -d '\n' | tr -d '\r')
+  # Remove square brackets from value
+  value="${value#[}"
+  value="${value%]}"
 
-  if [[ "$value" =~ $regex ]]; then
+  echo "Timestamp : $timestamp_unix"
+  echo "Value     : $value"
 
-      if [[ "$value" =~ ^-?[0-9]+$ ]]; then
-          value="${value}.0"  # Make integers float to avoid flux being quirky
-      fi
+  write_query="co2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
+  echo $write_query >> "$file_to_store"
 
-      write_query="com2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
-      echo $write_query >> "$file_to_store"
-
-  else
-      echo "NaN value=$value"
-  fi
-
-done < "$file_to_process"
+ done < "$file_to_process"

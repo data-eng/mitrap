@@ -1,17 +1,28 @@
 #!/bin/bash
 
+escape_tag_value() {
+  local val="$1"
+  val="${val//\\/\\\\}"   # escape backslashes
+  val="${val//,/\\,}"     # escape commas
+  val="${val// /\\ }"     # escape spaces
+  echo "$val"
+}
+
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
-  echo "Missing arguments [station], [file_to_process], [timestamp_DD] or [file_to_store]." >> /home/mitrap/log/cpc_a20.log
+  echo "Missing arguments: $*"
   exit 1
 fi
 
-station=$1
-file_to_process=$2
-timestamp_DD=$3
-file_to_store=$4
-dir_influx_log="/home/debian/src/mitrap/influx_log/$timestamp_DD/$station"
-mkdir -p $dir_influx_log
+file_to_process=$1
+file_to_store=$2
+installation_name=$3
+instrument_name=$4
 
+# The installation name and instrument may include spaces and other invalid
+# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
+# to clean them
+installation_name=$(escape_tag_value "$installation_name")
+instrument_name=$(escape_tag_value "$instrument_name")
 
 tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dead_time pulses sat_temp condenser_temp optics_temp cabin_temp inlet_p crit_orifice_p nozzle_p liquid_level pulse_ratio total_errors status_error; do
 
@@ -21,7 +32,7 @@ tail -n +2 "$file_to_process" | while IFS=',' read -r datetime concentration dea
     status_error=$(echo "$status_error" | tr -d '\n' | tr -d '\r')
     status_error_dec=$((16#${status_error#0x}))
 
-    write_query="cpc_data \
+    write_query="cpc_data,installation=${installation_name},instrument=${instrument_name} \
 concentration_cc=${concentration},\
 dead_time_us=${dead_time},\
 pulses=${pulses},\
@@ -38,7 +49,6 @@ total_errors=${total_errors},\
 status_error=${status_error_dec} \
 $timestamp_unix"
 
-    echo $write_query >> "$dir_influx_log/$file_to_store.txt"
-
+    echo $write_query >> "$file_to_store"
 
   done
