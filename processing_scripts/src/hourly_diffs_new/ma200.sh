@@ -22,8 +22,8 @@ file_to_store=$2
 installation_name=$(escape_tag_value "$3")
 instrument_name=$(escape_tag_value "$4")
 
-while IFS=',' read -r date time v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 flow_total flow1 flow2 v21 v22 v23 v24 v25 v26 \
-  uv0 uv1 uv2 uv3 uv4 uvatn1 b1 b2 b3 b4 b5 blueatn1 g1 g2 g3 g4 g5 greenatn1 r0 r1 r2 r3 r4 redatn1 ir0 ir1 ir2 ir3 ir4 iratn1 \
+while IFS=',' read -r date time v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 flow_total flow1 flow2 v22 v23 v24\
+  uv0 uv1 uv2 uvatn1 b1 b2 b3 b4 b5 blueatn1 g1 g2 g3 g4 g5 greenatn1 r0 r1 r2 r3 r4 redatn1 ir0 ir1 ir2 ir3 ir4 iratn1 \
   uvbc1 uvbc2 uvbcc bluebc1 bluebc2 bluebcc greenbc1 greenbc2 greenbcc redbc1 redbc2 redbcc irbc1 irbc2 irbcc
 do
 
