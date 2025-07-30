@@ -8,14 +8,15 @@ Tested:
  - AE31                  -> ae31.sh
  - CPC A20               -> cpc_a20.sh
  - Grimm OPC             -> grimm.sh
+ - Nanodust              -> nanodust.sh
+ - CO2                   -> co2.sh
 
 
-Under Evaluation:
+Under Testing:
  - MA 200                -> ma200.sh
 
-Implemented but not evaluated due to lack of incoming data:
-
- - Nanodust              -> nanodust.sh
+Implemented but not tested due to lack of incoming data:
  - OPS                   -> ops.sh
- - CO2                   -> co2.sh
+
+Deprecated:
  - Li Cor                -> li_cor.sh
