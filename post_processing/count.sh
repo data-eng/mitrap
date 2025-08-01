@@ -64,6 +64,7 @@ done
 python3 ${BINDIR}/condense.py ${OUTFILE} ${OUTDIR}/counts_${DISPLAY_DATE}.csv
 
 # Send to mitrap-pc
-rsync -av ${OUTDIR}/ vima@mitrap-pc.ipta.demokritos.gr:
+rsync -av --delete ${OUTDIR}/ vima@mitrap-pc.ipta.demokritos.gr:statistics/
 
 exit 0
+
