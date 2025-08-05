@@ -63,7 +63,10 @@ done
 # Prepare condensed format
 python3 ${BINDIR}/condense.py ${OUTFILE} ${OUTDIR}/counts_${DISPLAY_DATE}.csv
 
-# Send to mitrap-pc
+# Rotate the log
+ls -t ${OUTDIR} | tail -2 | sed "s#^#${OUTDIR}#" | xargs rm
+
+# Sync with mitrap-pc
 rsync -av --delete ${OUTDIR}/ vima@mitrap-pc.ipta.demokritos.gr:statistics/
 
 exit 0
