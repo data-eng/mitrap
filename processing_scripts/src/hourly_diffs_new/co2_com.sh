@@ -49,6 +49,10 @@ while IFS=',' read -r date time rest; do
   # Extract the numeric part (integer or decimal) from the value
   if [[ "$value" =~ ([0-9]+(\.[0-9]+)?) ]]; then
     num="${BASH_REMATCH[1]}"
+    if [[ "$num" =~ ^-?[0-9]+$ ]]; then
+          num="${num}.0"  # Make integers float to avoid flux being quirky
+      fi
+
   else
     continue
   fi
