@@ -4,7 +4,6 @@ DD=$(date +%s)
 # Redirect all stdout/stderr to logfile
 exec &>> /home/mitrap/log/sync.${DD}.log
 
-
 BINDIR=/home/debian/src/mitrap
 PROCDIR=${BINDIR}/processing_scripts/src/hourly_diffs_new/
 CONFIG=/mnt/installations.toml
@@ -81,14 +80,18 @@ for INST in ${INSTALLATIONS}; do
                     cp -p /mnt/incoming/$F ${DIR}
                 fi
 
+                INFLUXDIR="/mnt/influxlines/${DD}/${INST}"
+                INFLUXFILE="${INFLUXDIR}/${TYPE}_${i}"
 
 		if [[ -s "${OUTDIR}/${DD}/${F}" ]]; then
 		    # The TYPE in the TOML must be identical to the respective processot script
-		    INFLUXDIR="/mnt/influxlines/${DD}/${INST}"
 		    mkdir -p ${INFLUXDIR}
-		    echo "EXEC $PROCDIR/${TYPE}.sh $INST ${OUTDIR}/${DD}/$F ${INFLUXDIR}/${TYPE}_${i}.lp"
-		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXDIR}/${TYPE}_${i}.lp" "${INSTNAME}" "${INSTRUMENT}"
+		    # Remove DOS line-termintaions in-place
+		    echo "$(tr -d '\r' < ${OUTDIR}/${DD}/${F})" > ${OUTDIR}/${DD}/${F}
+		    echo "EXEC $PROCDIR/${TYPE}.sh $INST ${OUTDIR}/${DD}/$F ${INFLUXFILE}"
+		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXFILE}" "${INSTNAME}" "${INSTRUMENT}"
 		fi
+
 
 		((i++))
 	    done
