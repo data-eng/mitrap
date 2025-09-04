@@ -48,7 +48,7 @@ while IFS=',' read -r date time value; do
       fi
 
       write_query="com2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
-      echo $write_query >> "$file_to_store"
+      echo $write_query >> "${file_to_store}.lp"
 
   else
       echo "NaN value=$value"

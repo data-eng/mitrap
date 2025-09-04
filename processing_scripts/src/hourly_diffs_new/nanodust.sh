@@ -31,8 +31,7 @@ tail -n +2 "$file_to_process" | while IFS=',' read -r time_pc time_dut mode pn g
   fields="mode=\"${mode}\""; [[ $pn != "NaN" ]] && fields+=",pn=$pn"; [[ $gmd != "NaN" ]] && fields+=",gmd=$gmd"
   write_query="nanodust,installation=${installation_name},instrument=${instrument_name} ${fields} $timestamp_unix"
 
-
-  echo $write_query >> "$file_to_store"
+  echo $write_query >> "${file_to_store}.lp"
 
 done
 

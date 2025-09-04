@@ -49,7 +49,7 @@ done
 
   write_query="ma200,installation=$installation_name,instrument=$instrument_name flow_total=$flow_total,flow1=$flow1,flow2=$flow2,uvatn1=$uvatn1,blueatn1=$blueatn1,greenatn1=$greenatn1,redatn1=$redatn1,iratn1=$iratn1,uvbcc=$uvbcc,bluebcc=$bluebcc,greenbcc=$greenbcc,redbcc=$redbcc,irbcc=$irbcc,sampletemp=$sample_temp,samplerh=$sample_rh,bccwb=$bcc_wb,bccff=$bcc_ff $timestamp_unix"
 
-  echo "$write_query" >> "$file_to_store"
+  echo $write_query >> "${file_to_store}.lp"
 
 done < "$file_to_process"
 

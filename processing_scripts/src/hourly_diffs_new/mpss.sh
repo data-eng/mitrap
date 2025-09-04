@@ -111,7 +111,7 @@ while true; do
   done
 
   write_query="smps_data,installation=${installation_name},instrument=${instrument_name} ${fields} ${timestamp_unix}"
-  echo $write_query >> "$file_to_store"
+  echo $write_query >> "${file_to_store}.lp"
 
   done
 

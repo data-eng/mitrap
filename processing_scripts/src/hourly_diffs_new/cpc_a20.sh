@@ -49,6 +49,6 @@ total_errors=${total_errors},\
 status_error=${status_error_dec} \
 $timestamp_unix"
 
-    echo $write_query >> "$file_to_store"
+    echo $write_query >> "${file_to_store}.lp"
 
   done

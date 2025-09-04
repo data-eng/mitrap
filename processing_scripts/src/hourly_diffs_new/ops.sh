@@ -57,6 +57,7 @@ while IFS= read -r line; do
     timestamp_unix="$(date -d "$date $time" +%s)000000000"
 
     fields=""
+    csv_cols=""
     for i in "${!headers[@]}"; do
       if [[ i -le ${START_COL} ]]; then continue; fi
       key=$(escape_tag_value "${headers[$i]}")
@@ -64,12 +65,22 @@ while IFS= read -r line; do
       if [[ $key =~ ^[0-9] ]] ; then key="nm_$key" ; fi
       value="${values[$i]}"
       [[ "$value" == "NA" || "$value" == "" ]] && continue
-      [[ "$fields" != "" ]] && fields+=","
-      fields+="${key}=${value}"
+      if [[ "$fields" != "" ]]; then
+        fields+=",${key}=${value}"
+	csv_cols+=",${value}"
+      else 
+        fields="${key}=${value}"
+	csv_cols="${value}"
+      fi
     done
 
+    # Influx line
     write_query="ops,installation=${installation_name},instrument=${instrument_name} ${fields} $timestamp_unix"
-    echo $write_query >> "$file_to_store"
+    echo $write_query >> "${file_to_store}.lp"
+
+    # CSV line
+    echo "${timestamp_unix},${installation_name},${instrument_name},NA,${csv_cols}" >> "${file_to_store}.csv"
+    
 
   fi
 

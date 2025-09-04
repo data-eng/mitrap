@@ -59,6 +59,6 @@ while IFS= read -r line; do
 
     write_query="li_cor,installation=${installation_name},instrument=${instrument_name} co2_ppm=$co2_ppm,temp_c=$temp_c,pres_kPA=$pres_kPA $timestamp_unix"
 
-    echo $write_query >> "$file_to_store"
+    echo $write_query >> "${file_to_store}.lp"
 
 done < "$file_to_process"

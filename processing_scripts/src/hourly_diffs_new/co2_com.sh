@@ -58,6 +58,6 @@ while IFS=',' read -r date time rest; do
   fi
 
   write_query="co2,installation=${installation_name},instrument=${instrument_name} value=${num} ${timestamp_unix}"
-  echo "$write_query" >> "$file_to_store"
+  echo $write_query >> "${file_to_store}.lp"
 
 done < "$file_to_process"

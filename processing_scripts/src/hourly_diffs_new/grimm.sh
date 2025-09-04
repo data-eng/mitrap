@@ -109,16 +109,26 @@ while IFS= read -r line; do
       cname=${values[0]}
       values=("${values[@]:1}")
 
-      fields1=""
+      fields=""
+      csv_cols=""
       for i in "${!values[@]}"; do
-        val="${values[i]}"; col="${cols[i]}";
-        fields1+="${col}=${val},"
+	  col="${cols[i]}"
+          val="${values[i]}"
+	  if [[ "$fields" != "" ]]; then
+              fields+=",${col}=${val}"
+	      csv_cols+=",${val}"
+	  else 
+              fields="${col}=${val}"
+	      csv_cols="${val}"
+	  fi
       done
-      fields=$(echo $fields1|sed 's/,$//')
 
       # Influx line
       write_query="grimm,installation=${installation_name},instrument=${instrument_name},name=${cname} ${fields} ${timestamp_unix}"
-      echo $write_query >> "$file_to_store"
+      echo $write_query >> "${file_to_store}.lp"
+
+      # CSV line
+      echo "${timestamp_unix},${installation_name},${instrument_name},${cname},${csv_cols}" >> "${file_to_store}.csv"
 
     fi
 

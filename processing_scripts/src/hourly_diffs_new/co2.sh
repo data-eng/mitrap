@@ -39,6 +39,6 @@ while IFS=',' read -r date time value; do
   echo "Value     : $value"
 
   write_query="co2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
-  echo $write_query >> "$file_to_store"
+  echo $write_query >> "${file_to_store}.lp"
 
  done < "$file_to_process"
