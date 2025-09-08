@@ -5,7 +5,7 @@ DD=$(date +%s)
 exec &>> /home/mitrap/log/sync.${DD}.log
 
 BINDIR=/home/debian/src/mitrap
-PROCDIR=${BINDIR}/processing_scripts/src/hourly_diffs_new/
+PROCDIR=${BINDIR}/parsers/
 CONFIG=/mnt/installations.toml
 OUTDIR=/mnt/new
 
