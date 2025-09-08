@@ -5,10 +5,8 @@ escape_tag_value() {
   val="${val//\\/\\\\}"   # escape backslashes
   val="${val//,/\\,}"     # escape commas
   val="${val// /\\ }"     # escape spaces
-  echo "$val"
+  echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
-
-# /mnt/incoming/mitrap000/CO2/Data/COM2_Log_*.txt
 
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
   echo "Missing arguments: $*"
@@ -26,19 +24,14 @@ instrument_name=$4
 installation_name=$(escape_tag_value "$installation_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
-while IFS=',' read -r date time value; do
+tail -n +2 "$file_to_process" | while IFS=',' read -r time_pc time_dut mode pn gmd tet cabt tpe tze trf tse fre sp dp sf df uhv; do
 
-  timestamp="$date $time"
-  timestamp_unix=$(date -d "$timestamp" +%s)000000000
+  timestamp_unix=$(date -d "$time_pc" +%s)000000000
 
-  # Remove square brackets from value
-  value="${value#[}"
-  value="${value%]}"
+  fields="mode=\"${mode}\""; [[ $pn != "NaN" ]] && fields+=",pn=$pn"; [[ $gmd != "NaN" ]] && fields+=",gmd=$gmd"
+  write_query="nanodust,installation=${installation_name},instrument=${instrument_name} ${fields} $timestamp_unix"
 
-  echo "Timestamp : $timestamp_unix"
-  echo "Value     : $value"
+  echo $write_query >> "${file_to_store}.lp"
 
-  write_query="co2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
-  echo $write_query >> "$file_to_store"
+done
 
- done < "$file_to_process"

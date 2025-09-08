@@ -5,7 +5,7 @@ escape_tag_value() {
   val="${val//\\/\\\\}"   # escape backslashes
   val="${val//,/\\,}"     # escape commas
   val="${val// /\\ }"     # escape spaces
-  echo "$val"
+  echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
@@ -39,6 +39,6 @@ while IFS=',' read -r timestamp datestr timestr nm370 nm450 nm520 nm590 nm660 nm
 
     write_query="ae31,installation=${installation_name},instrument=${instrument_name} date_str=$datestr,time_str=$timestr,nm370=$nm370,nm450=$nm450,nm520=$nm520,nm590=$nm590,nm660=$nm660,nm880=$nm880,nm950=$nm950,flow=$flow $timestamp_unix"
 
-    echo $write_query >> "$file_to_store"
+    echo $write_query >> "${file_to_store}.lp"
 
  done < "$file_to_process"

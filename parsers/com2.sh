@@ -5,7 +5,7 @@ escape_tag_value() {
   val="${val//\\/\\\\}"   # escape backslashes
   val="${val//,/\\,}"     # escape commas
   val="${val// /\\ }"     # escape spaces
-  echo "$val"
+  echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
@@ -48,7 +48,7 @@ while IFS=',' read -r date time value; do
       fi
 
       write_query="com2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
-      echo $write_query >> "$file_to_store"
+      echo $write_query >> "${file_to_store}.lp"
 
   else
       echo "NaN value=$value"

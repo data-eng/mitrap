@@ -5,7 +5,7 @@ escape_tag_value() {
   val="${val//\\/\\\\}"   # escape backslashes
   val="${val//,/\\,}"     # escape commas
   val="${val// /\\ }"     # escape spaces
-  echo "$val"
+  echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
@@ -49,6 +49,6 @@ total_errors=${total_errors},\
 status_error=${status_error_dec} \
 $timestamp_unix"
 
-    echo $write_query >> "$file_to_store"
+    echo $write_query >> "${file_to_store}.lp"
 
   done

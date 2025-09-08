@@ -7,4 +7,18 @@ The MI-TRAP Data Service offers the following services:
 * Analytics and visualization: Data is loaded into InfluxDB with a retainment period of 6 months. The data within the retainment period is served via Grafana which visualizes the results from complex, analytical queries.
 
 
+## Supported formats
+
+The following parsers are available:
+
+ * com1, com2: Flow Meter Valves
+ * mpss: MPSS
+ * ae31: AE31
+ * cpc_a20
+ * grimm: Grimm OPC
+ * nanodust
+ * co2
+ * ma200
+ * ops
+ * li_cor (not used)
 

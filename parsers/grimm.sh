@@ -5,7 +5,7 @@ escape_tag_value() {
   val="${val//\\/\\\\}"   # escape backslashes
   val="${val//,/\\,}"     # escape commas
   val="${val// /\\ }"     # escape spaces
-  echo "$val"
+  echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
@@ -25,7 +25,7 @@ installation_name=$(escape_tag_value "$installation_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
 # Grimm data comes in chunks of 6sec, where each chunk starts with a P line
-# followed up by 40 C/c lines. But sync'ing is not aligned with chinks,
+# followed up by 40 C/c lines. But sync'ing is not aligned with chunks,
 # but happens in the middle of chunks and even lines.
 # We spool the unfinished last chunk until the next sync cycle.
 
@@ -39,17 +39,8 @@ instrument_name=$(escape_tag_value "$instrument_name")
 SPOOL=/mnt/spool
 
 PLINES=$(grep -n '^P' $file_to_process | cut -d: -f 1)
-
 FIRSTPLINE=$(echo $PLINES | tr ' ' '\n' | head -n 1)
 LASTPLINE=$(echo $PLINES | tr ' ' '\n' | tail -n 1)
-
-# Sanity check: all PLINES diffs must be 41, except for the first one
-PDIFF=$(echo $PLINES | awk 'BEGIN { RS=" "; PREV=0 } { print $0-PREV; PREV=$0 }' | tail -n +2 | uniq)
-if [[ x$PDIFF != x41 ]]; then
-    echo "Bad lines";
-    exit 1;
-fi
-
 
 # The data in the spool (if any) and the lines before the first
 # PLINE should be 41, if all went well.
@@ -60,7 +51,7 @@ if [[ $(cat ${SPOOL}/grim | wc -l) == 41 ]]; then
 else
     echo "WARNING: Bad spool, deleted."
     rm ${SPOOL}/grim
-    rm -f ${file_to_process}.temp
+    rm ${file_to_process}.temp
 fi
 
 # The useful data is the lines between the first PLINE and one line
@@ -75,7 +66,17 @@ NFULL=$(cat ${SPOOL}/tmp | wc -l)
 cat ${SPOOL}/tmp | head -n ${NFULL} > ${SPOOL}/grim
 
 
-mv ${file_to_process}.temp ${file_to_process}
+# Sanity check: all PLINES diffs must be 41
+PLINES=$(grep -n '^P' ${file_to_process}.temp | cut -d: -f 1)
+PDIFF=$(echo $PLINES | awk 'BEGIN { RS=" "; PREV=0 } { print $0-PREV; PREV=$0 }' | tail -n +2 | uniq)
+echo $PDIFF
+if [[ x$PDIFF != x41 ]]; then
+    BADLINES=$(echo $PLINES | awk 'BEGIN { RS=" "; PREV=0 } { print $0-PREV " " PREV "," $0-1 "d" ; PREV=$0 }' | tail -n +2 | grep -v '^41' | grep -v '^$' | cut -d ' ' -f 2- | tr '\n' ';' | sed 's/;$//')
+    echo "Bad lines: ${BADLINES}"
+    sed -e "${BADLINES}" < ${file_to_process}.temp > ${file_to_process}.temp2
+else
+    cp ${file_to_process}.temp ${file_to_process}.temp2
+fi
 
 
 # Fixed column names: 
@@ -109,20 +110,30 @@ while IFS= read -r line; do
       cname=${values[0]}
       values=("${values[@]:1}")
 
-      fields1=""
+      fields=""
+      csv_cols=""
       for i in "${!values[@]}"; do
-        val="${values[i]}"; col="${cols[i]}";
-        fields1+="${col}=${val},"
+	  col="${cols[i]}"
+          val="${values[i]}"
+	  if [[ "$fields" != "" ]]; then
+              fields+=",${col}=${val}"
+	      csv_cols+=",${val}"
+	  else 
+              fields="${col}=${val}"
+	      csv_cols="${val}"
+	  fi
       done
-      fields=$(echo $fields1|sed 's/,$//')
 
       # Influx line
       write_query="grimm,installation=${installation_name},instrument=${instrument_name},name=${cname} ${fields} ${timestamp_unix}"
-      echo $write_query >> "$file_to_store"
+      echo $write_query >> "${file_to_store}.lp"
+
+      # CSV line
+      echo "${timestamp_unix},${installation_name},${instrument_name},${cname},${csv_cols}" >> "${file_to_store}.csv"
 
     fi
 
-done < <( cat $file_to_process | gawk '/P/ { Q=0; print; } /^[Cc]/ { if (Q%4 == 0) { MYLINE = $1; for (i=2; i<NF; i++) MYLINE = MYLINE " " $i ; Q=Q+1 ; } else if  (Q%4==1) { for (i=2; i<NF; i++) MYLINE = MYLINE " " $i ; Q=Q+1; print MYLINE } else if  (Q%4==2) { MYLINE = $1; for (i=2; i<NF-1; i++) MYLINE = MYLINE FS $i ; Q=Q+1 } else if  (Q%4==3) { for (i=2; i<NF; i++) MYLINE= MYLINE " " $i ; Q=Q+1; print MYLINE } } ' )
+done < <( cat ${file_to_process}.temp2 | gawk '/P/ { Q=0; print; } /^[Cc]/ { if (Q%4 == 0) { MYLINE = $1; for (i=2; i<NF; i++) MYLINE = MYLINE " " $i ; Q=Q+1 ; } else if  (Q%4==1) { for (i=2; i<NF; i++) MYLINE = MYLINE " " $i ; Q=Q+1; print MYLINE } else if  (Q%4==2) { MYLINE = $1; for (i=2; i<NF-1; i++) MYLINE = MYLINE FS $i ; Q=Q+1 } else if  (Q%4==3) { for (i=2; i<NF; i++) MYLINE= MYLINE " " $i ; Q=Q+1; print MYLINE } } ' )
 
 # The awk script (a) lets P lines fall through (b) collects pairs of Cc lines into one line
 # (c) drops the last element of the first line of a c pair (TODO: sanity check, must be 160)
