@@ -810,18 +810,18 @@
     "list": [
       {
         "current": {
-          "text": "Athens - Patission - CE",
-          "value": "Athens - Patission - CE"
+          "text": "Athens - Patission - HR",
+          "value": "Athens - Patission - HR"
         },
         "name": "AQH_Station",
         "options": [
           {
             "selected": true,
-            "text": "Athens - Patission - CE",
-            "value": "Athens - Patission - CE"
+            "text": "Athens - Patission - HR",
+            "value": "Athens - Patission - HR"
           }
         ],
-        "query": "Athens - Patission - CE",
+        "query": "Athens - Patission - HR",
         "type": "custom"
       },
       {
