@@ -10,8 +10,8 @@ def CDepict(c):
     return v.index(c)
 
 
-table1 = pd.read_csv( "input_fixed.grimm",
-                      header=None, na_filter=False,names=range(17), low_memory=False )
+table1 = pd.read_csv( "temp-input.grimm",
+                      header=None, na_filter=False, names=range(17), low_memory=False )
 vec = [ np.nan, 'P',
         'C0:','C0;','c0:','c0;', 'C1:','C1;','c1:','c1;',
         'C2:','C2;','c2:','c2;', 'C3:','C3;','c3:','c3;',
@@ -63,12 +63,16 @@ rmv.index = range(1, rows + 1)
 # Negative values never appear, and we must remove
 # unwritten the cells with post-editing of the CSV
 mtemp = pd.DataFrame(-1, index=range(int(rows * 5 / 41)), columns=range(17) )
-mtemp.iloc[:, 0] = ['P', 'C_:', 'C_;', 'c_:', 'c_;'] * (rows // 41)
+
+# The first column is the times/channels characters
+mtemp[0] = ['P', 'C_:', 'C_;', 'c_:', 'c_;'] * (rows // 41)
 
 for i in range(rows // 41):
     mtemp.iloc[i * 5, 0] = str( rmv.iloc[i * 41, 0] )
+    # Copy the times lines (P lines)
     for j in range(1,17):
         mtemp.iloc[i * 5, j] = int( rmv.iloc[i * 41, j] )
+    # Aggregate the channels (C lines)
     for j in range(1, 10):
         for k in range(1, 5):
             ll = [rmv.iloc[i * 41 + k, j], rmv.iloc[i * 41 + k + 4, j],
@@ -93,4 +97,4 @@ for i in range(len(mtemp) // 5):
 mtemp.iloc[:, 9] = mtemp.iloc[:, 9].replace(1600, 160)
 #mtemp.iloc[:, 9] = mtemp.iloc[:, 9].replace(np.nan, np.nan)
 
-mtemp.to_csv( "output.txt", sep=",", header=False, index=False, na_rep="" )
+mtemp.to_csv( "temp-aggregated.csv", sep=",", header=False, index=False, na_rep="" )
