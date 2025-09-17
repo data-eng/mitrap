@@ -1,4 +1,3 @@
-install.packages('parallel')
 library('parallel')
 
 CDepict = function(c){
@@ -111,8 +110,7 @@ SixtoMin_Parallel = function(path){
   return(final)
 }
 
-Final <- SixtoMin_Parallel("F:/GRANAKIS_DEM_HAC/OPC_DEMstation/OPC107data2025/Data/DemOPC20250210_6sec.TXT")
-system.time(Final <- SixtoMin_Parallel("F:/GRANAKIS_DEM_HAC/OPC_DEMstation/OPC107data2025/Data/DemOPC20250210_6sec.TXT")) #H APO PANW ALLA GRAFEI KAI XRONO#
-#write.table(Final,'C:/Users/Willhelm II/Desktop/DemOPC20220418.txt',sep= "\t",quote = FALSE,row.names = FALSE,col.names = FALSE,na=" " )#writes txt /aligned
-write.table(Final,'F:/GRANAKIS_DEM_HAC/OPC_DEMstation/OPC107data2025/Data/DemOPC20250210.txt',sep= " ",quote = FALSE,row.names = FALSE,col.names = FALSE,na=" " )#writes txt /unaligned
+Final <- SixtoMin_Parallel("input.grimm")
+
+write.table(Final, "output.csv", sep=",", quote = FALSE, row.names = FALSE, col.names = FALSE, na="" )
 
