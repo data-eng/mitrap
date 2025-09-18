@@ -10,8 +10,8 @@ bins = [0.2646,0.2898,0.324,0.3742,0.4243,0.4743,0.5385,0.614,0.6745,0.7483,0.89
 # The following factors out calculations over constants
 # Calculate the volume for each bin as val * pi * diam^3 / 6
 vol = numpy.power( numpy.array(bins), 3 ) * numpy.pi / 6
-# Multiply by 1.6 (g/cm-3) density and divide by 10^6 to get μg/m3
-den = vol * 1.6E-6
+# Multiply by 1.6 (g/cm-3) density and divide by 10^3 to get μg/m3
+den = vol * 1.6E-3
 # den must now be multiplied by the values (particle counts) in the data
 
 
