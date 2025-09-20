@@ -37,20 +37,24 @@ while IFS=',' read -r \
 do
 
   timestamp_unix=$(date -d "$date $time" +%s)000000000
+  values=""
 
   # Force integer-looking numbers to floats
   for var in flow_total flow1 flow2 bluebcc greenbcc irbcc redbcc uvbcc blueatn1 greenatn1 iratn1 redatn1 uvatn1 sample_temp sample_rh bcc_wb bcc_ff
-do
-  if [[ "${!var}" =~ ^-?[0-9]+$ ]]; then
-    eval "$var=\"${!var}.0\""
+  do
+    if [[ x${!var} == x ]]; then continue
+    elif [[ "${!var}" =~ ^-?[0-9]+$ ]]; then
+      values="${values},${var}=${!var}.0"
+    else
+      values="${values},${var}=${!var}"
+    fi
+  done
+  values=${values#,}
+
+  if [[ x${values} != x ]]; then
+    write_query="ma200,installation=$installation_name,instrument=$instrument_name ${values} $timestamp_unix"
+    echo $write_query >> "${file_to_store}.lp"
   fi
-done
-
-
-  write_query="ma200,installation=$installation_name,instrument=$instrument_name flow_total=$flow_total,flow1=$flow1,flow2=$flow2,uvatn1=$uvatn1,blueatn1=$blueatn1,greenatn1=$greenatn1,redatn1=$redatn1,iratn1=$iratn1,uvbcc=$uvbcc,bluebcc=$bluebcc,greenbcc=$greenbcc,redbcc=$redbcc,irbcc=$irbcc,sampletemp=$sample_temp,samplerh=$sample_rh,bccwb=$bcc_wb,bccff=$bcc_ff $timestamp_unix"
-
-  echo $write_query >> "${file_to_store}.lp"
 
 done < "$file_to_process"
 
-  
