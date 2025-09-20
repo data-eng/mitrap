@@ -4,7 +4,9 @@ DD=$(date +%s)
 # Redirect all stdout/stderr to logfile
 exec &>> /home/mitrap/log/sync.${DD}.log
 
-BINDIR=/home/debian/src/mitrap
+source /home/mitrap/.influx.env
+
+BINDIR=/home/debian/live
 PROCDIR=${BINDIR}/parsers/
 CONFIG=/mnt/installations.toml
 OUTDIR=/mnt/new
@@ -88,10 +90,15 @@ for INST in ${INSTALLATIONS}; do
 		    mkdir -p ${INFLUXDIR}
 		    # Remove DOS line-termintaions in-place
 		    echo "$(tr -d '\r' < ${OUTDIR}/${DD}/${F})" > ${OUTDIR}/${DD}/${F}
-		    echo "EXEC $PROCDIR/${TYPE}.sh $INST ${OUTDIR}/${DD}/$F ${INFLUXFILE}"
+		    echo "EXEC $PROCDIR/${TYPE}.sh ${OUTDIR}/${DD}/$F ${INFLUXFILE} ${INSTNAME} ${INSTRUMENT}"
 		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXFILE}" "${INSTNAME}" "${INSTRUMENT}"
 		fi
 
+                # Write Influx lines to DB
+                if [[ -s "${INFLUXFILE}" ]]; then
+                    echo "WRITE ${INFLUXFILE} TO INFLUX"
+                    /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file ${INFLUXFILE}
+                fi
 
 		((i++))
 	    done
