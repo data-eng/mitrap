@@ -95,9 +95,10 @@ for INST in ${INSTALLATIONS}; do
 		fi
 
                 # Write Influx lines to DB
-                if [[ -s "${INFLUXFILE}" ]]; then
-                    echo "WRITE ${INFLUXFILE} TO INFLUX"
-                    /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file ${INFLUXFILE}
+		# Careful: INFLUXFILE is the pathname without the suffix
+                if [[ -s "${INFLUXFILE}.lp" ]]; then
+                    echo "WRITE ${INFLUXFILE}.lp TO INFLUX"
+                    /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file ${INFLUXFILE}.lp
                 fi
 
 		((i++))
