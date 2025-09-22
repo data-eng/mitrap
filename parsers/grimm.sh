@@ -24,6 +24,9 @@ instrument_name=$4
 installation_name=$(escape_tag_value "$installation_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
+BINDIR=/home/debian/live
+SPOOL=/mnt/spool
+
 # Grimm data comes in chunks of 6sec, where each chunk starts with a P line
 # followed up by 40 C/c lines. But sync'ing is not aligned with chunks,
 # but happens in the middle of chunks and even lines.
@@ -35,9 +38,6 @@ instrument_name=$(escape_tag_value "$instrument_name")
 # the file in the new/ folder starts with this line.
 # See in sync.sh how OLDLINES and NEWLINES are computed and used to
 # decide what to transfer to new/
-
-SPOOL=/mnt/spool
-SPOOL=/tmp/
 
 PLINES=$(grep -n '^P' $file_to_process | cut -d: -f 1)
 FIRSTPLINE=$(echo $PLINES | tr ' ' '\n' | head -n 1)
@@ -52,7 +52,7 @@ if [[ $(cat ${SPOOL}/grim | wc -l) == 41 ]]; then
 else
     echo "WARNING: Bad spool, deleted."
     rm ${SPOOL}/grim
-    rm ${file_to_process}.temp
+    rm -f ${file_to_process}.temp
 fi
 
 # The useful data is the lines between the first PLINE and one line
@@ -100,6 +100,9 @@ cat ${file_to_process}.temp2 | gawk '\
 # The value to the right might be marginally larger,
 # which makes no sense, so fix to zero.
 
+gawk_insta_name=$(echo ${installation_name} | sed 's|\\|\\\\|g' )
+gawk_instr_name=$(echo ${instrument_name} | sed 's|\\|\\\\|g' )
+
 cat ${file_to_process}.temp3 | gawk '\
 BEGIN  { MYLINE="" }
 /^P/   {
@@ -115,20 +118,18 @@ BEGIN  { MYLINE="" }
            print MYLINE;
          }
          MYLINE = sprintf( "%02d-%02d-%02d %02d:%02d", 2000 + $2, $3, $4, $5, $6 )
+         MYLINE = MYLINE ",'"${gawk_insta_name}"','"${gawk_instr_name}"'"
        }
 !/^P/  {
          for (i=1; i<=32; i++) arr[i] += $i
        }' >  ${file_to_process}.temp4
 
-cat ${file_to_process}.temp4 | (while IFS=',' read -ra line; do
-  datetime=${line[0]}
-  csv_fields=$( echo ${line[@]:1} | tr ' ' ',' )
+# Perform the PM2.5 calculation and write out the CSV
+python3 ${BINDIR}/parsers/pm25.py ${file_to_process}.temp4 ${file_to_store}.csv
 
-#  write_query="grimm,installation=${installation_name},instrument=${instrument_name} ${inf_fields} ${timestamp_unix}"
-#  echo $write_query >> "${file_to_store}.lp"
-
-  # CSV line
-  echo "${datetime},${installation_name},${instrument_name},${csv_fields}" >> "${file_to_store}.csv"
+# Make the influx line with PM2.5 value only
+cat ${file_to_store}.csv | tail +2 | cut -d ',' -f 1,4 | (while IFS=',' read -r datetime pm25; do
+  timestamp_unix=$(date -d "${datetime}" +%s%N)
+  write_query="grimm,installation=${installation_name},instrument=${instrument_name} pm25=${pm25} ${timestamp_unix}"
+  echo $write_query >> "${file_to_store}.lp"
 done)
-
-
