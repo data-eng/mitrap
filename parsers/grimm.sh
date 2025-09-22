@@ -24,6 +24,9 @@ instrument_name=$4
 installation_name=$(escape_tag_value "$installation_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
+BINDIR=/home/debian/live
+SPOOL=/mnt/spool
+
 # Grimm data comes in chunks of 6sec, where each chunk starts with a P line
 # followed up by 40 C/c lines. But sync'ing is not aligned with chunks,
 # but happens in the middle of chunks and even lines.
@@ -35,8 +38,6 @@ instrument_name=$(escape_tag_value "$instrument_name")
 # the file in the new/ folder starts with this line.
 # See in sync.sh how OLDLINES and NEWLINES are computed and used to
 # decide what to transfer to new/
-
-SPOOL=/mnt/spool
 
 PLINES=$(grep -n '^P' $file_to_process | cut -d: -f 1)
 FIRSTPLINE=$(echo $PLINES | tr ' ' '\n' | head -n 1)
@@ -51,7 +52,7 @@ if [[ $(cat ${SPOOL}/grim | wc -l) == 41 ]]; then
 else
     echo "WARNING: Bad spool, deleted."
     rm ${SPOOL}/grim
-    rm ${file_to_process}.temp
+    rm -f ${file_to_process}.temp
 fi
 
 # The useful data is the lines between the first PLINE and one line
@@ -69,7 +70,6 @@ cat ${SPOOL}/tmp | head -n ${NFULL} > ${SPOOL}/grim
 # Sanity check: all PLINES diffs must be 41
 PLINES=$(grep -n '^P' ${file_to_process}.temp | cut -d: -f 1)
 PDIFF=$(echo $PLINES | awk 'BEGIN { RS=" "; PREV=0 } { print $0-PREV; PREV=$0 }' | tail -n +2 | uniq)
-echo $PDIFF
 if [[ x$PDIFF != x41 ]]; then
     BADLINES=$(echo $PLINES | awk 'BEGIN { RS=" "; PREV=0 } { print $0-PREV " " PREV "," $0-1 "d" ; PREV=$0 }' | tail -n +2 | grep -v '^41' | grep -v '^$' | cut -d ' ' -f 2- | tr '\n' ';' | sed 's/;$//')
     echo "Bad lines: ${BADLINES}"
@@ -78,64 +78,58 @@ else
     cp ${file_to_process}.temp ${file_to_process}.temp2
 fi
 
+# One P line every minute, followed by 10 blocks of C_: C_; c_: c_; lines,
+# where _ is 0-9. Each C_: C_; c_: c_; set is one reading, taken every 6 sec.
 
-# Fixed column names: 
-  # J :    0.25     0.28     0.30     0.35     0.40     0.45     0.50     0.58
-  # J ;    0.65     0.70     0.80     1.00     1.30     1.60     2.0      2.5
+# This awk (a) lets P lines fall through (b) collects quads of Cc lines into one line
+# (c) drops the last element
+# TODO, sanity check 1: C_: C_; c_; should be empy, c_: should be 160
+# TODO, sanity check 2: Order of Cc lines must be C_: C_; c_: c_;
 
-cols=(nm0_25 nm0_28 nm0_30 nm0_35 nm0_40 nm0_45 nm0_50 nm0_58 nm0_65 nm0_70 nm0_80 nm1_00 nm1_30 nm1_60 nm2_00 nm2_50)
+cat ${file_to_process}.temp2 | gawk '\
+/^P/   { print; }
+/^C.:/ { MYLINE = $2; for (i=3; i<NF; i++) MYLINE = MYLINE " " $i; }
+/^C.;/ { for (i=2; i<NF; i++) MYLINE = MYLINE " " $i; }
+/^c.:/ { for (i=2; i<NF; i++) MYLINE = MYLINE " " $i; }
+/^c.;/ { for (i=2; i<NF; i++) MYLINE = MYLINE " " $i; print MYLINE }' >  ${file_to_process}.temp3
 
-	
-while IFS= read -r line; do
+# This awk (a) parses the P line into a datetime
+# (b) sums up the ten 6-sec lines into one 1-min line
+# These values are accumulative, so substract the value
+# to the right to get the actual value for each bin.
+# The value to the right might be marginally larger,
+# which makes no sense, so fix to zero.
 
-    # If is P line make the timestamp
-    if [[ "$line" =~ ^P[[:space:]]+([0-9]{2}) ]]; then
+gawk_insta_name=$(echo ${installation_name} | sed 's|\\|\\\\|g' )
+gawk_instr_name=$(echo ${instrument_name} | sed 's|\\|\\\\|g' )
 
-      read -ra fields <<< "$line"
+cat ${file_to_process}.temp3 | gawk '\
+BEGIN  { MYLINE="" }
+/^P/   {
+         if (MYLINE != "") {
+           for (i=1; i<32; i++) {
+             v = arr[i]-arr[i+1];
+             if (v<0) { v=0.0; }
+             MYLINE = MYLINE "," v;
+             arr[i]=0.0;
+           }
+           MYLINE = MYLINE "," arr[32];
+           arr[32]=0.0;
+           print MYLINE;
+         }
+         MYLINE = sprintf( "%02d-%02d-%02d %02d:%02d", 2000 + $2, $3, $4, $5, $6 )
+         MYLINE = MYLINE ",'"${gawk_insta_name}"','"${gawk_instr_name}"'"
+       }
+!/^P/  {
+         for (i=1; i<=32; i++) arr[i] += $i
+       }' >  ${file_to_process}.temp4
 
-      # Parse datetime parts from P line
-      yy="${fields[1]}"; mm="${fields[2]}"; dd="${fields[3]}";
-      HH="${fields[4]}"; MM="${fields[5]}"; SS="${fields[6]}";
+# Perform the PM2.5 calculation and write out the CSV
+python3 ${BINDIR}/parsers/pm25.py ${file_to_process}.temp4 ${file_to_store}.csv
 
-      # Convert to full year (2000+)
-      year=$((2000 + yy))
-      date_str=$(printf "%04d-%02d-%02d %02d:%02d:%02d" "$year" "$mm" "$dd" "$HH" "$MM" "$SS")
-      timestamp_unix=$(date -d "$date_str" +%s%N)
-
-    else
-
-      cleaned="${line//[:;]/}"
-      read -ra values <<< "$cleaned"
-
-      cname=${values[0]}
-      values=("${values[@]:1}")
-
-      fields=""
-      csv_cols=""
-      for i in "${!values[@]}"; do
-	  col="${cols[i]}"
-          val="${values[i]}"
-	  if [[ "$fields" != "" ]]; then
-              fields+=",${col}=${val}"
-	      csv_cols+=",${val}"
-	  else 
-              fields="${col}=${val}"
-	      csv_cols="${val}"
-	  fi
-      done
-
-      # Influx line
-      write_query="grimm,installation=${installation_name},instrument=${instrument_name},name=${cname} ${fields} ${timestamp_unix}"
-      echo $write_query >> "${file_to_store}.lp"
-
-      # CSV line
-      echo "${timestamp_unix},${installation_name},${instrument_name},${cname},${csv_cols}" >> "${file_to_store}.csv"
-
-    fi
-
-done < <( cat ${file_to_process}.temp2 | gawk '/P/ { Q=0; print; } /^[Cc]/ { if (Q%4 == 0) { MYLINE = $1; for (i=2; i<NF; i++) MYLINE = MYLINE " " $i ; Q=Q+1 ; } else if  (Q%4==1) { for (i=2; i<NF; i++) MYLINE = MYLINE " " $i ; Q=Q+1; print MYLINE } else if  (Q%4==2) { MYLINE = $1; for (i=2; i<NF-1; i++) MYLINE = MYLINE FS $i ; Q=Q+1 } else if  (Q%4==3) { for (i=2; i<NF; i++) MYLINE= MYLINE " " $i ; Q=Q+1; print MYLINE } } ' )
-
-# The awk script (a) lets P lines fall through (b) collects pairs of Cc lines into one line
-# (c) drops the last element of the first line of a c pair (TODO: sanity check, must be 160)
-
-
+# Make the influx line with PM2.5 value only
+cat ${file_to_store}.csv | tail +2 | cut -d ',' -f 1,4 | (while IFS=',' read -r datetime pm25; do
+  timestamp_unix=$(date -d "${datetime}" +%s%N)
+  write_query="grimm,installation=${installation_name},instrument=${instrument_name} pm25=${pm25} ${timestamp_unix}"
+  echo $write_query >> "${file_to_store}.lp"
+done)

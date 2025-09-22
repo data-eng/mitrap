@@ -1,6 +1,6 @@
 #!/bin/bash
 
-START_COL=2
+BINDIR="/home/debian/live"
 
 escape_tag_value() {
   local val="$1"
@@ -36,52 +36,19 @@ trim() {
   echo "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
 }
 
-while IFS= read -r line; do
+sed_insta_name=$(echo ${installation_name} | sed 's|\\|\\\\|g' )
+sed_instr_name=$(echo ${instrument_name} | sed 's|\\|\\\\|g' )
 
-  # Skip empty lines
-  [[ -z "$line" ]] && continue
+cat "$file_to_process" | tail +16 | cut -d ',' -f 2,3,18-33 |\
+sed 's|\([0-9][0-9]\)/\([0-9][0-9]\)/\([0-9][0-9][0-9][0-9]\),\([0-9:]*\),|\3-\1-\2 \4,'"${sed_insta_name}"','"${sed_instr_name}"',|' > "${file_to_process}.temp"
 
-  # Detect and store column headers
-  if [[ "$line" == Sample\ #,* ]]; then
-    IFS=',' read -ra headers <<< "$line"
-    DATA_SECTION=true
-    continue
-  fi
 
-  if [[ "$DATA_SECTION" == true && "$line" =~ ^[0-9]+, ]]; then
-    IFS=',' read -ra values <<< "$line"
+# Perform the PM2.5 calculation and write out the CSV
+python3 ${BINDIR}/parsers/pm25.py ${file_to_process}.temp ${file_to_store}.csv
 
-    sample_id="${values[0]}"
-    date="${values[1]}"
-    time="${values[2]}"
-    timestamp_unix="$(date -d "$date $time" +%s)000000000"
-
-    fields=""
-    csv_cols=""
-    for i in "${!headers[@]}"; do
-      if [[ i -le ${START_COL} ]]; then continue; fi
-      key=$(escape_tag_value "${headers[$i]}")
-      key=$(echo  "$key" | sed 's/(..*)//g' | tr '.' '_')
-      if [[ $key =~ ^[0-9] ]] ; then key="nm_$key" ; fi
-      value="${values[$i]}"
-      [[ "$value" == "NA" || "$value" == "" ]] && continue
-      if [[ "$fields" != "" ]]; then
-        fields+=",${key}=${value}"
-	csv_cols+=",${value}"
-      else 
-        fields="${key}=${value}"
-	csv_cols="${value}"
-      fi
-    done
-
-    # Influx line
-    write_query="ops,installation=${installation_name},instrument=${instrument_name} ${fields} $timestamp_unix"
-    echo $write_query >> "${file_to_store}.lp"
-
-    # CSV line
-    echo "${timestamp_unix},${installation_name},${instrument_name},NA,${csv_cols}" >> "${file_to_store}.csv"
-    
-
-  fi
-
-done < "$file_to_process"
+# Make the influx line with PM2.5 value only
+cat ${file_to_store}.csv | tail +2 | cut -d ',' -f 1,4 | (while IFS=',' read -r datetime pm25; do
+  timestamp_unix=$(date -d "${datetime}" +%s%N)
+  write_query="grimm,installation=${installation_name},instrument=${instrument_name} pm25=${pm25} ${timestamp_unix}"
+  echo $write_query >> "${file_to_store}.lp"
+done)
