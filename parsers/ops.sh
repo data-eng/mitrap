@@ -49,6 +49,6 @@ python3 ${BINDIR}/parsers/pm25.py ${file_to_process}.temp ${file_to_store}.csv
 # Make the influx line with PM2.5 value only
 cat ${file_to_store}.csv | tail +2 | cut -d ',' -f 1,4 | (while IFS=',' read -r datetime pm25; do
   timestamp_unix=$(date -d "${datetime}" +%s%N)
-  write_query="grimm,installation=${installation_name},instrument=${instrument_name} pm25=${pm25} ${timestamp_unix}"
+  write_query="pm25,installation=${installation_name},instrument=${instrument_name} pm25=${pm25} ${timestamp_unix}"
   echo $write_query >> "${file_to_store}.lp"
 done)
