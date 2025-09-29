@@ -1,0 +1,6 @@
+from(bucket: "${bucket}")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r._measurement == "pm25" and r.installation == "${AQH_Station}")
+  |> filter(fn: (r) => r._field == "pm25")
+  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)
+  |> keep(columns: ["id", "_field", "_value", "_time"])

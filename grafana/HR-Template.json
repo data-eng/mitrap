@@ -1,0 +1,950 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 3,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "cepbemlo6msjke"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "#/cm³",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 60000,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cpc_data\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"concentration_cc\")\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\n   |> map(fn: (r) => ({\n      r with\n      _field: if r._field == \"concentration_cc\" then \"concentration\"\n              else r._field\n  }))\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Ultrafine Particle Number concentration (#/cm³) ",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "cepbemlo6msjke"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "µg/m³",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 300000,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "query": "import \"strings\"\n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"ae31\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"nm880\")\n  |> map(fn: (r) => ({\n      r with _field: strings.replaceAll(v: r._field, t: \"nm\", u: \"\") + \" nm\"\n  }))\n  |> map(fn: (r) => ({ r with _value: r._value / 1000.0 }))\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Black Carbon mass concentration (µg/m³)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "cepbemlo6msjke"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlPu"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "ppm",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 30000,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "query": "import \"math\"\n\nwin = 6 + 6\nshiftPrev = 6\npointInterval = 30s\n\nbase =\n  from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"co2\" and r.installation == \"${AQH_Station}\")\n    |> filter(fn: (r) => r._field == \"value\")\n    |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\n    |> keep(columns: [\"_time\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n\nrollMean =\n  base\n    |> movingAverage(n: win)\n    |> timeShift(duration: -180s)\n    |> rename(columns: {_value: \"mean_excl\"})\n\nrollE2 =\n  base\n    |> map(fn: (r) => ({ r with _value: r._value*r._value }))\n    |> movingAverage(n: win)\n    |> timeShift(duration: -180s)\n    |> rename(columns: {_value: \"e2_excl\"})\n\njoined1 = join(\n  tables: {o: base, m: rollMean},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined2 = join(\n    tables: {jm: joined1, e: rollE2},\n    on: [\"_time\"],\n    method: \"inner\"\n)\n\njoined =\n  joined2\n  |> map(fn: (r) => {\n      std = math.sqrt(x: r.e2_excl - r.mean_excl*r.mean_excl)\n      outlier = if math.abs(x: r._value - r.mean_excl) > 3.0*std then true else false\n      return {_time: r._time, _value: r._value, outlier: outlier}\n    })\n    |> filter(fn: (r) => r.outlier == false)\n    |> drop(columns: [\"outlier\"]) \n\njoined\n",
+          "refId": "A"
+        }
+      ],
+      "title": "CO₂ concentration (ppm)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "cepbemlo6msjke"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "µg/m³",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "query": "import \"math\"\n\nvolumes = from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"grimm\" and r.installation == \"${AQH_Station}\")\n  |> aggregateWindow(every: v.windowPeriod, fn: sum, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_field\", \"_value\", \"name\"])\n  |> group(columns: [\"name\"]) \n  |> difference()\n   |> map(fn: (r) => {\n        Dp = if r.name == \"C0\" then 0.2646\n            else if r.name == \"C1\" then 0.2898\n            else if r.name == \"C2\" then 0.324\n            else if r.name == \"C3\" then 0.3742\n            else if r.name == \"C4\" then 0.4243\n            else if r.name == \"C5\" then 0.4743\n            else if r.name == \"C6\" then 0.5385\n            else if r.name == \"C7\" then 0.614\n            else if r.name == \"C8\" then 0.6745\n            else if r.name == \"C9\" then 0.7483\n            else if r.name == \"c0\" then 0.8944\n            else if r.name == \"c1\" then 1.1402\n            else if r.name == \"c2\" then 1.4422\n            else if r.name == \"c3\" then 1.7889\n            else if r.name == \"c4\" then 2.2361\n            else if r.name == \"c5\" then 2.7386\n            else if r.name == \"c6\" then 3.2404\n            else if r.name == \"c7\" then 3.7417\n            else if r.name == \"c8\" then 4.4721\n            else if r.name == \"c9\" then 5.7009\n             else 0.0  \n        volume = (1.6 / 10.0^6.0) * ((-1.0 * r._value * 10000.0) * math.pi * (Dp^3.0) / 6.0)\n        return {_time: r._time, name: r.name, volume: volume}\n    })\n\ngroup1 =\n  volumes\n    |> filter(fn: (r) => r.name == \"C0\" or r.name == \"C1\" or r.name == \"C2\" or r.name == \"C3\" or r.name == \"C4\" or r.name == \"C5\" or r.name == \"C6\")\n    |> group(columns: [\"_time\"])\n    |> sum(column: \"volume\")\n    |> group(columns: [\"_time\"])\n    |> map(fn: (r) => ({ _time: r._time, volume: r.volume * 2.0 }))\n\ngroup2 =\n  volumes\n    |> filter(fn: (r) => r.name == \"C7\" or r.name == \"C8\" or r.name == \"C9\" or r.name == \"c0\" or r.name == \"c1\" or r.name == \"c2\" or r.name == \"c3\" or r.name == \"c4\")\n    |> group(columns: [\"_time\"])\n    |> sum(column: \"volume\")\n    |> map(fn: (r) => ({ _time: r._time, volume: r.volume}))\n    \n\ntotal =\n  union(tables: [group1, group2])\n    |> group(columns: [\"_time\"])\n    |> sum(column: \"volume\")\n    |> group() \n    |> rename(columns: {volume: \"pm 2.5\"})\n\n\ntotal",
+          "refId": "A"
+        }
+      ],
+      "title": "PM2.5 mass concentration (µg/m³)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "cepbemlo6msjke"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "#/cm³",
+            "axisPlacement": "auto",
+            "fillOpacity": 50,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "pointShape": "circle",
+            "pointSize": {
+              "fixed": 7
+            },
+            "pointStrokeWidth": 1,
+            "scaleDistribution": {
+              "log": 2,
+              "type": "log"
+            },
+            "show": "points+lines"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "hourly_valve_off (mean)"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "ambient"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "hourly_valve_off (mean)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "hourly_valve_on (mean)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "solid"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 13,
+        "x": 5,
+        "y": 20
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "mapping": "manual",
+        "series": [
+          {
+            "frame": {
+              "matcher": {
+                "id": "byIndex",
+                "options": 1
+              }
+            },
+            "x": {
+              "matcher": {
+                "id": "byName",
+                "options": "nm"
+              }
+            },
+            "y": {
+              "matcher": {
+                "id": "byName",
+                "options": "hourly_valve_on (mean)"
+              }
+            }
+          },
+          {
+            "frame": {
+              "matcher": {
+                "id": "byIndex",
+                "options": 0
+              }
+            },
+            "x": {
+              "matcher": {
+                "id": "byName",
+                "options": "nm"
+              }
+            },
+            "y": {
+              "matcher": {
+                "id": "byName",
+                "options": "hourly_valve_off (mean)"
+              }
+            }
+          }
+        ],
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "hide": false,
+          "query": "import \"strings\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\n\nvalve_off_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"com1\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\")\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 0)\n  |> keep(columns: [\"_time\"])\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))\n  |> aggregateWindow(every: 10m, fn: sum, createEmpty: false)\n\n\njoined = join(\n  tables: {all: all_data, valveOff: valve_off_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(\n            v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"),\n            t: \"_\", u: \".\"\n          ))\n  }))\n  |> map(fn: (r) => ({ r with hourly_valve_off: r._value }))\n  |> keep(columns: [\"nm\", \"hourly_valve_off\"])\n  |> sort(columns: [\"nm\"])\n",
+          "refId": "Valve-Off"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "cepbemlo6msjke"
+          },
+          "hide": false,
+          "query": "import \"strings\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\n\nvalve_on_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"com1\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\")\n  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 1)\n  |> keep(columns: [\"_time\"])\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))\n  |> aggregateWindow(every: 10m, fn: sum, createEmpty: false)\n\n\njoined = join(\n  tables: {all: all_data, valveOn: valve_on_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(\n            v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"),\n            t: \"_\", u: \".\"\n          ))\n  }))\n  |> map(fn: (r) => ({ r with hourly_valve_on: r._value }))\n  |> keep(columns: [\"nm\", \"hourly_valve_on\"])\n  |> sort(columns: [\"nm\"])\n",
+          "refId": "Valve-On"
+        }
+      ],
+      "title": "Hourly size distribution of Ultrafine Particle Number concentration (#/cm³), catalyticlally stripped and ambient.",
+      "transformations": [
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": "/^(?:Valve-On)$/"
+          },
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "_value": {
+                "aggregations": [
+                  "mean"
+                ],
+                "operation": "aggregate"
+              },
+              "hourly_valve_on": {
+                "aggregations": [
+                  "mean"
+                ],
+                "operation": "aggregate"
+              },
+              "nm": {
+                "aggregations": [
+                  "mean"
+                ],
+                "operation": "groupby"
+              }
+            }
+          },
+          "topic": "series"
+        },
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": "/^(?:Valve-Off)$/"
+          },
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "hourly_valve_off": {
+                "aggregations": [
+                  "mean"
+                ],
+                "operation": "aggregate"
+              },
+              "nm": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          },
+          "topic": "series"
+        }
+      ],
+      "type": "xychart"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "cepbemlo6msjke"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "id": 22,
+      "options": {
+        "calculate": false,
+        "cellGap": 0,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "max": 100000,
+          "min": 0,
+          "mode": "opacity",
+          "reverse": true,
+          "scale": "exponential",
+          "scheme": "Oranges",
+          "steps": 128
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 0
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "le"
+        },
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "nm"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "query": "import \"strings\"\nimport \"array\"\nimport \"experimental\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> aggregateWindow(every: 6m, fn: sum, createEmpty: false)\n  \n\nvalve_off_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"com1\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\")\n  |> aggregateWindow(every: 6m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 0)\n  |> keep(columns: [\"_time\"])\n\njoined = join(\n  tables: {all: all_data, valveOn: valve_off_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> aggregateWindow(every: 30m, fn: sum, createEmpty: false)\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))  \n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"), t: \"_\", u: \".\")) \n  }))\n  |> map(fn: (r) => ({\n     r with nm_bin: r.nm \n  }))\n  |> keep(columns: [\"_time\", \"_value\", \"nm_bin\"])\n\n\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Size distribution of Ultrafine Particle Number concentration (#/cm³) - Ambient",
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "nm_bin"
+              }
+            ]
+          }
+        },
+        {
+          "id": "groupingToMatrix",
+          "options": {
+            "columnField": "nm_bin",
+            "rowField": "_time",
+            "valueField": "_value"
+          }
+        }
+      ],
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "cepbemlo6msjke"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "id": 8,
+      "options": {
+        "calculate": false,
+        "cellGap": 0,
+        "color": {
+          "exponent": 0.5,
+          "fill": "purple",
+          "max": 100000,
+          "min": 0,
+          "mode": "opacity",
+          "reverse": true,
+          "scale": "exponential",
+          "scheme": "Purples",
+          "steps": 128
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "le"
+        },
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "nm"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "query": "import \"strings\"\nimport \"array\"\nimport \"experimental\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> aggregateWindow(every: 6m, fn: sum, createEmpty: false)\n  \n\nvalve_on_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"com1\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\")\n  |> aggregateWindow(every: 6m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 1)\n  |> keep(columns: [\"_time\"])\n\njoined = join(\n  tables: {all: all_data, valveOn: valve_on_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> aggregateWindow(every: 30m, fn: sum, createEmpty: false)\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))  \n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"), t: \"_\", u: \".\")) \n  }))\n  |> map(fn: (r) => ({\n     r with nm_bin: r.nm \n  }))\n  |> keep(columns: [\"_time\", \"_value\", \"nm_bin\"])\n\n\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Size distribution of Ultrafine Particle Number concentration (#/cm³) - Solid",
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "nm_bin"
+              }
+            ]
+          }
+        },
+        {
+          "id": "groupingToMatrix",
+          "options": {
+            "columnField": "nm_bin",
+            "rowField": "_time",
+            "valueField": "_value"
+          }
+        }
+      ],
+      "type": "heatmap"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "@INSTALLATION_STR",
+          "value": "@INSTALLATION_STR"
+        },
+        "name": "AQH_Station",
+        "options": [
+          {
+            "selected": true,
+            "text": "@INSTALLATION_STR",
+            "value": "@INSTALLATION_STR"
+          }
+        ],
+        "query": "@INSTALLATION_STR",
+        "type": "custom"
+      },
+      {
+        "current": {
+          "text": "MPSS",
+          "value": "MPSS"
+        },
+        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
+        "hide": 2,
+        "name": "mpss_name",
+        "options": [],
+        "query": {
+          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "Flow Meter Valve COM1",
+          "value": "Flow Meter Valve COM1"
+        },
+        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com1\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
+        "hide": 2,
+        "name": "com1_name",
+        "options": [],
+        "query": {
+          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com1\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "Flow Meter Valve COM2",
+          "value": "Flow Meter Valve COM2"
+        },
+        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
+        "hide": 2,
+        "name": "com2_name",
+        "options": [],
+        "query": {
+          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "AE 31",
+          "value": "AE 31"
+        },
+        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"ae31\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
+        "hide": 2,
+        "name": "ae31_name",
+        "options": [],
+        "query": {
+          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"ae31\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "Grimm OPC",
+          "value": "Grimm OPC"
+        },
+        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"grimm\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
+        "hide": 2,
+        "name": "grimm_name",
+        "options": [],
+        "query": {
+          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"grimm\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "mitrap006",
+          "value": "mitrap006"
+        },
+        "definition": "buckets()\n",
+        "hide": 2,
+        "name": "bucket",
+        "options": [],
+        "query": {
+          "query": "buckets()\n"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "CO2",
+          "value": "CO2"
+        },
+        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"co2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)",
+        "hide": 2,
+        "name": "co2_name",
+        "options": [],
+        "query": {
+          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"co2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "2025-08-28T06:36:50.281Z",
+    "to": "2025-08-29T02:34:22.162Z"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "@TITLE_STR",
+  "uid": "@UID_STR",
+  "version": 44
+}
