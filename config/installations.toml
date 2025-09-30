@@ -2,6 +2,7 @@
 [mitrap000]
 
 city = "Athens - Piraeus - CE"
+ypen = 2
 
 co2_com1 = { name = "CO2", file = "CO2/Data/COM1_Log_*.txt", head = 0 }
 
@@ -17,6 +18,7 @@ com1 = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM
 [mitrap001]
 
 city = "Athens - Aristotelous - CE"
+ypen = 9
 
 co2_com1 = { name = "CO2", file = "mitrap1/CO2/Data/COM1_Log_*.txt", head = 0 }
 
@@ -30,6 +32,7 @@ com1 = { name = "Flow Meter Valve COM1", file = "mitrap1/MStack_Flow_Meter_Valve
 [mitrap006]
 
 city = "Athens - Patission - HR"
+ypen = 1
 
 com1 = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0 }
 co2 = { name = "CO2", file = "CO2/COM2_Log_*.txt", head = 0 }
