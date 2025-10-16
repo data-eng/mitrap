@@ -29,41 +29,43 @@ ma200 = { name = "MA 200", file = "mitrap1/MA200/MA200_Log_*.txt", head = 0 }
 com1 = { name = "Flow Meter Valve COM1", file = "mitrap1/MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0 }
 
 
+[mitrap004]
+
+city = "Rotterdam - Statenweg - CE"
+
+nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1 }
+
+
+[mitrap005]
+
+city = "Rotterdam - Hoek van Holland - CE"
+
+nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1 }
+
+
 [mitrap006]
 
 city = "Athens - Patission - HR"
 ypen = 1
 
 com1 = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0 }
+
 co2 = { name = "CO2", file = "CO2/COM2_Log_*.txt", head = 0 }
 
-[mitrap006.com2]
-name = "Flow Meter Valve COM2"
-file = "MStack_Flow_Meter_Valve_RHT/COM2_Log_*"
-head = 0
+com2 = { name = "Flow Meter Valve COM2", file = "MStack_Flow_Meter_Valve_RHT/COM2_Log_*", head = 0 }
 
-[mitrap006.ae31]
-name = "AE 31" 
-file = "sambashare/AE31/mitrap/*.csv"
-head = 0
+ae31 = { name = "AE 31", file = "sambashare/AE31/mitrap/*.csv", head = 0 }
 
-[mitrap006.mpss]
-name = "MPSS" 
-file = "sambashare/MPSS_ATH/inverted/*.inv"
-head = 0
+mpss = { name = "MPSS", file = "sambashare/MPSS_ATH/inverted/*.inv", head = 0 }
 
-[mitrap006.cpc_a20]
-name = "CPC A20"
-file = "sambashare/cpc_A20/*.dat"
-head = 0
+cpc_a20 = { name = "CPC A20", file = "sambashare/cpc_A20/*.dat", head = 0 }
 
-[mitrap006.li_cor]
-name = "LiCor"
-file = "sambashare/Li_Cor/*.txt"
-head = 2
+grimm = { name = "Grimm OPC", file = "sambashare/GrimmOPC107/*", head = 0 }
 
-[mitrap006.grimm]
-name = "Grimm OPC"
-file = "sambashare/GrimmOPC107/*"
-head = 0
+
+[mitrap009]
+
+city = "Rotterdam - Hoek van Holland - HR"
+
+li_cor = { name = "LiCor", file = "mitrap009/CO2/*.txt", head = 2 }
 
