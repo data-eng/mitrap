@@ -15,7 +15,7 @@ if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
   exit 1
 fi
 
-BINDIR=~/src/mitrap.git # /home/debian/live
+BINDIR=/home/debian/live
 
 file_to_process=$1
 file_to_store=$2
