@@ -15,5 +15,5 @@ df["timestamp"] = df["Time_PC"].apply( lambda d: d.value )
 
 for i in df.index:
 
-    print( f"nanodust,installation={sys.argv[2]},instrument={sys.argv[3]} mode=\"{df.loc[i,'MODE']}\",pn={df.loc[i,'PN']} {df.loc[i,'timestamp']}" )
+    print( f"nanodust,installation={sys.argv[2]},instrument={sys.argv[3]} mode=\"{df.loc[i,'MODE']}\",pn={df.loc[i,'PN']},gmd=0.0 {df.loc[i,'timestamp']}" )
 
