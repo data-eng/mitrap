@@ -35,12 +35,18 @@ city = "Rotterdam - Statenweg - CE"
 
 nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1 }
 
+ma200 = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*.txt", head = 0 }
+
+co2_modbus = { name = "CO2", file = "CURRENT/CO2/*_co2_log.txt", head = 0 }
+
 
 [mitrap005]
 
 city = "Rotterdam - Hoek van Holland - CE"
 
 nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1 }
+
+co2_modbus = { name = "CO2", file = "CURRENT/CO2/*_co2_log.txt", head = 0 }
 
 
 [mitrap006]

@@ -7,18 +7,27 @@ The MI-TRAP Data Service offers the following services:
 * Analytics and visualization: Data is loaded into InfluxDB with a retainment period of 6 months. The data within the retainment period is served via Grafana which visualizes the results from complex, analytical queries.
 
 
-## Supported formats
+## Supported measurements and formats
+
+Parsers for the following measurements are available:
+
+ * Black carbon mass concetration
+ * CO2 concentration
+ * Flow Meter Valves
+ * PM2.5 mass concetration
+ * Ultrafine particle number concetration and size distribution
+
+
+### CO2 concentration
 
 The following parsers are available:
 
- * com1, com2: Flow Meter Valves
- * mpss: MPSS
- * ae31: AE31
- * cpc_a20
- * grimm: Grimm OPC
- * nanodust
- * co2
- * ma200
- * ops
- * li_cor (not used)
+ * `co2_com1`: Data acquired from GMP252 using custom software
+    Sample line: `2025-10-15,00:00:00,CO2=   421 ppm`
+ * `co2_modbus`: Data acquired from GMP252 using Vaisala modbus
+   Sample line: `2025-11-13 08:03:25; CO2=427.4059 ppm; T=25.55132 °C`
+   where °C has the degree symbol encoded in ISO-8859-1
+ * `co2`: Data acquired from GMP343 using custom software
+   Sample line: `2025-05-21,00:00:00,[447.4]`
+
 
