@@ -11,23 +11,52 @@ The MI-TRAP Data Service offers the following services:
 
 Parsers for the following measurements are available:
 
- * Black carbon mass concetration
- * CO2 concentration
+ * Black carbon mass concentration
+ * CO2 particle number concentration
  * Flow Meter Valves
- * PM2.5 mass concetration
- * Ultrafine particle number concetration and size distribution
+ * Particle mass concetration and size distribution
+ * Ultrafine particle number concentration and size distribution
 
 
-### CO2 concentration
+### CO2 particle number concentration
 
 The following parsers are available:
 
- * `co2_com1`: Data acquired from GMP252 using custom software
+ * `co2_com1`: Data acquired from GMP252 using custom software. \
     Sample line: `2025-10-15,00:00:00,CO2=   421 ppm`
- * `co2_modbus`: Data acquired from GMP252 using Vaisala modbus
-   Sample line: `2025-11-13 08:03:25; CO2=427.4059 ppm; T=25.55132 °C`
+ * `co2_modbus`: Data acquired from GMP252 using Vaisala modbus. \
+   Sample line: `2025-11-13 08:03:25; CO2=427.4059 ppm; T=25.55132 °C` \
    where °C has the degree symbol encoded in ISO-8859-1
- * `co2`: Data acquired from GMP343 using custom software
+ * `co2`: Data acquired from GMP343 using custom software. \
    Sample line: `2025-05-21,00:00:00,[447.4]`
+
+
+### Particle mass concentration and size distribution
+
+This is a two-step process. The first step homogenizes the data
+acquired from different instruments into a CVS with the particle
+number concentrations for different particle-diameter bins;
+The second step calculates mass concentration by estimating mass from
+the median diameter in each size bin.
+
+The following parsers are available for the first step:
+
+ * `pm_grimm`: Data acquired from Grimm OPC.
+   This is a multi-line format, where lines starting with `P` give the datetime,
+   followed by several lines starting with `C|c` giving the
+   concentration distribution for different partcicle diameters.
+ * `pm_ops`: Data acquired from TSI OPS (Optical Particle Sizer).
+   Standard CSV files, except for several lines of metadata
+   at the top of the file before the actual CSV header.
+ * `pm_pplus`: Data acquired from ParticlesPlus 9300P-OEM.
+   Standard CSV files, except for several lines of metadata
+   at the top of the file before the actual CSV header.
+
+All parsers output a CSV with datetime, location, instrument, and
+number concentrations for different size bins. The size of each bin
+is given in the header.
+
+The `pm25.py` script calculates concentration for particles
+up to size 2.5, and adds as the fourth column.
 
 
