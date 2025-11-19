@@ -77,5 +77,5 @@ pm_grimm = { name = "Grimm OPC", file = "sambashare/GrimmOPC107/*", head = 0 }
 
 city = "Rotterdam - Hoek van Holland - HR"
 
-li_cor = { name = "LiCor", file = "mitrap009/CO2/*.txt", head = 2 }
+co2_licor = { name = "LiCor", file = "mitrap009/CO2/*.txt", head = 2 }
 

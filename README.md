@@ -23,12 +23,19 @@ Parsers for the following measurements are available:
 The following parsers are available:
 
  * `co2_com1`: Data acquired from GMP252 using custom software. \
-    Sample line: `2025-10-15,00:00:00,CO2=   421 ppm`
+    Sample line: `2025-11-13,08:03:25,CO2=   427 ppm`
  * `co2_modbus`: Data acquired from GMP252 using Vaisala modbus. \
    Sample line: `2025-11-13 08:03:25; CO2=427.4059 ppm; T=25.55132 °C` \
    where °C has the degree symbol encoded in ISO-8859-1
  * `co2`: Data acquired from GMP343 using custom software. \
-   Sample line: `2025-05-21,00:00:00,[447.4]`
+   Sample line: `2025-11-13,08:03:25,[427.4]`
+ * `co2_licor`: Data acquired from LI-COR gas analyser. \
+   Sample line: `08:03:25 427.41 25.55 102.09` \
+   where the columns are `time`, `ppm`, `temperature`, `pressure` 
+   and the date for each file in given at the top of the file.
+   Times might be after mightnight to indicate the following date.
+
+
 
 
 ### Particle mass concentration and size distribution
