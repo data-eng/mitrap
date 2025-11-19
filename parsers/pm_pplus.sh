@@ -10,8 +10,6 @@ escape_tag_value() {
   echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
-# /mnt/incoming/mitrap000/OPS/*.csv
-
 if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
@@ -28,27 +26,18 @@ instrument_name=$4
 installation_name=$(escape_tag_value "$installation_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
-declare -a headers
-DATA_SECTION=false
+# Re-format the cvs into the columns expected by pm25.py
+tail +5 "${file_to_process}" > "${file_to_process}_temp1.csv"
+python3 ${BINDIR}/parsers/pm_pplus.py "${file_to_process}_temp1.csv" "${installation_name}" "${instrument_name}" "${file_to_process}_temp2.csv"
 
-# Function to trim whitespace
-trim() {
-  echo "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
-}
-
-sed_insta_name=$(echo ${installation_name} | sed 's|\\|\\\\|g' )
-sed_instr_name=$(echo ${instrument_name} | sed 's|\\|\\\\|g' )
-
-cat "$file_to_process" | tail +16 | cut -d ',' -f 2,3,18-33 |\
-sed 's|\([0-9][0-9]\)/\([0-9][0-9]\)/\([0-9][0-9][0-9][0-9]\),\([0-9:]*\),|\3-\1-\2 \4,'"${sed_insta_name}"','"${sed_instr_name}"',|' > "${file_to_process}.temp"
-
-
-# Perform the PM2.5 calculation and write out the CSV
-python3 ${BINDIR}/parsers/pm25.py ${file_to_process}.temp ${file_to_store}.csv
+# Perform the PM calculations and write out the CSV
+python3 ${BINDIR}/parsers/pm25.py "${file_to_process}_temp2.csv" "${file_to_store}.csv"
 
 # Make the influx line with PM2.5 value only
 cat ${file_to_store}.csv | tail +2 | cut -d ',' -f 1,4 | (while IFS=',' read -r datetime pm25; do
   timestamp_unix=$(date -d "${datetime}" +%s%N)
-  write_query="pm25,installation=${installation_name},instrument=${instrument_name} pm25=${pm25} ${timestamp_unix}"
+  write_query="pm,installation=${installation_name},instrument=${instrument_name} pm25=${pm25} ${timestamp_unix}"
   echo $write_query >> "${file_to_store}.lp"
 done)
+
+exit 0

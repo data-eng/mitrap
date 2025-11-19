@@ -7,18 +7,63 @@ The MI-TRAP Data Service offers the following services:
 * Analytics and visualization: Data is loaded into InfluxDB with a retainment period of 6 months. The data within the retainment period is served via Grafana which visualizes the results from complex, analytical queries.
 
 
-## Supported formats
+## Supported measurements and formats
+
+Parsers for the following measurements are available:
+
+ * Black carbon mass concentration
+ * CO2 particle number concentration
+ * Flow Meter Valves
+ * Particle mass concetration and size distribution
+ * Ultrafine particle number concentration and size distribution
+
+
+### CO2 particle number concentration
 
 The following parsers are available:
 
- * com1, com2: Flow Meter Valves
- * mpss: MPSS
- * ae31: AE31
- * cpc_a20
- * grimm: Grimm OPC
- * nanodust
- * co2
- * ma200
- * ops
- * li_cor (not used)
+ * `co2_com1`: Data acquired from GMP252 using custom software. \
+    Sample line: `2025-11-13,08:03:25,CO2=   427 ppm`
+ * `co2_modbus`: Data acquired from GMP252 using Vaisala modbus. \
+   Sample line: `2025-11-13 08:03:25; CO2=427.4059 ppm; T=25.55132 °C` \
+   where °C has the degree symbol encoded in ISO-8859-1
+ * `co2`: Data acquired from GMP343 using custom software. \
+   Sample line: `2025-11-13,08:03:25,[427.4]`
+ * `co2_licor`: Data acquired from LI-COR gas analyser. \
+   Sample line: `08:03:25 427.41 25.55 102.09` \
+   where the columns are `time`, `ppm`, `temperature`, `pressure` 
+   and the date for each file in given at the top of the file.
+   Times might be after mightnight to indicate the following date.
+
+
+
+
+### Particle mass concentration and size distribution
+
+This is a two-step process. The first step homogenizes the data
+acquired from different instruments into a CVS with the particle
+number concentrations for different particle-diameter bins;
+The second step calculates mass concentration by estimating mass from
+the median diameter in each size bin.
+
+The following parsers are available for the first step:
+
+ * `pm_grimm`: Data acquired from Grimm OPC.
+   This is a multi-line format, where lines starting with `P` give the datetime,
+   followed by several lines starting with `C|c` giving the
+   concentration distribution for different partcicle diameters.
+ * `pm_ops`: Data acquired from TSI OPS (Optical Particle Sizer).
+   Standard CSV files, except for several lines of metadata
+   at the top of the file before the actual CSV header.
+ * `pm_pplus`: Data acquired from ParticlesPlus 9300P-OEM.
+   Standard CSV files, except for several lines of metadata
+   at the top of the file before the actual CSV header.
+
+All parsers output a CSV with datetime, location, instrument, and
+number concentrations for different size bins. The size of each bin
+is given in the header.
+
+The `pm25.py` script calculates concentration for particles
+up to size 2.5, and adds as the fourth column.
+
 

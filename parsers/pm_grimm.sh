@@ -118,7 +118,7 @@ BEGIN  { MYLINE="" }
            print MYLINE;
          }
          MYLINE = sprintf( "%02d-%02d-%02d %02d:%02d", 2000 + $2, $3, $4, $5, $6 )
-         MYLINE = MYLINE ",'"${gawk_insta_name}"','"${gawk_instr_name}"'"
+         MYLINE = MYLINE ",'"${gawk_insta_name}"',GrimmOPC"
        }
 !/^P/  {
          for (i=1; i<=32; i++) arr[i] += $i
@@ -130,6 +130,6 @@ python3 ${BINDIR}/parsers/pm25.py ${file_to_process}.temp4 ${file_to_store}.csv
 # Make the influx line with PM2.5 value only
 cat ${file_to_store}.csv | tail +2 | cut -d ',' -f 1,4 | (while IFS=',' read -r datetime pm25; do
   timestamp_unix=$(date -d "${datetime}" +%s%N)
-  write_query="pm25,installation=${installation_name},instrument=${instrument_name} pm25=${pm25} ${timestamp_unix}"
+  write_query="pm,installation=${installation_name},instrument=${instrument_name} pm25=${pm25} ${timestamp_unix}"
   echo $write_query >> "${file_to_store}.lp"
 done)
