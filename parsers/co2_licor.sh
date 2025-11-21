@@ -44,18 +44,21 @@ cat "$file_to_process" | head -1 | while IFS= read -r line; do
 	num_days=0
 	# Drop the line with the date and the CSV header
 	cat "$file_to_process" | tail +3 > "${file_to_process}.temp"
+	echo "LICOR, new: num_days: 0, header_date: ${header_date}"
     else
 	# File fraction. Use whole file, read the spool.
 	# Warn and fall back if no spool was found.
 	cp -p "$file_to_process" "${file_to_process}.temp"
 	if [[ -f "${SPOOL}/licor_${installation_name}" ]]; then
 	    cat "${SPOOL}/licor_${installation_name}" | read -r num_days header_date header_hour
+	    echo "LICOR, spool: num_days: ${num_days}, header_date: ${header_date}"
 	else
 	    echo "WARNING: Reading file fraction but missing spoolfile ${SPOOL}/licor_${installation_name}"
 	    echo "WARNING: Falling back to today's date"
 	    header_date=$(date --iso)
 	    header_hour="00:01"
 	    num_days=0
+	    echo "LICOR, fallback: num_days: ${num_days}, header_date: ${header_date}"
 	fi
     fi
 done
@@ -65,6 +68,7 @@ num_days=$?
 
 # Update the spool
 echo "${num_days} ${header_date} ${header_hour}" > "${SPOOL}/licor_${installation_name}"
+echo "LICOR, update: num_days: ${num_days}, header_date: ${header_date}"
 
 # Make the influx line with CO2 value only
 python3 ${BINDIR}/parsers/co2.py "${file_to_store}.csv" "${installation_name}" ${instrument_name} > "${file_to_store}.lp"

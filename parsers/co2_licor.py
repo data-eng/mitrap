@@ -13,8 +13,8 @@ savepath  = sys.argv[5]
 # Hours might roll over midnight, implicitly advancing the date
 
 start_date = datetime.datetime.fromisoformat( header_date )
-current_date = start_date
-prev_time = datetime.time.fromisoformat( header_hour )
+current_date = start_date + datetime.timedelta(days=num_days)
+prev_time = datetime.time.fromisoformat( "00:00:01" )
 
 for idx in df.index:
     current_time = datetime.time.fromisoformat( df.loc[idx,"Time"] )
