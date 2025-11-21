@@ -1,6 +1,7 @@
 #!/bin/bash
 
 BINDIR="/home/debian/live"
+SPOOL=/mnt/spool
 
 escape_tag_value() {
   local val="$1"
@@ -26,5 +27,20 @@ instrument_name=$4
 installation_name=$(escape_tag_value "$installation_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
-python3 ${BINDIR}/parsers/org_acsm.py "${file_to_process}" "${installation_name}" "${instrument_name}" "${file_to_store}.csv" > "${file_to_store}.lp"
+python3 ${BINDIR}/parsers/org_acsm.py "${file_to_process}" "${installation_name}" "${instrument_name}" "${file_to_store}.csv" > "${file_to_process}.temp.lp"
 
+# ACSM files in new/ are complete files, not incremental.
+# To avoid re-loading all timepoints, spool the number of
+# lines in the CSV that have already been loaded.
+
+if [[ -f "${SPOOL}/acsm_${installation_name}" ]]; then
+    num_lines=$(cat "${SPOOL}/acsm_${installation_name})
+else
+    num_lines=0
+fi
+
+num_lines=$((num_lines+1))
+
+wc -l "${file_to_process}.temp.lp" > "${SPOOL}/acsm_${installation_name}
+
+cat "${file_to_process}.temp.lp" | tail +$num_lines > "${file_to_store}.lp"
