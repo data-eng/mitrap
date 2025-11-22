@@ -36,7 +36,6 @@ python3 ${PROCDIR}/ypen.py ${LATEST} > ${YPENINFLUX}
 /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN -p s --file ${YPENINFLUX}
 
 
-
 # fetch MI-TRAP data
 
 for inst in ${INSTALLATIONS}; do
@@ -77,12 +76,12 @@ for INST in ${INSTALLATIONS}; do
 		    # and must be copied over
 		    if [ ! -f "/mnt/backup/$F" ]; then
 		        # New file, just copy
-                        echo "CP -p /mnt/incoming/$F ${DIR}"
+			echo "CP -p /mnt/incoming/$F ${DIR} (new file)"
                         cp -p "/mnt/incoming/$F" "${DIR}"
 		    elif [ "/mnt/incoming/$F" -nt "/mnt/backup/$F" ]; then
 		        # Newer file, also copy
-                        echo "CP -p /mnt/incoming/$F ${DIR}"
-                        cp -p "/mnt/incoming/$F" "${DIR}"
+                        echo "CP -p /mnt/incoming/$F ${DIR} (newer timestamp)"
+			cp -p "/mnt/incoming/$F" "${DIR}"
 		    fi
                 elif [[ -f /mnt/backup/$F ]]; then
                     OLDLINES=$(cat "/mnt/backup/$F" | wc -l)
@@ -116,8 +115,11 @@ for INST in ${INSTALLATIONS}; do
 		if [[ -s "${OUTDIR}/${DD}/${F}" ]]; then
 		    # The TYPE in the TOML must be identical to the respective processot script
 		    mkdir -p ${INFLUXDIR}
-		    # Remove DOS line-termintaions in-place
-		    echo "$(tr -d '\r' < ${OUTDIR}/${DD}/${F})" > ${OUTDIR}/${DD}/${F}
+		    # Remove DOS line terminations, also caring for files with \r only
+		    # (eg, IGOR files)
+		    TMP_LINE_TERM=$(mktemp)
+		    cat "${OUTDIR}/${DD}/${F}" | sed 's|\r\n|\n|' | sed 's|\r|\n|g' > "${TMP_LINE_TERM}"
+		    mv "${TMP_LINE_TERM}" "${OUTDIR}/${DD}/${F}"
 		    echo "EXEC $PROCDIR/${TYPE}.sh ${OUTDIR}/${DD}/$F ${INFLUXFILE} ${INSTNAME} ${INSTRUMENT}"
 		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXFILE}" "${INSTNAME}" "${INSTRUMENT}"
 		fi

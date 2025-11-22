@@ -41,6 +41,7 @@ fi
 
 num_lines=$((num_lines+1))
 
-wc -l "${file_to_process}.temp.lp" > "${SPOOL}/acsm_${installation_name}
+wc -l "${file_to_process}.temp.lp" > "${SPOOL}/acsm_${installation_name}"
 
 cat "${file_to_process}.temp.lp" | tail +${num_lines} > "${file_to_store}.lp"
+

@@ -86,5 +86,5 @@ df.to_csv( csvfilename )
 
 # Print out lp with "Org" only
 for idx in df.index:
-    print( f"org ppcc={df.loc[idx,'Org']} {idx*1000}" )
+    print( f"org,installation={installation_name},instrument={instrument_name} ppcc={df.loc[idx,'Org']} {idx}000000000" )
     
