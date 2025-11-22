@@ -34,7 +34,7 @@ python3 ${BINDIR}/parsers/org_acsm.py "${file_to_process}" "${installation_name}
 # lines in the CSV that have already been loaded.
 
 if [[ -f "${SPOOL}/acsm_${installation_name}" ]]; then
-    num_lines=$(cat "${SPOOL}/acsm_${installation_name})
+    num_lines=$(cat "${SPOOL}/acsm_${installation_name}")
 else
     num_lines=0
 fi
@@ -43,4 +43,4 @@ num_lines=$((num_lines+1))
 
 wc -l "${file_to_process}.temp.lp" > "${SPOOL}/acsm_${installation_name}
 
-cat "${file_to_process}.temp.lp" | tail +$num_lines > "${file_to_store}.lp"
+cat "${file_to_process}.temp.lp" | tail +${num_lines} > "${file_to_store}.lp"
