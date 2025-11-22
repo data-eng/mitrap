@@ -36,7 +36,6 @@ python3 ${PROCDIR}/ypen.py ${LATEST} > ${YPENINFLUX}
 /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN -p s --file ${YPENINFLUX}
 
 
-
 # fetch MI-TRAP data
 
 for inst in ${INSTALLATIONS}; do
@@ -69,7 +68,22 @@ for INST in ${INSTALLATIONS}; do
 		echo "FILE $F DIR ${DIR}"
 		mkdir -p ${DIR}
 
-                if [[ -f /mnt/backup/$F ]]; then
+                mykey="${INST}.${TYPE}.head"
+                HEADER=${toml[$mykey]}
+
+		if [[ ${HEADER} -lt 0 ]]; then
+		    # header is -1, this format cannot be treated incrementally
+		    # and must be copied over
+		    if [ ! -f "/mnt/backup/$F" ]; then
+		        # New file, just copy
+			echo "CP -p /mnt/incoming/$F ${DIR} (new file)"
+                        cp -p "/mnt/incoming/$F" "${DIR}"
+		    elif [ "/mnt/incoming/$F" -nt "/mnt/backup/$F" ]; then
+		        # Newer file, also copy
+                        echo "CP -p /mnt/incoming/$F ${DIR} (newer timestamp)"
+			cp -p "/mnt/incoming/$F" "${DIR}"
+		    fi
+                elif [[ -f /mnt/backup/$F ]]; then
                     OLDLINES=$(cat "/mnt/backup/$F" | wc -l)
                     NEWLINES=$(cat "/mnt/incoming/$F" | wc -l)
                     echo "LINES $F: $OLDLINES $NEWLINES"
@@ -80,8 +94,6 @@ for INST in ${INSTALLATIONS}; do
                         # There are more lines now.
 
                         # First, copy the header
-                        mykey="${INST}.${TYPE}.head"
-                        HEADER=${toml[$mykey]}
                         if [[ $HEADER -gt 0 ]]; then
                                 echo "CP HEADER $HEADER"
                                 head -n ${HEADER} "/mnt/incoming/$F" > "${OUTDIR}/${DD}/$F"
@@ -94,7 +106,7 @@ for INST in ${INSTALLATIONS}; do
                 else
 		    # New file, just copy
                     echo "CP -p /mnt/incoming/$F ${DIR}"
-                    cp -p /mnt/incoming/$F ${DIR}
+                    cp -p "/mnt/incoming/$F" "${DIR}"
                 fi
 
                 INFLUXDIR="/mnt/influxlines/${DD}/${INST}"
@@ -103,8 +115,11 @@ for INST in ${INSTALLATIONS}; do
 		if [[ -s "${OUTDIR}/${DD}/${F}" ]]; then
 		    # The TYPE in the TOML must be identical to the respective processot script
 		    mkdir -p ${INFLUXDIR}
-		    # Remove DOS line-termintaions in-place
-		    echo "$(tr -d '\r' < ${OUTDIR}/${DD}/${F})" > ${OUTDIR}/${DD}/${F}
+		    # Remove DOS line terminations, also caring for files with \r only
+		    # (eg, IGOR files)
+		    TMP_LINE_TERM=$(mktemp)
+		    cat "${OUTDIR}/${DD}/${F}" | sed 's|\r\n|\n|' | sed 's|\r|\n|g' > "${TMP_LINE_TERM}"
+		    mv "${TMP_LINE_TERM}" "${OUTDIR}/${DD}/${F}"
 		    echo "EXEC $PROCDIR/${TYPE}.sh ${OUTDIR}/${DD}/$F ${INFLUXFILE} ${INSTNAME} ${INSTRUMENT}"
 		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXFILE}" "${INSTNAME}" "${INSTRUMENT}"
 		fi

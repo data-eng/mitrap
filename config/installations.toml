@@ -79,3 +79,5 @@ city = "Rotterdam - Hoek van Holland - HR"
 
 co2_licor = { name = "LiCor", file = "mitrap009/CO2/*.txt", head = 2 }
 
+org_acsm = { name = "ACSM", file = "mitrap009/ACSM/ExportData_new/Rotterdam_ACSM-140294_RTdata_*.itx", head = -1 }
+
