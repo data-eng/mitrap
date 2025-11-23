@@ -1,0 +1,7 @@
+# m h  dom mon dow   command
+25 * * * * /home/debian/live/data_fetchers/ypen.sh
+35 * * * * /home/debian/live/data_fetchers/ypen.sh
+45 * * * * /home/debian/live/data_fetchers/ypen.sh
+55 * * * * /home/debian/live/data_fetchers/ypen.sh
+10 * * * * /home/debian/live/data_fetchers/dk.sh
+17 * * * * /home/debian/live/data_fetchers/sync.sh
