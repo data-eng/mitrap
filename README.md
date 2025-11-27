@@ -14,6 +14,7 @@ Parsers for the following measurements are available:
  * Black carbon mass concentration
  * CO2 particle number concentration
  * Flow Meter Valves
+ * Organic fraction concentration
  * Particle mass concetration and size distribution
  * Ultrafine particle number concentration and size distribution
 
@@ -36,6 +37,12 @@ The following parsers are available:
    Times might be after mightnight to indicate the following date.
 
 
+
+### Organic fraction concentration
+
+The following parser is available:
+
+ * `org_acsm`: Data following the IGOR format.
 
 
 ### Particle mass concentration and size distribution
