@@ -129,7 +129,7 @@ for INST in ${INSTALLATIONS}; do
 		    # Remove DOS line terminations, also caring for files with \r only
 		    # (eg, IGOR files)
 		    TMP_LINE_TERM=$(mktemp)
-		    cat "${OUTDIR}/${DD}/${F}" | sed 's|\r\n|\n|' | sed 's|\r|\n|g' > "${TMP_LINE_TERM}"
+		    cat "${OUTDIR}/${DD}/${F}" | sed 's|\r$||' | sed 's|\r|\n|g' > "${TMP_LINE_TERM}"
 		    mv "${TMP_LINE_TERM}" "${OUTDIR}/${DD}/${F}"
 		    echo "EXEC $PROCDIR/${TYPE}.sh ${OUTDIR}/${DD}/$F ${INFLUXFILE} ${INSTNAME} ${INSTRUMENT}"
 		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXFILE}" "${INSTNAME}" "${INSTRUMENT}"
