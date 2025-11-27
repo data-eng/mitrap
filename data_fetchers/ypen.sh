@@ -20,10 +20,10 @@ for STATION_ID in ${STATIONS}; do
 	if [[ ! -f /mnt/ypen/${MYFILE}.csv ]]; then
 	    echo "datetime,my_timestamp,station,nox,no2,co" >> /mnt/ypen/${MYFILE}.csv
         fi
-	echo "${DATETIME},${MYTIMESTAMP},${STATION_ID},${NOX},${NO2},${CO}" >> /mnt/ypen/${MYFILE}.csv
+	echo "${DATETIME},${MYTIMESTAMP},${STATION_ID},${NOX},${NO2},${CO}" >> /mnt/web/ypen/${MYFILE}.csv
     fi
 done
 
-mv ${TMP} /mnt/ypen/raw/${MYTIMESTAMP}.xml
+mv ${TMP} /mnt/web/ypen/raw/${MYTIMESTAMP}.xml
 
 exit 0

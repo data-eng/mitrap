@@ -24,20 +24,31 @@ KEYS="${!toml[@]}"
 INSTALLATIONS=$(echo ${KEYS} | tr ' ' '\n' | sed 's/\..*$//' | sort | uniq)
 
 
+# parse and load Web API data
 
-# parse and load YPEN data
+WEBINFLUX="/mnt/influxlines/${DD}"
+mkdir -p $WEBINFLUX
 
-YPENINFLUX="/mnt/influxlines/${DD}"
-mkdir -p $YPENINFLUX
-YPENINFLUX="${YPENINFLUX}/ypen.lp"
-LATEST=$(ls /mnt/ypen/*.csv | tail -1)
-echo "EXEC ypen.py ${LATEST} ${YPENINFLUX}"
-python3 ${PROCDIR}/ypen.py ${LATEST} > ${YPENINFLUX}
+YPENINFLUX="${WEBINFLUX}/ypen.lp"
+LATEST=$(ls /mnt/web/ypen/*.csv | tail -1)
+echo "EXEC web_ypen.py ${LATEST} ${YPENINFLUX}"
+python3 ${PROCDIR}/web_ypen.py ${LATEST} /mnt/web/ypen/csv/${DD}.csv > ${YPENINFLUX}
 /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN -p s --file ${YPENINFLUX}
+
+LATEST=$(ls /mnt/web/au/raw/*.json | tail -1)
+echo "EXEC web_au.py ${LATEST} /mnt/web/au/csv/${DD}.csv 'Aarhus - CE' 'AU WebAPI' > ${WEBINFLUX}/au.lp"
+python3 ${PROCDIR}/web_au.py ${LATEST} /mnt/web/au/csv/${DD}.csv 'Aarhus - CE' 'AU WebAPI' > "${WEBINFLUX}/au.lp"
+/usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file "${WEBINFLUX}/au.lp"
+
 
 
 # fetch MI-TRAP data
 
+#ping -c 1 mitrap-pc.ipta.demokritos.gr >/dev/null
+#if [ $? == 1 ]; then
+#	echo "mitrap-pc is unreachable"
+#	exit 1
+#fi
 for inst in ${INSTALLATIONS}; do
 	rsync -av --delete ${inst}@mitrap-pc.ipta.demokritos.gr:/sensor_data/MITRAP-DATA/${inst} /mnt/incoming/
 done
