@@ -225,7 +225,7 @@
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": 30000,
+            "insertNulls": 80000,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -370,7 +370,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm25\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
           "refId": "A"
         }
       ],
@@ -384,88 +384,190 @@
       },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
             }
-          },
-          "mappings": [],
-          "max": 100,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
           }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 11,
+        "h": 12,
+        "w": 12,
         "x": 0,
         "y": 20
       },
-      "id": 23,
+      "id": 22,
       "options": {
+        "calculate": false,
+        "cellGap": 0,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "max": 100000,
+          "min": 0,
+          "mode": "opacity",
+          "reverse": true,
+          "scale": "exponential",
+          "scheme": "Oranges",
+          "steps": 128
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 0
+        },
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "le"
         },
         "tooltip": {
-          "hideZeros": false,
           "mode": "single",
-          "sort": "none"
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "nm"
         }
       },
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ypen\" and r.installation == \"${AQH_Station}\")\n        |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
+          "query": "import \"strings\"\nimport \"array\"\nimport \"experimental\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> aggregateWindow(every: 6m, fn: sum, createEmpty: false)\n  \n\nvalve_off_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"com1\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\")\n  |> aggregateWindow(every: 6m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 0)\n  |> keep(columns: [\"_time\"])\n\njoined = join(\n  tables: {all: all_data, valveOn: valve_off_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> aggregateWindow(every: 30m, fn: sum, createEmpty: false)\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))  \n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"), t: \"_\", u: \".\")) \n  }))\n  |> map(fn: (r) => ({\n     r with nm_bin: r.nm \n  }))\n  |> keep(columns: [\"_time\", \"_value\", \"nm_bin\"])\n\n\n\n",
           "refId": "A"
         }
       ],
-      "title": "CO/NOx/NO₂",
-      "type": "timeseries"
+      "title": "Size distribution of Ultrafine Particle Number concentration (#/cm³) - Ambient",
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "nm_bin"
+              }
+            ]
+          }
+        },
+        {
+          "id": "groupingToMatrix",
+          "options": {
+            "columnField": "nm_bin",
+            "rowField": "_time",
+            "valueField": "_value"
+          }
+        }
+      ],
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "cepbemlo6msjke"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "id": 8,
+      "options": {
+        "calculate": false,
+        "cellGap": 0,
+        "color": {
+          "exponent": 0.5,
+          "fill": "purple",
+          "max": 100000,
+          "min": 0,
+          "mode": "opacity",
+          "reverse": true,
+          "scale": "exponential",
+          "scheme": "Purples",
+          "steps": 128
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "le"
+        },
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "nm"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "query": "import \"strings\"\nimport \"array\"\nimport \"experimental\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> aggregateWindow(every: 6m, fn: sum, createEmpty: false)\n  \n\nvalve_on_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"com1\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\")\n  |> aggregateWindow(every: 6m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 1)\n  |> keep(columns: [\"_time\"])\n\njoined = join(\n  tables: {all: all_data, valveOn: valve_on_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> aggregateWindow(every: 30m, fn: sum, createEmpty: false)\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))  \n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"), t: \"_\", u: \".\")) \n  }))\n  |> map(fn: (r) => ({\n     r with nm_bin: r.nm \n  }))\n  |> keep(columns: [\"_time\", \"_value\", \"nm_bin\"])\n\n\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Size distribution of Ultrafine Particle Number concentration (#/cm³) - Solid",
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "nm_bin"
+              }
+            ]
+          }
+        },
+        {
+          "id": "groupingToMatrix",
+          "options": {
+            "columnField": "nm_bin",
+            "rowField": "_time",
+            "valueField": "_value"
+          }
+        }
+      ],
+      "type": "heatmap"
     },
     {
       "datasource": {
@@ -565,9 +667,9 @@
       },
       "gridPos": {
         "h": 9,
-        "w": 13,
-        "x": 11,
-        "y": 20
+        "w": 12,
+        "x": 0,
+        "y": 32
       },
       "id": 12,
       "options": {
@@ -707,94 +809,88 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
             }
+          },
+          "mappings": [],
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 12,
+        "h": 9,
         "w": 12,
-        "x": 0,
-        "y": 29
+        "x": 12,
+        "y": 32
       },
-      "id": 22,
+      "id": 23,
       "options": {
-        "calculate": false,
-        "cellGap": 0,
-        "color": {
-          "exponent": 0.5,
-          "fill": "dark-orange",
-          "max": 100000,
-          "min": 0,
-          "mode": "opacity",
-          "reverse": true,
-          "scale": "exponential",
-          "scheme": "Oranges",
-          "steps": 128
-        },
-        "exemplars": {
-          "color": "rgba(255,0,255,0.7)"
-        },
-        "filterValues": {
-          "le": 0
-        },
         "legend": {
-          "show": true
-        },
-        "rowsFrame": {
-          "layout": "le"
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
-          "showColorScale": false,
-          "yHistogram": false
-        },
-        "yAxis": {
-          "axisPlacement": "left",
-          "reverse": false,
-          "unit": "nm"
+          "sort": "none"
         }
       },
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "import \"strings\"\nimport \"array\"\nimport \"experimental\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> aggregateWindow(every: 6m, fn: sum, createEmpty: false)\n  \n\nvalve_off_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"com1\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\")\n  |> aggregateWindow(every: 6m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 0)\n  |> keep(columns: [\"_time\"])\n\njoined = join(\n  tables: {all: all_data, valveOn: valve_off_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> aggregateWindow(every: 30m, fn: sum, createEmpty: false)\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))  \n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"), t: \"_\", u: \".\")) \n  }))\n  |> map(fn: (r) => ({\n     r with nm_bin: r.nm \n  }))\n  |> keep(columns: [\"_time\", \"_value\", \"nm_bin\"])\n\n\n\n",
+          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ypen\" and r.installation == \"${AQH_Station}\")\n        |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
           "refId": "A"
         }
       ],
-      "title": "Size distribution of Ultrafine Particle Number concentration (#/cm³) - Ambient",
-      "transformations": [
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "desc": true,
-                "field": "nm_bin"
-              }
-            ]
-          }
-        },
-        {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "nm_bin",
-            "rowField": "_time",
-            "valueField": "_value"
-          }
-        }
-      ],
-      "type": "heatmap"
+      "title": "CO/NOx/NO₂",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -803,99 +899,232 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "μg/m³",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
             }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 12,
+        "h": 9,
         "w": 12,
-        "x": 12,
-        "y": 29
+        "x": 0,
+        "y": 41
       },
-      "id": 8,
+      "id": 24,
       "options": {
-        "calculate": false,
-        "cellGap": 0,
-        "color": {
-          "exponent": 0.5,
-          "fill": "purple",
-          "max": 100000,
-          "min": 0,
-          "mode": "opacity",
-          "reverse": true,
-          "scale": "exponential",
-          "scheme": "Purples",
-          "steps": 128
-        },
-        "exemplars": {
-          "color": "rgba(255,0,255,0.7)"
-        },
-        "filterValues": {
-          "le": 1e-9
-        },
         "legend": {
-          "show": true
-        },
-        "rowsFrame": {
-          "layout": "le"
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
-          "showColorScale": false,
-          "yHistogram": false
-        },
-        "yAxis": {
-          "axisPlacement": "left",
-          "reverse": false,
-          "unit": "nm"
+          "sort": "none"
         }
       },
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "import \"strings\"\nimport \"array\"\nimport \"experimental\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> aggregateWindow(every: 6m, fn: sum, createEmpty: false)\n  \n\nvalve_on_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"com1\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\")\n  |> aggregateWindow(every: 6m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 1)\n  |> keep(columns: [\"_time\"])\n\njoined = join(\n  tables: {all: all_data, valveOn: valve_on_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> aggregateWindow(every: 30m, fn: sum, createEmpty: false)\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))  \n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"), t: \"_\", u: \".\")) \n  }))\n  |> map(fn: (r) => ({\n     r with nm_bin: r.nm \n  }))\n  |> keep(columns: [\"_time\", \"_value\", \"nm_bin\"])\n\n\n\n",
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"org\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"ppcc\")\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
           "refId": "A"
         }
       ],
-      "title": "Size distribution of Ultrafine Particle Number concentration (#/cm³) - Solid",
-      "transformations": [
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
+      "title": "Organic fraction concentration (μg/m³)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "cepbemlo6msjke"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 5400000,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": true,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "desc": true,
-                "field": "nm_bin"
+                "color": "green"
               }
             ]
           }
         },
-        {
-          "id": "groupingToMatrix",
-          "options": {
-            "columnField": "nm_bin",
-            "rowField": "_time",
-            "valueField": "_value"
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "S16"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-yellow",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cu29"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fe26"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-green",
+                  "mode": "fixed"
+                }
+              }
+            ]
           }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 41
+      },
+      "id": 26,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${AQH_Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
+          "refId": "A"
         }
       ],
-      "type": "heatmap"
+      "title": "Elemental concentration (μg/m³)",
+      "type": "timeseries"
     }
   ],
   "preload": false,
   "schemaVersion": 41,
-  "tags": [],
+  "tags": [
+    "AQM",
+    "HR",
+    "Rotterdam"
+  ],
   "templating": {
     "list": [
       {
@@ -980,8 +1209,8 @@
       },
       {
         "current": {
-          "text": "Grimm OPC",
-          "value": "Grimm OPC"
+          "text": "",
+          "value": ""
         },
         "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"grimm\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
         "hide": 2,
@@ -1012,8 +1241,8 @@
       },
       {
         "current": {
-          "text": "CO2",
-          "value": "CO2"
+          "text": "GMP252",
+          "value": "GMP252"
         },
         "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"co2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)",
         "hide": 2,
