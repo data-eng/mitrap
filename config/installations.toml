@@ -31,6 +31,32 @@ com1 = { name = "Flow Meter Valve COM1", file = "mitrap1/MStack_Flow_Meter_Valve
 
 
 
+[mitrap002]
+
+city = "Florence - Lavagnini - CE"
+
+co2_modbus = { name = "CO2", file = "CURRENT/CO2/*_co2_log.txt", head = 0 }
+
+nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1 }
+
+ma200 = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*.txt", head = 0 }
+
+com1 = { name = "Flow Meter Valve COM1", file = "CURRENT/RH-T_p_valve/*Device1_log.txt", head = 5 }
+
+
+[mitrap003]
+
+city = "Florence - Ponte alle Mosse - CE"
+
+co2_modbus = { name = "CO2", file = "CURRENT/CO2/*_co2_log.txt", head = 0 }
+
+nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1 }
+
+com1 = { name = "Flow Meter Valve COM1", file = "CURRENT/RH-T_p_valve/*Device1_log.txt", head = 1 }
+
+ma200 = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*.txt", head = 0 }
+
+
 [mitrap004]
 
 city = "Rotterdam - Statenweg - CE"
