@@ -17,4 +17,4 @@ df.to_csv( outfile )
 installation = installation.replace(" ","\\ ")
 instrument = instrument.replace(" ","\\ ")
 for idx in df.index:
-    print( f"uf,installation={installation},instrument={instrument} conc={df.loc[idx,'Conc Mean']} {df.loc[idx,'datetime']}" )
+    print( f"uf,installation={installation},instrument={instrument} conc={df.loc[idx,'Conc Mean']} {df.loc[idx,'datetime'].value}" )
