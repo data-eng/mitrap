@@ -27,7 +27,7 @@ installation_name=$(escape_tag_value "$installation_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
 datetime=$(cat "${file_to_process}" | tail -1 | cut -d, -f 2)
-timestamp_unix=$(date -d "${datetime}" +%s%N)
+timestamp_unix=$(TZ="Europe/Amsterdam" date -d "${datetime}" +%s%N)
 
 S16=$(cat "${file_to_process}" | tail -1 | cut -d, -f 32)
 K19=$(cat "${file_to_process}" | tail -1 | cut -d, -f 38)
