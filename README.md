@@ -13,6 +13,7 @@ Parsers for the following measurements are available:
 
  * Black carbon mass concentration
  * CO2 particle number concentration
+ * Elemental concentration
  * Flow Meter Valves
  * Organic fraction concentration
  * Particle mass concetration and size distribution
@@ -36,6 +37,12 @@ The following parsers are available:
    and the date for each file in given at the top of the file.
    Times might be after mightnight to indicate the following date.
 
+
+### Elemental concentration
+
+The following parser is available:
+
+ * `inorg_xact`: Elemental concentration from the Xact instrument.
 
 
 ### Organic fraction concentration
