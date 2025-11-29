@@ -7,12 +7,12 @@ outfile = sys.argv[2]
 installation = sys.argv[3]
 instrument = sys.argv[4]
 
-if len(sys.argv) >= 5:
+if len(sys.argv) > 5:
     instrument_tz = sys.argv[5]
 else:
     instrument_tz = "UTC"
 
-if len(sys.argv) >= 6:
+if len(sys.argv) > 6:
     df_valve = pandas.read_csv( sys.argv[6], parse_dates=["datetime"] ) 
 else:
     df_valve = None

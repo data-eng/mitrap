@@ -28,7 +28,7 @@ df = df.drop( boring_columns, axis=1 )
 
 df.to_csv( outfile )
 
-installation = installation.replace(" ","\\ ")
-instrument = instrument.replace(" ","\\ ")
+installation = station_name.replace(" ","\\ ")
+instrument = instrument_name.replace(" ","\\ ")
 for idx in df.index:
-    print( f"uf,installation={installation},instrument={instrument} valve={df.loc[idx,'valve_state']} {df.loc[idx,'datetime'].value}" )
+    print( f"uf,installation={installation},instrument={instrument} valve={df.loc[idx,'valve_state']} {idx.value}" )
