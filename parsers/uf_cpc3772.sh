@@ -26,7 +26,12 @@ instrument_name=$4
 # The AWK scripts the first header only and checks that all
 # subsequent headers are the same
 
-cat "${file_to_process}" |  iconv -f iso-8859-1 | awk 'BEGIN { N=0; H="" } N==1 { print ; N=0; } /^Sample #,Start Date,/ { if (H=="") { N=1; H=$0; print } else if (H==$0) { N=1 } else { print "BAD HEADER" } }' > ${file_to_process}.temp
+cat "${file_to_process}" |  iconv -f iso-8859-1 | awk 'BEGIN { N=0; H=""; NUMFIELDS=0; FS="," } N==1 { N=0; if (NUMFIELDS==NF) { print } else { print "ERROR: Line " NR " wanted " NUMFIELDS " found " NF " values" } } /^Sample #,Start Date,/ { if (H=="") { N=1; H=$0; NUMFIELDS=NF; print } else if (H==$0) { N=1 } else { print "ERROR: Line " NR " wanted " NUMFIELDS " found " NF " headers" } }' > ${file_to_process}.temp1
 
-python3 ${BINDIR}/parsers/uf_cpc3772.py "${file_to_process}.temp" "${file_to_store}.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
+# Log the errors
+cat "${file_to_process}.temp1" | grep ^ERROR
+
+cat "${file_to_process}.temp1" | grep -v ^ERROR > "${file_to_process}.temp2"
+
+python3 ${BINDIR}/parsers/uf_cpc3772.py "${file_to_process}.temp2" "${file_to_store}.csv" "${installation_name}" "${instrument_name}" "UTC" "outCOM1_Log_2025-11-18.csv" > "${file_to_store}.lp"
 
