@@ -8,7 +8,8 @@ instrument = sys.argv[4]
 
 df = pandas.read_csv( infile, index_col="Sample #" )
 
-df["datetime"] = pandas.to_datetime( df["Start Date"] + " " + df["Start Time"], format='%m/%d/%y %H:%M:%S', utc=False ).dt.tz_localize(tz = "Europe/Athens")
+#df["datetime"] = pandas.to_datetime( df["Start Date"] + " " + df["Start Time"], format='%m/%d/%y %H:%M:%S', utc=False ).dt.tz_localize(tz = "Europe/Athens")
+df["datetime"] = pandas.to_datetime( df["Start Date"] + " " + df["Start Time"], format='%m/%d/%y %H:%M:%S', utc=True )
 
 df = df.drop( ["Start Date","Start Time"], axis=1 )
 
