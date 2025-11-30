@@ -6,7 +6,7 @@ outfile = sys.argv[2]
 station_name = sys.argv[3]
 instrument_name = sys.argv[4]
 
-if len(sys.argv) >= 5:
+if len(sys.argv) > 5:
     instrument_tz = sys.argv[5]
 else:
     instrument_tz = "UTC"
