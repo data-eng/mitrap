@@ -25,4 +25,4 @@ instrument_name=$4
 # (a) ensures that this is executed before uf_cpc3772.py
 # (b) provides the filename of this csv to uf_cpc3772.py
 
-python3 ${BINDIR}/parsers/uf_valve.py "${file_to_process}" "${file_to_store}.csv" "${installation_name}" "${instrument_name}" "Europe/Athens" > "${file_to_store}.lp"
+python3 ${BINDIR}/parsers/uf_valve.py "${file_to_process}" "${file_to_store}.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
