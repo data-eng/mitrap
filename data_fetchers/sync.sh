@@ -35,10 +35,16 @@ echo "EXEC web_ypen.py ${LATEST} ${YPENINFLUX}"
 python3 ${PROCDIR}/web_ypen.py ${LATEST} /mnt/web/ypen/csv/${DD}.csv > ${YPENINFLUX}
 /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN -p s --file ${YPENINFLUX}
 
-LATEST=$(ls /mnt/web/au/raw/*.json | tail -1)
-echo "EXEC web_au.py ${LATEST} /mnt/web/au/csv/${DD}.csv 'Aarhus - CE' 'AU WebAPI' > ${WEBINFLUX}/au.lp"
-python3 ${PROCDIR}/web_au.py ${LATEST} /mnt/web/au/csv/${DD}.csv 'Aarhus - CE' 'AU WebAPI' > "${WEBINFLUX}/au.lp"
-/usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file "${WEBINFLUX}/au.lp"
+# AU Web API files look like: "1764619803_HVID.json"
+# Strip the station abbreviation and iterate through all stations
+LATEST=$(ls /mnt/web/au/raw/*.json | tail -1 | sed 's|_.*json$||')
+for ABBREV in "AARH3" "HCAB" "JAGT1" "HCØ" "HVID"; do
+    echo "EXEC web_au.py ${LATEST}_${ABBREV}.json /mnt/web/au/csv/${DD}_${ABBREV}.csv ${ABBREV} >> ${WEBINFLUX}/au.lp"
+    if [[ -f ${LATEST}_${ABBREV}.json ]]; then
+	python3 ${PROCDIR}/web_au.py ${LATEST}_${ABBREV}.json /mnt/web/au/csv/${DD}_${ABBREV}.csv "${ABBREV}" >> "${WEBINFLUX}/au.lp"
+    fi
+done
+/usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN -p s --file "${WEBINFLUX}/au.lp"
 
 
 
