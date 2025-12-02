@@ -1,22 +1,17 @@
 #!/bin/bash
 
 NOWDATE=$(date "+%Y-%m-%d")
-URL="https://envs2.au.dk/luftdata_hist/api/api/Air/Aarhus/${NOWDATE}/${NOWDATE}/AARH3"
+URLBASE="https://envs2.au.dk/luftdata_hist/api/api/Air"
+MYTIMESTAMP=$(date +%s)
 
-# Gives 'packet filtered'
-#ping -c 1 envs2.au.dk >/dev/null
-#if [ $? == 1 ]; then
-#        echo "envs2.au.dk is unreachable"
-#        exit 1
-#fi
+# Aarhus, all data
+ABBREV="AARH3"
+URL="${URLBASE}/Aarhus/${NOWDATE}/${NOWDATE}/${ABBREV}"
+curl ${URL} -s -o "/mnt/web/au/raw/${MYTIMESTAMP}_${ABBREV}.json"
 
-TMP=$(mktemp)
-curl ${URL} -s -o ${TMP}
-MYDATE=$(date "+%Y-%m-%d %H:%M:%S")
-MYTIMESTAMP=$(date -d "$MYDATE" +%s)
-MYFILE=$(date -d "$MYDATE" "+%Y%m%d")
-
-mv ${TMP} /mnt/web/au/raw/${MYTIMESTAMP}.json
+for ABBREV in "JAGT1" "HCAB" "HVID" "HCØ"; do
+    URL="${URLBASE}/Copenhagen/${NOWDATE}/${NOWDATE}/${ABBREV}"
+    curl ${URL} -s -o "/mnt/web/au/raw/${MYTIMESTAMP}_${ABBREV}.json"
+done
 
 exit 0
-
