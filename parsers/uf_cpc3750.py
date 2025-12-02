@@ -19,12 +19,12 @@ if instrument_tz == "UTC":
 else:
     df["datetime"] = pandas.to_datetime( df["#date"]+" "+df["time"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize(tz = instrument_tz)
 
-df.to_csv( outfile, sep="," )
+# Re-order so that "datetime" and "concentration_cc" are the first two columns.
+# Drop the date, time fields that were used to make "datetime"
 
-installation = installation.replace(" ","\\ ")
-instrument = instrument.replace(" ","\\ ")
+new_df = df[ ["datetime"] ]
+new_df["concentration_cc"] = df["concentration[#/cm3]"]
+new_df = pandas.concat( [new_df,df.drop(["#date","time","datetime","concentration[#/cm3]"],axis=1)], axis=1 )
 
-for idx in df.index:
-    print( f"uf,installation={installation},instrument={instrument} concentration_cc={df.loc[idx,'concentration[#/cm3]']} {df.loc[idx,'datetime'].value}" )
-
+new_df.to_csv( outfile, sep=",", index=False )
 

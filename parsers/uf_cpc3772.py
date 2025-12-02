@@ -23,7 +23,14 @@ df = pandas.read_csv( infile, index_col="Sample #" )
 #df["datetime"] = pandas.to_datetime( df["Start Date"] + " " + df["Start Time"], format='%m/%d/%y %H:%M:%S', utc=False ).dt.tz_localize(tz = "Europe/Athens")
 df["datetime"] = pandas.to_datetime( df["Start Date"] + " " + df["Start Time"], format='%m/%d/%y %H:%M:%S', utc=True )
 
-df = df.drop( ["Start Date","Start Time"], axis=1 )
+# Re-order so that "datetime" and "concentration_cc" are the first two columns.
+# Drop the date, time fields that were used to make "datetime"
+
+new_df = df[ ["datetime"] ]
+new_df["concentration_cc"] = df["Conc Mean"]
+new_df = pandas.concat( [new_df,df.drop(["Start Date","Start Time","datetime","Conc Mean"],axis=1)], axis=1 )
+
+new_df.to_csv( outfile, index=False )
 
 
 # Find the valve timepoints that box this timepoint
@@ -63,9 +70,3 @@ if df_valve is not None:
     df["valve_frac"] = df.index.to_series().apply(valve_frac)
 
 
-df.to_csv( outfile )
-
-installation = installation.replace(" ","\\ ")
-instrument = instrument.replace(" ","\\ ")
-for idx in df.index:
-    print( f"uf,installation={installation},instrument={instrument} conc={df.loc[idx,'Conc Mean']} {df.loc[idx,'datetime'].value}" )

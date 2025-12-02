@@ -35,7 +35,7 @@ cat "${file_to_process}.temp1" | grep -v ^ERROR > "${file_to_process}.temp2"
 
 python3 ${BINDIR}/parsers/uf_cpc3772.py "${file_to_process}.temp2" "${file_to_store}.csv" "${installation_name}" "${instrument_name}" "UTC" > /dev/null
 
-bash ${BINDIR}/parsers/uf_valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv"
+bash ${BINDIR}/parsers/uf_valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv" "${installation_name}"
 
 python3 ${BINDIR}/parsers/uf_cpc3772_lp.py "${file_to_store}_valve.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
 

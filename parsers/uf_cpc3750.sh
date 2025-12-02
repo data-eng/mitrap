@@ -20,7 +20,9 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
-cat "${file_to_process}" |  tail +21 > "${file_to_process}.temp1
+python3 ${BINDIR}/parsers/uf_cpc3750.py "${file_to_process}" "${file_to_store}.csv" "${installation_name}" "${instrument_name}" "Europe/Rome"
 
-python3 ${BINDIR}/parsers/uf_cpc3750.py "${file_to_process}" "${file_to_store}.csv" "${installation_name}" "${instrument_name}" "Europe/Rome" > "${file_to_store}.lp"
+bash ${BINDIR}/parsers/uf_valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv" "${installation_name}"
+
+python3 ${BINDIR}/parsers/uf_cpc3772_lp.py "${file_to_store}_valve.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
 
