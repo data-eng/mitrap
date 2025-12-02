@@ -44,6 +44,8 @@ for ABBREV in "AARH3" "HCAB" "JAGT1" "HCØ" "HVID"; do
 	python3 ${PROCDIR}/web_au.py ${LATEST}_${ABBREV}.json /mnt/web/au/csv/${DD}_${ABBREV}.csv "${ABBREV}" >> "${WEBINFLUX}/au.lp"
     fi
 done
+/usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN -p s --file "${WEBINFLUX}/au.lp"
+
 
 
 # fetch MI-TRAP data
