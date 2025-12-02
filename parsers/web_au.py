@@ -41,9 +41,9 @@ whoiswho = {
     "HCAB": { "vars": ["CO"],
                "installation": "Copenhagen - HR" },
     "HVID": { "vars": ["NOx","NO2"],
-               "installation": "Copenhagen - CE" },
+               "installation": "Copenhagen - Taarnby - CE" },
     "HCØ": { "vars": ["CO"],
-               "installation": "Copenhagen - CE" }
+               "installation": "Copenhagen - Taarnby - CE" }
 }
 
 installation = whoiswho[station]["installation"].replace( ' ', '\\ ' )
