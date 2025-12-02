@@ -83,3 +83,5 @@ org_acsm = { name = "ACSM", file = "mitrap009/ACSM/ExportData_new/Rotterdam_ACSM
 
 inorg_xact = { name = "XACT", file = "mitrap009/Xact/Process_Data_CSV/Sample*csv", head = 0, pri=1 }
 
+uf_cpc3752 = { name = "CPC 3752", file = "mitrap009/CPC/*Minute.csv", head = 21, pri = 1 }
+
