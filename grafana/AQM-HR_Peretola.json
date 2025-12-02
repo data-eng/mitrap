@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 22,
   "links": [],
   "panels": [
     {
@@ -1128,24 +1128,24 @@
   "tags": [
     "AQM",
     "HR",
-    "Athens"
+    "Florence"
   ],
   "templating": {
     "list": [
       {
         "current": {
-          "text": "Athens - Patission - HR",
-          "value": "Athens - Patission - HR"
+          "text": "Florence - Peretola - HR",
+          "value": "Florence - Peretola - HR"
         },
         "name": "AQH_Station",
         "options": [
           {
             "selected": true,
-            "text": "Athens - Patission - HR",
-            "value": "Athens - Patission - HR"
+            "text": "Florence - Peretola - HR",
+            "value": "Florence - Peretola - HR"
           }
         ],
-        "query": "Athens - Patission - HR",
+        "query": "Florence - Peretola - HR",
         "type": "custom"
       },
       {
@@ -1268,7 +1268,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "AQM-HR: Athens - Patission",
-  "uid": "c02285f1-8bee-4803-9a0b-616da99b333b",
-  "version": 82
+  "title": "AQM-HR: Peretola, Florence",
+  "uid": "6e951c05-43be-498b-9007-b2a7ec55da4d",
+  "version": 3
 }
