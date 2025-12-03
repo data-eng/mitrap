@@ -20,7 +20,7 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
-cat "${file_to_process}" |  tail +21 > "${file_to_process}.temp1
+cat "${file_to_process}" |  tail +21 > "${file_to_process}.temp1"
 
 CHECK=$(cat "${file_to_process}.temp" | head -1)
 
@@ -36,5 +36,5 @@ else
 
 	python3 ${BINDIR}/parsers/uf_csv.py "${file_to_process}.temp1" "${file_to_store}.csv" ',' 'Date-Time' 'Date-Time' '%Y-%m-%d %H:%M:%S' 'Europe/Amsterdam' 'Concentration (#/cm3)' 'no_index'
 
-done
+fi
 
