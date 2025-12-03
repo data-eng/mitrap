@@ -2,35 +2,16 @@ import sys
 import pandas
 import numpy
 
-infile = sys.argv[1]
-outfile = sys.argv[2]
-installation = sys.argv[3]
-instrument = sys.argv[4]
-
-if len(sys.argv) > 5:
-    instrument_tz = sys.argv[5]
-else:
-    instrument_tz = "UTC"
-
-if len(sys.argv) > 6:
-    df_valve = pandas.read_csv( sys.argv[6], parse_dates=["datetime"] ) 
-else:
-    df_valve = None
+infile_measurement = sys.argv[1]
+infile_valve_state = sys.argv[2]
+outfile = sys.argv[3]
 
 
 df = pandas.read_csv( infile, index_col="Sample #" )
 
-#df["datetime"] = pandas.to_datetime( df["Start Date"] + " " + df["Start Time"], format='%m/%d/%y %H:%M:%S', utc=False ).dt.tz_localize(tz = "Europe/Athens")
-df["datetime"] = pandas.to_datetime( df["Start Date"] + " " + df["Start Time"], format='%m/%d/%y %H:%M:%S', utc=True )
-
-# Re-order so that "datetime" and "concentration_cc" are the first two columns.
-# Drop the date, time fields that were used to make "datetime"
-
-new_df = df[ ["datetime"] ]
-new_df["concentration_cc"] = df["Conc Mean"]
-new_df = pandas.concat( [new_df,df.drop(["Start Date","Start Time","datetime","Conc Mean"],axis=1)], axis=1 )
-
-new_df.to_csv( outfile, index=False )
+##
+## DOES NOT WORK, WIP
+##
 
 
 # Find the valve timepoints that box this timepoint

@@ -20,9 +20,17 @@ file_to_store=$2
 installation_name=$3
 instrument_name=$4
 
-python3 ${BINDIR}/parsers/uf_cpc3750.py "${file_to_process}" "${file_to_store}.csv" "${installation_name}" "${instrument_name}" "Europe/Rome"
+# args: infile, outfile, separator,
+# date_col, time_col, datetime_fmt, instrument_tz,
+# measurement_col, index_col
+
+# If there is single datetime column, give date_col==time_col.
+# The datetime_fmt should assume date_col + " " + time_col.
+# The index_col will be dropped. Give "no_index" to not drop any column.
+
+python3 ${BINDIR}/parsers/uf_csv.py "${file_to_process}" "${file_to_store}.csv" ' ' '#date' 'time' '%Y-%m-%d %H:%M:%S' 'Europe/Rome' 'concentration[#/cm3]' 'no_index'
 
 bash ${BINDIR}/parsers/uf_valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv" "${installation_name}"
 
-python3 ${BINDIR}/parsers/uf_cpc3772_lp.py "${file_to_store}_valve.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
+python3 ${BINDIR}/parsers/uf_lp_maker.py "${file_to_store}_valve.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
 
