@@ -71,16 +71,37 @@ for INST in ${INSTALLATIONS}; do
     # The level under $INST is the name of the processor
     # The next level must have 'name', 'file', 'head' third-levels.
     TYPES=$(echo $KEYS | tr ' ' '\n' | grep $INST | sed "s/^$INST\.//" | grep -F '.' | sed 's/\..*$//' | sort | uniq) 
+    echo "TYPES: $TYPES"
+
+    # Priority types must come first
+    TYPES0=""
+    TYPES1=""
     for TYPE in $TYPES; do
 	FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
-	if [[ "${FIELDS}" == "file_head_name_" ]]; then
+	mykey="${INST}.${TYPE}.pri"
+	if [[ ${toml[$mykey]} == 0 ]]; then
+	   TYPES0="$TYPES0 $TYPE"
+   	else
+	   TYPES1="$TYPES1 $TYPE"
+	fi	
+    done
+    TYPES="$TYPES0 $TYPES1"
+    echo "Prioritized TYPES: $TYPES"
+
+    for TYPE in $TYPES; do
+	FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
+	if [[ "${FIELDS}" == "file_head_name_pri_" ]]; then
 	    mykey="${INST}.${TYPE}.name"
 	    INSTRUMENT=${toml[$mykey]}
 	    mykey="${INST}.${TYPE}.file"
-	    FILES=$(ls -d /mnt/incoming/${INST}/${toml[$mykey]} 2>/dev/null | sed "s#/mnt/incoming/##")
-	    echo "INSTRUMENT ${INSTRUMENT} FILES $FILES from ${toml[$mykey]} for key $mykey"
+	    echo "INSTRUMENT ${INSTRUMENT} FILES ${toml[$mykey]} for key $mykey"
 	    i=0
-	    for F in $FILES; do
+	    OIFS="$IFS"
+	    IFS=$'\n'
+	    for F in `find /mnt/incoming -type f -wholename "/mnt/incoming/${INST}/${toml[$mykey]}"`
+	    do
+		F=${F#/mnt/incoming/}
+	        echo "Doing file $F"
 		DIR="${OUTDIR}/${DD}/"$(dirname "$F")
 		echo "FILE $F DIR ${DIR}"
 		mkdir -p ${DIR}
@@ -150,6 +171,8 @@ for INST in ${INSTALLATIONS}; do
 
 		((i++))
 	    done
+	    # Put the IFS back after changing it for the loop over all files
+	    IFS="$OIFS"
 	else
 	    echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
 	fi
