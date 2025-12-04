@@ -81,3 +81,19 @@ The `pm25.py` script calculates concentration for particles
 up to size 2.5, and adds as the fourth column.
 
 
+ * Ultrafine particle number concentration and size distribution
+
+The following parsers are available:
+
+ * `uf_cpc3750`, `uf_cpc3752`, `uf_cpc3772`: Data in various formats exported
+   by Condensation Particle Counter (CPC) instruments.
+
+ * `nanodust`:
+
+The CPC instruments do not make the solid/ambient distinction, so a valve is
+used to alternate between the two measurements. To prepare the final dataframe
+the following pipeline is used: (a) Re-format the original file into a CSV,
+(b) query the database to find the valve position at each sample, and (c) export
+the final CSV and lp files.
+
+
