@@ -1,7 +1,7 @@
 
 [mitrap000]
 
-city = "Athens - Piraeus - CE"
+city = "Copenhagen - Taarnby - CE"
 ypen = 2
 
 co2_com1 = { name = "GMP252", file = "CO2/Data/COM1_Log_*.txt", head = 0 , pri=1 }
@@ -17,9 +17,11 @@ com1 = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM
 
 [mitrap001]
 
-city = "Athens - Aristotelous - CE"
+city = "Aarhus - Port - CE"
 
 co2_com1 = { name = "GMP252", file = "mitrap1/CO2/Data/COM1_Log_*.txt", head = 0, pri=1 }
+
+pm_pplus = { name = "OPS", file = "mitrap1/PM_Monitor/ParticlePlus94_PM_MITRAP_*.csv", head = 5, pri=1 }
 
 nanodust = { name = "Nanodust", file = "mitrap1/Nanodust/AirPN10_Software/data/*1HzData.csv", head = 1, pri=1 }
 
