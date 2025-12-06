@@ -119,6 +119,10 @@ uf_cpc3752 = { name = "CPC 3752", file = "mitrap009/CPC/*Minute.csv", head = 21,
 city = "Florence - Peretola - HR"
 tz = "Europe/Rome"
 
+aeth_raw = { name = "AE36", file = "AE36/*.raw", head = 1, pri = 1 }
+
+pm_raw = { name = "PM 2.5", file = "MASS/*.raw", head = 1, pri = 1 }
+
 uf_valve = { name = "Flow Meter Valve COM1", file = "VALVE/COM1_Log_*i.txt", head = 0, pri = 0 }
 uf_cpc3750 = { name = "CPC 3750", file = "CPC/*.raw", head = 1, pri = 1 }
 
