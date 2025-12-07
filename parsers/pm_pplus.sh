@@ -21,7 +21,7 @@ instrument_tz=$5
 
 temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
 
-echo "ENV ae31: $BINDIR $instrument_tz"
+echo "ENV pm_pplus: $BINDIR $instrument_tz"
 
 # The installation name and instrument may include spaces and other invalid
 # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have

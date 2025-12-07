@@ -26,8 +26,8 @@ echo "ENV nanodust: $BINDIR $instrument_tz"
 # The installation name and instrument may include spaces and other invalid
 # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
 # to clean them
-installation_name=$(escape_tag_value "$tation_name")
+station_name=$(escape_tag_value "$station_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
-python3 ${BINDIR}/nanodust.py "${file_to_process}" "${installation_name}" ${instrument_name} > "${file_to_store}.lp"
+python3 ${BINDIR}/nanodust.py "${file_to_process}" "${station_name}" ${instrument_name} > "${file_to_store}.lp"
 

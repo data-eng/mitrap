@@ -62,7 +62,7 @@ while IFS=',' read -r date time rest; do
   fi
 
   echo "${datetime_tz},${station_name},${instrument_name},1,0,${num}" >> "${file_to_store}.csv"
-  echo "co2,installation=${station_name_lp},instrument=${instrument_name_lp} value=${num} $i{timestamp_unix}" >> "${file_to_store}.lp"
+  echo "co2,installation=${station_name_lp},instrument=${instrument_name_lp} value=${num} ${timestamp_unix}" >> "${file_to_store}.lp"
 
 done < "$file_to_process"
 
