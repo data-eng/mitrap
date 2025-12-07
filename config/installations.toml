@@ -2,6 +2,7 @@
 [mitrap000]
 
 city = "Copenhagen - Taarnby - CE"
+tz = "Europe/Copenhagen"
 ypen = 2
 
 co2_com1 = { name = "GMP252", file = "CO2/Data/COM1_Log_*.txt", head = 0 , pri=1 }
@@ -18,6 +19,7 @@ com1 = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM
 [mitrap001]
 
 city = "Aarhus - Port - CE"
+tz = "Europe/Copenhagen"
 
 co2_com1 = { name = "GMP252", file = "mitrap1/CO2/Data/COM1_Log_*.txt", head = 0, pri=1 }
 
@@ -30,10 +32,38 @@ ma200 = { name = "MA 200", file = "mitrap1/MA200/MA200_Log_*.txt", head = 0, pri
 com1 = { name = "Flow Meter Valve COM1", file = "mitrap1/MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0, pri=1 }
 
 
+[mitrap002]
+
+city = "Florence - Lavagnini - CE"
+tz = "Europe/Rome"
+
+co2_modbus = { name = "CO2", file = "CURRENT/CO2/*_co2_log.txt", head = 0 }
+
+nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1 }
+
+ma200 = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*.txt", head = 0 }
+
+com1 = { name = "Flow Meter Valve COM1", file = "CURRENT/RH-T_p_valve/*Device1_log.txt", head = 5 }
+
+
+[mitrap003]
+
+city = "Florence - Ponte alle Mosse - CE"
+tz = "Europe/Rome"
+
+co2_modbus = { name = "CO2", file = "CURRENT/CO2/*_co2_log.txt", head = 0 }
+
+nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1 }
+
+com1 = { name = "Flow Meter Valve COM1", file = "CURRENT/RH-T_p_valve/*Device1_log.txt", head = 1 }
+
+ma200 = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*.txt", head = 0 }
+
 
 [mitrap004]
 
 city = "Rotterdam - Statenweg - CE"
+tz = "Europe/Amsterdam"
 
 nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1, pri=1 }
 
@@ -47,6 +77,7 @@ pm_pplus = { name = "ParticlePlus", file = "CURRENT/OPS/start_*.csv", head = 5, 
 [mitrap005]
 
 city = "Rotterdam - Hoek van Holland - CE"
+tz = "Europe/Amsterdam"
 
 nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1, pri=1 }
 
@@ -58,6 +89,7 @@ pm_pplus = { name = "ParticlePlus", file = "CURRENT/OPS/start_*.csv", head = 5, 
 [mitrap006]
 
 city = "Athens - Patission - HR"
+tz = "Europe/Athens"
 ypen = 1
 
 co2 = { name = "GMP343", file = "CO2/COM2_Log_*.txt", head = 0, pri=1 }
@@ -77,6 +109,7 @@ pm_grimm = { name = "Grimm OPC", file = "sambashare/GrimmOPC107/*", head = 0, pr
 [mitrap009]
 
 city = "Rotterdam - Hoek van Holland - HR"
+tz = "Europe/Amsterdam"
 
 co2_licor = { name = "LiCor", file = "mitrap009/CO2/*.txt", head = 0, pri=1 }
 
@@ -92,6 +125,10 @@ inorg_xact = { name = "XACT", file = "mitrap009/Xact/Process_Data_CSV/Sample*csv
 
 city = "Florence - Peretola - HR"
 tz = "Europe/Rome"
+
+aeth_raw = { name = "AE36", file = "AE36/*.raw", head = 1, pri = 1 }
+
+pm_raw = { name = "PM 2.5", file = "MASS/*.raw", head = 1, pri = 1 }
 
 uf_valve = { name = "Flow Meter Valve COM1", file = "VALVE/COM1_Log_*i.txt", head = 0, pri = 0 }
 uf_cpc3750 = { name = "CPC 3750", file = "CPC/*.raw", head = 1, pri = 1 }
