@@ -65,8 +65,10 @@ done
 
 for INST in ${INSTALLATIONS}; do
     mykey="${INST}.city"
-    INSTNAME=${toml[$mykey]}
-    echo "===== RUN ${DD} INSTALLATION ${INST} ${INSTNAME}"
+    INSTNAME="${toml[$mykey]}"
+    mykey="${INST}.tz"
+    STATION_TZ="${toml[$mykey]}"
+    echo "===== RUN ${DD} INSTALLATION ${INST} ${INSTNAME} ${STATION_TZ}"
     # Find all sub-keys under $INST that have sub-sub-keys (have a dot)
     # The level under $INST is the name of the processor
     # The next level must have 'name', 'file', 'head' third-levels.
@@ -90,7 +92,19 @@ for INST in ${INSTALLATIONS}; do
 
     for TYPE in $TYPES; do
 	FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
-	if [[ "${FIELDS}" == "file_head_name_pri_" ]]; then
+	# TZ is optional and defaults to STATION_TZ
+	if [[ "${FIELDS}" == "file_head_name_pri_tz_" ]]; then
+	    mykey="${INST}.${TYPE}.tz"
+	    INSTRUMENT_TZ="${toml[$mykey]}"
+	    FIELDS_ARE_GOOD=1
+	elif [[ "${FIELDS}" == "file_head_name_pri_" ]]; then
+	    INSTRUMENT_TZ="${STATION_TZ}"
+	    FIELDS_ARE_GOOD=1
+	else
+	    FIELDS_ARE_GOOD=0
+	fi
+
+	if [[ "${FIELDS_ARE_GOOD}" == 1 ]]; then
 	    mykey="${INST}.${TYPE}.name"
 	    INSTRUMENT=${toml[$mykey]}
 	    mykey="${INST}.${TYPE}.file"
@@ -158,8 +172,8 @@ for INST in ${INSTALLATIONS}; do
 		    TMP_LINE_TERM=$(mktemp)
 		    cat "${OUTDIR}/${DD}/${F}" | sed 's|\r$||' | sed 's|\r|\n|g' > "${TMP_LINE_TERM}"
 		    mv "${TMP_LINE_TERM}" "${OUTDIR}/${DD}/${F}"
-		    echo "EXEC $PROCDIR/${TYPE}.sh ${OUTDIR}/${DD}/$F ${INFLUXFILE} ${INSTNAME} ${INSTRUMENT}"
-		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXFILE}" "${INSTNAME}" "${INSTRUMENT}"
+		    echo "EXEC $PROCDIR/${TYPE}.sh ${OUTDIR}/${DD}/$F ${INFLUXFILE} ${INSTNAME} ${INSTRUMENT} ${INSTRUMENT_TZ}"
+		    bash ${PROCDIR}/${TYPE}.sh "${OUTDIR}/${DD}/$F" "${INFLUXFILE}" "${INSTNAME}" "${INSTRUMENT}" "${INSTRUMENT_TZ}"
 		fi
 
                 # Write Influx lines to DB

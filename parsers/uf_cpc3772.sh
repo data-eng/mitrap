@@ -1,7 +1,5 @@
 #!/bin/bash
 
-BINDIR="/home/debian/live"
-
 escape_tag_value() {
   local val="$1"
   val="${val//\\/\\\\}"   # escape backslashes
@@ -10,15 +8,22 @@ escape_tag_value() {
   echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+if [[ x"$5" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
 fi
 
 file_to_process=$1
 file_to_store=$2
-installation_name=$3
+station_name=$3
 instrument_name=$4
+instrument_tz=$5
+
+instrument_tz="UTC"
+
+temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
+
+echo "ENV uf_cpc3772: $BINDIR $instrument_tz"
 
 # iconv to clean iso-8859-1 cubic-meters.
 # Each entry has its own header (starting with "Sample #") followed by
@@ -41,9 +46,9 @@ cat "${file_to_process}.temp1" | grep -v ^ERROR > "${file_to_process}.temp2"
 # The datetime_fmt should assume date_col + " " + time_col.
 # The index_col will be dropped. Give "no_index" to not drop any column.
 
-python3 ${BINDIR}/parsers/uf_csv.py "${file_to_process}.temp2" "${file_to_store}.csv" ',' 'Start Date' 'Start Time' '%m/%d/%y %H:%M:%S' 'UTC' 'Conc Mean' 'Sample #'
+python3 ${BINDIR}/uf_csv.py "${file_to_process}.temp2" "${file_to_store}.csv" ',' 'Start Date' 'Start Time' '%m/%d/%y %H:%M:%S' "${instrument_tz}" 'Conc Mean' 'Sample #'
 
-bash ${BINDIR}/parsers/uf_valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv" "${installation_name}"
+bash ${BINDIR}/uf_valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv" "${station_name}"
 
-python3 ${BINDIR}/parsers/uf_lp_maker.py "${file_to_store}_valve.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
+python3 ${BINDIR}/uf_lp_maker.py "${file_to_store}_valve.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
 

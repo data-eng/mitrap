@@ -8,18 +8,25 @@ escape_tag_value() {
   echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+if [[ x"$5" == x ]]; then
   echo "Missing arguments: $*"
+  exit 1
 fi
 
 file_to_process=$1
 file_to_store=$2
-installation_name=$3
+station_name=$3
 instrument_name=$4
+instrument_tz=$5
 
-installation_name=$(escape_tag_value "$installation_name")
-instrument_name=$(escape_tag_value "$instrument_name")
+temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
 
+echo "ENV co2_com1: $BINDIR $instrument_tz"
+
+station_name_lp=$(escape_tag_value "$station_name")
+instrument_name_lp=$(escape_tag_value "$instrument_name")
+
+echo "datetime,station_name,instrument_name,num_data_col,num_meta_col,co2" > "${file_to_store}.csv"
 
 while IFS=',' read -r date time rest; do
 
@@ -28,12 +35,12 @@ while IFS=',' read -r date time rest; do
     continue
   fi
 
-  timestamp="$date $time"
+  datetime="$date $time"
 
-  if epoch_s=$(date -d "$timestamp" +%s 2>/dev/null); then
-    timestamp_unix="${epoch_s}000000000"
+  if timestamp_unix=$(TZ="${instrument_tz}" date -d "$datetime" +%s%N 2>/dev/null); then
+    datetime_tz=$(TZ="${instrument_tz}" date --rfc-3339=seconds -d "$datetime")
   else
-    echo "Failed to parse timestamp: $timestamp — skipping line."
+    echo "Failed to parse datetime: $datetime — skipping line."
     continue
   fi
 
@@ -54,7 +61,8 @@ while IFS=',' read -r date time rest; do
     continue
   fi
 
-  write_query="co2,installation=${installation_name},instrument=${instrument_name} value=${num} ${timestamp_unix}"
-  echo $write_query >> "${file_to_store}.lp"
+  echo "${datetime_tz},${station_name},${instrument_name},1,0,${num}" >> "${file_to_store}.csv"
+  echo "co2,installation=${station_name_lp},instrument=${instrument_name_lp} value=${num} ${timestamp_unix}" >> "${file_to_store}.lp"
 
 done < "$file_to_process"
+

@@ -14,7 +14,7 @@ df["instrument"] = [sys.argv[3]] * len(df)
 cols = ["datetime","station","instrument"]
 cols.extend( cols_dCnt )
 df1 = df[cols]
-df1["pm25_native"] = df["Pm2p5"]
+#df1["pm25_native"] = df["Pm2p5"]
 df1.to_csv( sys.argv[4], index=False, header=False )
 
 

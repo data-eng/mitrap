@@ -8,19 +8,22 @@ escape_tag_value() {
   echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+if [[ x"$5" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
 fi
 
 file_to_process=$1
 file_to_store=$2
+station_name=$3
+instrument_name=$4
+instrument_tz=$5
 
 # The installation name and instrument may include spaces and other invalid
 # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
 # to clean them
-installation_name=$(escape_tag_value "$3")
-instrument_name=$(escape_tag_value "$4")
+installation_name=$(escape_tag_value "$station_name")
+instrument_name=$(escape_tag_value "$instrument_name")
 
 while IFS=',' read -r \
     date time serial_number datum_id session_id data_format_version firmware_version date_utc timezone_offset \
@@ -36,7 +39,10 @@ while IFS=',' read -r \
     cref aae_wb aae_ff bcc_wb bcc_ff aae bb delta_c pump_drive reporting_temp reporting_pressure wifi_rssi cksum
 do
 
-  timestamp_unix=$(date -d "$date $time" +%s)000000000
+  datetime="$date $time"
+  timestamp_unix=$(TZ="${instrument_tz}" date -d "$datetime" +%s%N)
+  datetime_tz=$(TZ="${instrument_tz}" date --rfc-3339=seconds -d "$datetime")
+
   values=""
 
   # Force integer-looking numbers to floats
