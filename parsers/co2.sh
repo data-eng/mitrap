@@ -10,35 +10,40 @@ escape_tag_value() {
 
 # /mnt/incoming/mitrap000/CO2/Data/COM2_Log_*.txt
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+if [[ x"$5" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
 fi
 
 file_to_process=$1
 file_to_store=$2
-installation_name=$3
+station_name=$3
 instrument_name=$4
+instrument_tz=$5
+
+temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
+
+echo "ENV co2: $BINDIR $instrument_tz"
+
 
 # The installation name and instrument may include spaces and other invalid
 # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
 # to clean them
-installation_name=$(escape_tag_value "$installation_name")
+installation_name=$(escape_tag_value "$station_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
 while IFS=',' read -r date time value; do
 
-  timestamp="$date $time"
-  timestamp_unix=$(date -d "$timestamp" +%s)000000000
+  datetime="$date $time"
+  timestamp_unix=$(TZ="${instrument_tz}" date -d "$datetime" +%s%N)
+  datetime_tz=$(TZ="${instrument_tz}" date --rfc-3339=seconds -d "$datetime")
 
   # Remove square brackets from value
   value="${value#[}"
   value="${value%]}"
 
-  echo "Timestamp : $timestamp_unix"
-  echo "Value     : $value"
-
   write_query="co2,installation=${installation_name},instrument=${instrument_name} value=$value $timestamp_unix"
   echo $write_query >> "${file_to_store}.lp"
 
  done < "$file_to_process"
+

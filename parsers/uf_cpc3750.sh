@@ -1,7 +1,5 @@
 #!/bin/bash
 
-BINDIR="/home/debian/live"
-
 escape_tag_value() {
   local val="$1"
   val="${val//\\/\\\\}"   # escape backslashes
@@ -10,15 +8,22 @@ escape_tag_value() {
   echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+if [[ x"$5" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
 fi
 
 file_to_process=$1
 file_to_store=$2
-installation_name=$3
+station_name=$3
 instrument_name=$4
+instrument_tz=$5
+
+instrument_tz="Europe/Rome"
+
+temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
+
+echo "ENV cpc3750: $BINDIR $instrument_tz"
 
 # args: infile, outfile, separator,
 # date_col, time_col, datetime_fmt, instrument_tz,
@@ -28,9 +33,9 @@ instrument_name=$4
 # The datetime_fmt should assume date_col + " " + time_col.
 # The index_col will be dropped. Give "no_index" to not drop any column.
 
-python3 ${BINDIR}/parsers/uf_csv.py "${file_to_process}" "${file_to_store}.csv" ' ' '#date' 'time' '%Y-%m-%d %H:%M:%S' 'Europe/Rome' 'concentration[#/cm3]' 'no_index'
+python3 ${BINDIR}/uf_csv.py "${file_to_process}" "${file_to_store}.csv" ' ' '#date' 'time' '%Y-%m-%d %H:%M:%S' "${instrument_tz}" 'concentration[#/cm3]' 'no_index'
 
-bash ${BINDIR}/parsers/uf_valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv" "${installation_name}"
+bash ${BINDIR}/uf_valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv" "${station_name}"
 
-python3 ${BINDIR}/parsers/uf_lp_maker.py "${file_to_store}_valve.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
+python3 ${BINDIR}/uf_lp_maker.py "${file_to_store}_valve.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
 

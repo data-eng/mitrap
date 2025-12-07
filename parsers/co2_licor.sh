@@ -10,24 +10,23 @@ escape_tag_value() {
   echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+if [[ x"$5" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
 fi
 
-BINDIR=/home/debian/live
 SPOOL=/mnt/spool
 
 file_to_process=$1
 file_to_store=$2
-installation_name=$3
+station_name=$3
 instrument_name=$4
+instrument_tz=$5
 
-# The installation name and instrument may include spaces and other invalid
-# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-# to clean them
-installation_name=$(escape_tag_value "$installation_name")
-instrument_name=$(escape_tag_value "$instrument_name")
+temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
+
+echo "ENV co2_licor: $BINDIR $instrument_tz"
+
 
 # LI-COR files have the startdate/starthour at the top of the file,
 # and then roll over to multiple days. To correctly parse file fragments
@@ -63,7 +62,7 @@ cat "$file_to_process" | head -1 | while IFS= read -r line; do
     fi
 done
 
-python3 ${BINDIR}/parsers/co2_licor.py "${file_to_process}.temp" "${header_date}" "${header_hour}" "${num_days}" "${file_to_store}.csv"
+python3 ${BINDIR}/co2_licor.py "${file_to_process}.temp" "${header_date}" "${header_hour}" "${num_days}" "${file_to_store}.csv"
 num_days=$?
 
 # Update the spool
@@ -71,6 +70,7 @@ echo "${num_days} ${header_date} ${header_hour}" > "${SPOOL}/licor_${installatio
 echo "LICOR, update: num_days: ${num_days}, header_date: ${header_date}"
 
 # Make the influx line with CO2 value only
-python3 ${BINDIR}/parsers/co2.py "${file_to_store}.csv" "${installation_name}" ${instrument_name} > "${file_to_store}.lp"
+python3 ${BINDIR}/co2.py "${file_to_store}.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
 
 exit 0
+

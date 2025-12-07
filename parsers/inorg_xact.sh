@@ -1,7 +1,5 @@
 #!/bin/bash
 
-BINDIR="/home/debian/live"
-
 escape_tag_value() {
   local val="$1"
   val="${val//\\/\\\\}"   # escape backslashes
@@ -10,24 +8,31 @@ escape_tag_value() {
   echo "$val" | tr -cd '[:print:]' # remove funny codepoints
 }
 
-if [[ x"$1" == x || x"$2" == x || x"$3" == x || x"$4" == x ]]; then
+if [[ x"$5" == x ]]; then
   echo "Missing arguments: $*"
   exit 1
 fi
 
 file_to_process=$1
 file_to_store=$2
-installation_name=$3
+station_name=$3
 instrument_name=$4
+instrument_tz=$5
+
+instrument_tz="Europe/Amsterdam"
+
+temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
+
+echo "ENV inorg_xact: $BINDIR $instrument_tz"
 
 # The installation name and instrument may include spaces and other invalid
 # (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
 # to clean them
-installation_name=$(escape_tag_value "$installation_name")
+installation_name=$(escape_tag_value "$station_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
 datetime=$(cat "${file_to_process}" | tail -1 | cut -d, -f 2)
-timestamp_unix=$(TZ="Europe/Amsterdam" date -d "${datetime}" +%s%N)
+timestamp_unix=$(TZ="${instrument_tz}" date -d "${datetime}" +%s%N)
 
 S16=$(cat "${file_to_process}" | tail -1 | cut -d, -f 32)
 K19=$(cat "${file_to_process}" | tail -1 | cut -d, -f 38)

@@ -1,11 +1,10 @@
 #!/bin/bash
 
-BINDIR="/home/debian/live"
 source /home/mitrap/.influx.env
 
 file_to_process=$1
 file_to_store=$2
-installation_name=$3
+station_name=$3
 
 header=$(cat "${file_to_process}" | head -1)
 echo "${header},valve_state" > "${file_to_store}"
@@ -19,7 +18,7 @@ cat "${file_to_process}" | tail +2 |\
 	   t2=date.add(d: 2m, to: $mytime)
 	   from(bucket: \"mitrap006\")
 		|> range(start: t1, stop: t2) 
-		|> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"$installation_name\" )
+		|> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"$station_name\" )
 		|> filter(fn: (r) => r._field == \"valve\")
 		|> keep(columns: [\"_time\",\"_value\"])"
 	echo "Q1 : $q"
