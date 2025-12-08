@@ -27,5 +27,5 @@ echo "ENV co2_modbus: $BINDIR $instrument_tz"
 echo "Datetime,CO2_ppm,Temperature_C" > "${file_to_process}.temp"
 cat "${file_to_process}" | iconv -f iso-8859-1 | sed 's|\([^;]*\); CO2=\(.*\) ppm; T=\(.*\) .*$|\1,\2,\3|' >> "${file_to_process}.temp"
 
-python3 ${BINDIR}/co2.py "${file_to_process}.temp" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
+python3 ${BINDIR}/co2.py "${file_to_process}.temp" "${station_name}" "${instrument_name}" "${instrument_tz}" '%Y-%m-%d %H:%M:%S' > "${file_to_store}.lp"
 

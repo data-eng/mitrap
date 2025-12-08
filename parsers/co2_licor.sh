@@ -70,7 +70,7 @@ echo "${num_days} ${header_date} ${header_hour}" > "${SPOOL}/licor_${installatio
 echo "LICOR, update: num_days: ${num_days}, header_date: ${header_date}"
 
 # Make the influx line with CO2 value only
-python3 ${BINDIR}/co2.py "${file_to_store}.csv" "${installation_name}" "${instrument_name}" > "${file_to_store}.lp"
+python3 ${BINDIR}/co2.py "${file_to_store}.csv" "${installation_name}" "${instrument_name}" "${instrument_tz}" '%Y-%m-%d %H:%M:%S' > "${file_to_store}.lp"
 
 exit 0
 
