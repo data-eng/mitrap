@@ -21,7 +21,7 @@ instrument_tz=$5
 
 temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
 
-echo "ENV uf_valve: $BINDIR $instrument_tz"
+echo "ENV valve: $BINDIR $instrument_tz"
 
-python3 ${BINDIR}/uf_valve.py "${file_to_process}" "${file_to_store}.csv" "${station_name}" "${instrument_name}" "${instrument_tz}" "uf" > "${file_to_store}.lp"
+python3 ${BINDIR}/uf_valve.py "${file_to_process}" "${file_to_store}.csv" "${station_name}" "${instrument_name}" "${instrument_tz}" "other" > "${file_to_store}.lp"
 
