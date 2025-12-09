@@ -34,10 +34,6 @@ if [[ "$(basename "$file_to_process")" == *Event* ]]; then
     echo "We do not process Event files."; exit 1
 fi
 
-if [[ ! "$(basename "$file_to_process")" == *COM2* ]]; then
-    echo "COM1 are processed from other script."; exit 1
-fi
-
 regex='^-?[0-9]+(\.[0-9]+)?$'
 
 while IFS=',' read -r date time value; do
