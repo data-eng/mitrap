@@ -23,10 +23,5 @@ temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
 
 echo "ENV uf_valve: $BINDIR $instrument_tz"
 
-# No .lp file written. The .csv is read in by uf_cpc3772.py
-# The data fetcher:
-# (a) ensures that this is executed before uf_cpc3772.py
-# (b) provides the filename of this csv to uf_cpc3772.py
-
-python3 ${BINDIR}/uf_valve.py "${file_to_process}" "${file_to_store}.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
+python3 ${BINDIR}/uf_valve.py "${file_to_process}" "${file_to_store}.csv" "${station_name}" "${instrument_name}" "${instrument_tz}" "uf" > "${file_to_store}.lp"
 
