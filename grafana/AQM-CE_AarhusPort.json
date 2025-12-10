@@ -20,6 +20,7 @@
   "graphTooltip": 0,
   "id": 14,
   "links": [],
+  "liveNow": true,
   "panels": [
     {
       "datasource": {
@@ -574,7 +575,8 @@
   "tags": [
     "Aarhus",
     "CE",
-    "AQM"
+    "AQM",
+    "Port"
   ],
   "templating": {
     "list": [
@@ -613,8 +615,8 @@
       },
       {
         "current": {
-          "text": "Flow Meter Valve COM1",
-          "value": "Flow Meter Valve COM1"
+          "text": "",
+          "value": ""
         },
         "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com1\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
         "hide": 2,
@@ -713,9 +715,16 @@
     "from": "now-6h",
     "to": "now-1h"
   },
-  "timepicker": {},
-  "timezone": "browser",
+  "timepicker": {
+    "refresh_intervals": [
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "Europe/Copenhagen",
   "title": "AQM-CE: Aarhus Port",
   "uid": "eed290a8-bc28-4f19-a4a8-60264bfdb5ba",
-  "version": 10
+  "version": 12
 }

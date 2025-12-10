@@ -1129,7 +1129,8 @@
   "tags": [
     "AQM",
     "HR",
-    "Florence"
+    "Florence",
+    "Airport"
   ],
   "templating": {
     "list": [
@@ -1167,8 +1168,8 @@
       },
       {
         "current": {
-          "text": "Flow Meter Valve COM1",
-          "value": "Flow Meter Valve COM1"
+          "text": "",
+          "value": ""
         },
         "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com1\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
         "hide": 2,
@@ -1271,5 +1272,5 @@
   "timezone": "browser",
   "title": "AQM-HR: Peretola, Florence",
   "uid": "6e951c05-43be-498b-9007-b2a7ec55da4d",
-  "version": 6
+  "version": 7
 }

@@ -737,7 +737,7 @@
       "targets": [
         {
           "hide": false,
-          "query": "import \"strings\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\n\nvalve_off_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve\")\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 0)\n  |> keep(columns: [\"_time\"])\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))\n  |> aggregateWindow(every: 10m, fn: sum, createEmpty: false)\n\n\njoined = join(\n  tables: {all: all_data, valveOff: valve_off_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(\n            v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"),\n            t: \"_\", u: \".\"\n          ))\n  }))\n  |> map(fn: (r) => ({ r with hourly_valve_off: r._value }))\n  |> keep(columns: [\"nm\", \"hourly_valve_off\"])\n  |> sort(columns: [\"nm\"])\n",
+          "query": "import \"strings\"\n\nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 3600000000000 then // 1h in nanoseconds\n    {\n      timeRangeStart: time(v: int(v: v.timeRangeStop) - 3600000000000),\n      timeRangeStop:  v.timeRangeStop\n    }\n  else\n    {\n      timeRangeStart: v.timeRangeStart,\n      timeRangeStop:  v.timeRangeStop\n    }\n\n\nvalve_off_times = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"valve\")\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)\n  |> filter(fn: (r) => r._value == 0)\n  |> keep(columns: [\"_time\"])\n\nall_data = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => strings.hasPrefix(v: r._field, prefix: \"nm\"))\n  |> aggregateWindow(every: 15m, fn: sum, createEmpty: false)\n\n\njoined = join(\n  tables: {all: all_data, valveOff: valve_off_times},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined\n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(\n            v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"),\n            t: \"_\", u: \".\"\n          ))\n  }))\n  |> map(fn: (r) => ({ r with hourly_valve_off: r._value }))\n  |> keep(columns: [\"nm\", \"hourly_valve_off\"])\n  |> sort(columns: [\"nm\"])\n",
           "refId": "Valve-Off"
         },
         {
@@ -1128,7 +1128,8 @@
   "tags": [
     "AQM",
     "HR",
-    "Athens"
+    "Athens",
+    "Traffic"
   ],
   "templating": {
     "list": [
@@ -1166,8 +1167,8 @@
       },
       {
         "current": {
-          "text": "Flow Meter Valve COM1",
-          "value": "Flow Meter Valve COM1"
+          "text": "",
+          "value": ""
         },
         "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com1\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
         "hide": 2,
@@ -1270,5 +1271,5 @@
   "timezone": "browser",
   "title": "AQM-HR: Athens - Patission",
   "uid": "c02285f1-8bee-4803-9a0b-616da99b333b",
-  "version": 82
+  "version": 84
 }

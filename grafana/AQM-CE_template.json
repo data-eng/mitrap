@@ -561,7 +561,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ypen\" and r._field == \"nox\" and r.installation == \"${AQH_Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
+          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"noxco\" and r.installation == \"${AQH_Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
           "refId": "nox"
         },
         {
@@ -591,25 +591,27 @@
   "schemaVersion": 41,
   "tags": [
     "AQM",
-    "CE"
+    "CE",
+    "@CAMPAIGN_STR@",
+    "@CATEGORY_STR@"
   ],
   "templating": {
     "list": [
       {
         "current": {
-          "text": "@INSTALLATION_STR@",
-          "value": "@INSTALLATION_STR@"
+          "text": "@STATION_STR@",
+          "value": "@STATION_STR@"
         },
         "description": "",
         "name": "AQH_Station",
         "options": [
           {
             "selected": true,
-            "text": "@INSTALLATION_STR@",
-            "value": "@INSTALLATION_STR@"
+            "text": "@STATION_STR@",
+            "value": "@STATION_STR@"
           }
         ],
-        "query": "@INSTALLATION_STR@",
+        "query": "@STATION_STR@",
         "type": "custom"
       },
       {
@@ -630,8 +632,8 @@
       },
       {
         "current": {
-          "text": "Flow Meter Valve COM1",
-          "value": "Flow Meter Valve COM1"
+          "text": "",
+          "value": ""
         },
         "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com1\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
         "hide": 2,
@@ -710,8 +712,8 @@
       },
       {
         "current": {
-          "text": "CO2",
-          "value": "CO2"
+          "text": "GMP252",
+          "value": "GMP252"
         },
         "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"co2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)",
         "hide": 2,
@@ -727,10 +729,10 @@
     ]
   },
   "time": {
-    "from": "now-7h",
+    "from": "now-6h",
     "to": "now-1h"
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "@TITLE_STR@",
+  "title": "@TITLE_STR@"
 }

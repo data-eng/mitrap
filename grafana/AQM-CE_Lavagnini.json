@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 7,
+  "id": 17,
   "links": [],
   "panels": [
     {
@@ -561,7 +561,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ypen\" and r._field == \"nox\" and r.installation == \"${AQH_Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
+          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"noxco\" and r.installation == \"${AQH_Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
           "refId": "nox"
         },
         {
@@ -592,26 +592,26 @@
   "tags": [
     "AQM",
     "CE",
-    "Athens",
+    "Florence",
     "Traffic"
   ],
   "templating": {
     "list": [
       {
         "current": {
-          "text": "Athens - Aristotelous - CE",
-          "value": "Athens - Aristotelous - CE"
+          "text": "Florence - Lavagnini - CE",
+          "value": "Florence - Lavagnini - CE"
         },
         "description": "",
         "name": "AQH_Station",
         "options": [
           {
             "selected": true,
-            "text": "Athens - Aristotelous - CE",
-            "value": "Athens - Aristotelous - CE"
+            "text": "Florence - Lavagnini - CE",
+            "value": "Florence - Lavagnini - CE"
           }
         ],
-        "query": "Athens - Aristotelous - CE",
+        "query": "Florence - Lavagnini - CE",
         "type": "custom"
       },
       {
@@ -712,8 +712,8 @@
       },
       {
         "current": {
-          "text": "CO2",
-          "value": "CO2"
+          "text": "GMP252",
+          "value": "GMP252"
         },
         "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"co2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)",
         "hide": 2,
@@ -734,7 +734,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "AQM-CE: Athens - Aristotelous st.",
-  "uid": "c02285f1-8bee-4803-9a0b-616da99b333f",
-  "version": 14
+  "title": "AQM-CE: Florence Lavagnini",
+  "uid": "7bfedc1d-aed8-4492-a417-8e0bce4be600",
+  "version": 5
 }

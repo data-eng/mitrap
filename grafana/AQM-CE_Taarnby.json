@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 7,
+  "id": 19,
   "links": [],
   "panels": [
     {
@@ -561,26 +561,8 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ypen\" and r._field == \"nox\" and r.installation == \"${AQH_Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
-          "refId": "nox"
-        },
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "cepbemlo6msjke"
-          },
-          "hide": false,
-          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ypen\" and r._field == \"no2\" and r.installation == \"${AQH_Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
-          "refId": "no2"
-        },
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "cepbemlo6msjke"
-          },
-          "hide": false,
-          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ypen\" and r._field == \"co\" and r.installation == \"${AQH_Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
-          "refId": "co"
+          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"noxco\" and r.installation == \"${AQH_Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
+          "refId": "noxco"
         }
       ],
       "title": "CO/NOx/NO₂",
@@ -590,28 +572,28 @@
   "preload": false,
   "schemaVersion": 41,
   "tags": [
-    "AQM",
     "CE",
-    "Athens",
-    "Traffic"
+    "AQM",
+    "Copenhagen",
+    "Airport"
   ],
   "templating": {
     "list": [
       {
         "current": {
-          "text": "Athens - Aristotelous - CE",
-          "value": "Athens - Aristotelous - CE"
+          "text": "Copenhagen - Taarnby - CE",
+          "value": "Copenhagen - Taarnby - CE"
         },
         "description": "",
         "name": "AQH_Station",
         "options": [
           {
             "selected": true,
-            "text": "Athens - Aristotelous - CE",
-            "value": "Athens - Aristotelous - CE"
+            "text": "Copenhagen - Taarnby - CE",
+            "value": "Copenhagen - Taarnby - CE"
           }
         ],
-        "query": "Athens - Aristotelous - CE",
+        "query": "Copenhagen - Taarnby - CE",
         "type": "custom"
       },
       {
@@ -734,7 +716,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "AQM-CE: Athens - Aristotelous st.",
-  "uid": "c02285f1-8bee-4803-9a0b-616da99b333f",
-  "version": 14
+  "title": "AQM-CE: Copenhagen Taarnby",
+  "uid": "ee49f75a-dc60-47a4-986f-b58de7afcd97",
+  "version": 6
 }
