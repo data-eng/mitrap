@@ -38,6 +38,12 @@ file_to_process=$1
 file_to_store=$2
 station_name=$3
 instrument_name=$4
+instrument_tz=$5
+
+temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
+
+echo "ENV mpss_inv: $BINDIR $instrument_tz"
+
 
 filename=$(basename "$file_to_process")
 date_str=$(echo "$filename" | grep -oP '\d{8}')  # Extract YYYYMMDD
@@ -79,7 +85,7 @@ while true; do
   if [[ x${diameters} == x ]]; then
       diameters=${diameters_now}
       num_diameters=$((${#fields1[@]}-4))
-      echo "datetime,station_name,instrument_name,num_data_cols,num_meta_cols${diameters},temperature,pressure,other,lineage" > "${file_to_store}"
+      echo "datetime,station_name,instrument_name,num_data_cols,num_meta_cols${diameters},temperature,pressure,other,lineage" > "${file_to_store}.csv"
   elif [[ x${header} != x${header_now} ]]; then
       echo ${header}
       echo ${header_now}
@@ -104,7 +110,11 @@ while true; do
     fields="${fields},${val}"
   done
 
-  echo "${datetime},${station_name},${instrument_name},${num_diameters},3${fields},${meta_fields},${file_to_process}" >> "${file_to_store}"
+  echo "${datetime},${station_name},${instrument_name},${num_diameters},3${fields},${meta_fields},${file_to_process}" >> "${file_to_store}.csv"
 
 done
+
+bash ${BINDIR}/valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv" "${station_name}"
+
+python3 ${BINDIR}/mpss_lp_maker.py "${file_to_store}_valve.csv" > "${file_to_store}.lp"
 

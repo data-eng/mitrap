@@ -18,9 +18,14 @@ for c in df.columns:
 for idx in df.index:
     stn = df.loc[idx,"station_name"].replace(" ","\\ ")
     ins = df.loc[idx,"instrument_name"].replace(" ","\\ ")
+
     values = ""
     for c in col:
         if values == "": values = f"{c}={df.loc[idx,c]}"
         else: values += f",{c}={df.loc[idx,c]}"
-    print( f"mpss,installation={stn},instrument={ins} {values} {df.loc[idx,'datetime'].value}" )
+    print( f"mpss,installation={stn},instrument={ins},valve={df.loc[idx,'valve_state']} {values} {df.loc[idx,'datetime'].value}" )
+    print( f"mpss1,installation={stn},instrument={ins},valve={df.loc[idx,'valve_state_1']} {values} {df.loc[idx,'datetime'].value}" )
+    print( f"mpss2,installation={stn},instrument={ins},valve={df.loc[idx,'valve_state_2']} {values} {df.loc[idx,'datetime'].value}" )
+    print( f"mpss3,installation={stn},instrument={ins},valve={df.loc[idx,'valve_state_3']} {values} {df.loc[idx,'datetime'].value}" )
+    print( f"mpss4,installation={stn},instrument={ins},valve={df.loc[idx,'valve_state_4']} {values} {df.loc[idx,'datetime'].value}" )
 
