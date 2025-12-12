@@ -125,10 +125,23 @@ uf_cpc3752 = { name = "CPC 3752", file = "mitrap009/CPC/*Minute.csv", head = 21,
 city = "Florence - Peretola - HR"
 tz = "Europe/Rome"
 
+co2_modbus = { name = "CO2", file = "CO2/*_co2_log.txt", head = 0, pri=1 }
+
 aeth_raw = { name = "AE36", file = "AE36/*.raw", head = 1, pri = 1 }
 
 pm_raw = { name = "PM 2.5", file = "MASS/*.raw", head = 1, pri = 1 }
 
 uf_valve = { name = "Flow Meter Valve COM1", file = "VALVE/COM1_Log_*.txt", head = 0, pri = 0, tz = "UTC" }
 uf_cpc3750 = { name = "CPC 3750", file = "CPC/*.raw", head = 1, pri = 1, tz = "UTC" }
+
+[mitrap011]
+
+city = "Copenhagen - Jagtvej - HR"
+tz = "Europe/Copenhagen"
+
+co2_csv = { name = "CO2", file = "HRbox/data2/CO2/*.dat", head = 0, pri=1 }
+
+#uf_valve = { name = "Flow Meter Valve COM1", file = "HRbox/data1/valve*.dat", head = 0, pri = 0, tz = "UTC" }
+#uf_cpc3010 = { name = "CPC 3010", file = "HRbox/data3/AIM*.csv", head = 0, pri =1 }
+#uf_cpc3330 = { name = "CPC 3330", file = "HRbox/data3/AIM*.csv", head = 15, pri =1 }
 
