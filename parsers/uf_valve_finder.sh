@@ -40,7 +40,7 @@ cat "${file_to_process}" | tail +2 |\
 	elif [[ x$num_resp == x3 ]]; then
 	    my_v=2
 	else
-	    echo "ERROR"
+	    echo "ERROR: ${num_resp} responses"
 	fi
 	    
 	#echo "$line,$my_v,$before_t,$before_v,$after_v,$after_t" # DEBUG

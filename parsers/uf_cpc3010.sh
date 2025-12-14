@@ -19,11 +19,9 @@ station_name=$3
 instrument_name=$4
 instrument_tz=$5
 
-instrument_tz="UTC"
-
 temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
 
-echo "ENV uf_cpc3772: $BINDIR $instrument_tz"
+echo "ENV uf_cpc3010: $BINDIR $instrument_tz"
 
 # iconv to clean iso-8859-1 cubic-meters.
 # Each entry has preamble with the 2-min mean and then detailed (per second) measurements.
@@ -39,7 +37,7 @@ cat "${file_to_process}" |  iconv -f iso-8859-1 | awk 'BEGIN { FS=","; LINE=""; 
 # The datetime_fmt should assume date_col + " " + time_col.
 # The index_col will be dropped. Give "no_index" to not drop any column.
 
-python3 ${BINDIR}/uf_csv.py "${file_to_process}.temp2" "${file_to_store}.csv" ',' 'Start Date' 'Start Time' '%m/%d/%y %H:%M:%S' "${instrument_tz}" 'Mean' 'Sample #'
+python3 ${BINDIR}/uf_csv.py "${file_to_process}.temp1" "${file_to_store}.csv" ',' 'Start Date' 'Start Time' '%m/%d/%y %H:%M:%S' "${instrument_tz}" 'Mean' 'Sample #'
 
 bash ${BINDIR}/uf_valve_finder.sh "${file_to_store}.csv" "${file_to_store}_valve.csv" "${station_name}"
 
