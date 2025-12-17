@@ -36,7 +36,7 @@ trim() {
   echo "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
 }
 
-sed_insta_name=$(echo ${installation_name} | sed 's|\\|\\\\|g' )
+sed_insta_name=$(echo ${station_name} | sed 's|\\|\\\\|g' )
 sed_instr_name=$(echo ${instrument_name} | sed 's|\\|\\\\|g' )
 
 cat "$file_to_process" | tail +16 | cut -d ',' -f 2,3,18-33 |\
