@@ -12,7 +12,7 @@ nanodust = { name = "Nanodust", file = "Nanodust/AirPN10_Software/Test/*1HzData.
 
 ma200 = { name = "MA 200", file = "MA200/MA200_Log_*.txt", head = 0, pri=1, tz = "UTC" }
 
-uf_valve = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0, pri=1 }
+valve = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0, pri=1 }
 
 
 [mitrap001]
@@ -28,7 +28,7 @@ nanodust = { name = "Nanodust", file = "mitrap1/Nanodust/AirPN10_Software/data/*
 
 ma200 = { name = "MA 200", file = "mitrap1/MA200/MA200_Log_*.txt", head = 0, pri=1, tz = "UTC" }
 
-uf_valve = { name = "Flow Meter Valve COM1", file = "mitrap1/MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0, pri=1 }
+valve = { name = "Flow Meter Valve COM1", file = "mitrap1/MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0, pri=1 }
 
 
 [mitrap002]
@@ -99,7 +99,7 @@ ae31 = { name = "AE 31", file = "sambashare/AE31/mitrap/*.csv", head = 0, pri=1 
 
 mpss = { name = "MPSS", file = "sambashare/MPSS_ATH/inverted/*.inv", head = 0, pri=1 }
 
-uf_valve = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0, pri=0, tz = "UTC" }
+valve = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0, pri=0, tz = "UTC" }
 #cpc_a20 = { name = "CPC A20", file = "sambashare/cpc_A20/*.dat", head = 0, pri=1 }
 uf_cpc3772 = { name = "CPC 3772", file = "sambashare/cpc_3772_Patision/patision_*.txt", head = 0, pri=1 }
 
@@ -131,8 +131,9 @@ aeth_raw = { name = "AE36", file = "AE36/*.raw", head = 1, pri = 1 }
 
 pm_raw = { name = "PM 2.5", file = "MASS/*.raw", head = 1, pri = 1 }
 
-uf_valve = { name = "Flow Meter Valve COM1", file = "VALVE/COM1_Log_*.txt", head = 0, pri = 0, tz = "UTC" }
+valve = { name = "Flow Meter Valve COM1", file = "VALVE/COM1_Log_*.txt", head = 0, pri = 0, tz = "UTC" }
 uf_cpc3750 = { name = "CPC 3750", file = "CPC/*.raw", head = 1, pri = 1, tz = "UTC" }
+
 
 [mitrap011]
 
@@ -141,7 +142,7 @@ tz = "Europe/Copenhagen"
 
 co2_csv = { name = "CO2", file = "HRbox/data2/CO2/*.dat", head = 0, pri=1 }
 
-valve_nan = { name = "Flow Meter Valve COM1", file = "HRbox/data1/valve*.dat", head = 0, pri = 0 }
+valve = { name = "Flow Meter Valve COM1", file = "HRbox/data1/valve*.dat", head = 0, pri = 0 }
 #uf_cpc3330 = { name = "CPC 3330", file = "HRbox/data3/AIM*.csv", head = 15, pri =1 }
 uf_cpc3010 = { name = "CPC 3010", file = "HRbox/data3/AIM*.csv", head = 0, pri =1 }
 
