@@ -108,5 +108,15 @@ df["valve5"] = numpy.where( (before>=5*60) & (after>=60), vv, bad )
 # valve7: i7 good minutes before, 1 good minute after "now"
 df["valve7"] = numpy.where( (before>=7*60) & (after>=60), vv, bad )
 
-df.set_index( "datetime" ).to_csv( outfile )
+num_data_cols = df.iloc[0,4]
+num_meta_cols = df.iloc[0,5]
+
+data_cols = df.columns[6:6+num_data_cols]
+meta_cols = df.columns[6+num_data_cols:6+num_data_cols+num_meta_cols]
+
+newdf = pandas.concat( [df[["datetime","station_name","instrument_name","num_calc_cols","num_data_cols","num_meta_cols"]],
+                        df["valve2"],df["valve3"],df["valve5"],df["valve7"],df[data_cols],df[meta_cols]], axis=1 )
+newdf["num_calc_cols"] = [4]*len(newdf)
+
+newdf.set_index( "datetime" ).to_csv( outfile )
 

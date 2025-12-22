@@ -28,7 +28,14 @@ TYPE3='^[12][0-9][0-9][0-9]-[01][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9
 # Sample line:
 # 2025-12-20 00:01:40 b'nan,PSI,nan,Pa,nan,kPa,nan,torr,nan,inHg,nan,atm,nan,bar,0.0,%3,0.0,C3,0.0,%5,0.0,C5,0,valve\r\n'
 
-cat "${file_to_process}" | sed "s|${TYPE1}|1|" | sed "s|${TYPE2}|2|" | sed "s|${TYPE3}|3|" | sed 's|^...*$|0|' | sort | uniq -c |\
+TYPE4='^[0-3][0-9]-[A-Z][a-z][a-z]-[12][0-9][0-9][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9],\(CS\|AMB\)$'
+# Sample lines:
+# 14-Jul-2025 11:15:00,AMB
+# 14-Jul-2025 11:30:00,CS
+
+cat "${file_to_process}" |\
+	sed "s@${TYPE1}@1@" | sed "s@${TYPE2}@2@" | sed "s@${TYPE3}@3@" | sed "s@${TYPE4}@4@" |\
+	sed 's|^...*$|0|' | sort | uniq -c |\
 	sed 's|^[[:space:]]*\([0-9][0-9]*\)[[:space:]][[:space:]]*\([0-9][0-0]*\)[[:space:]]*$|\1 \2|' |\
 	sort -rn | head -1 | cut -d ' ' -f 2 | read TYPE
 
@@ -37,34 +44,36 @@ if [[ x$TYPE == x0 ]]; then
 	exit 1
 elif [[ x${TYPE} == x1 ]]; then
 	RE=$TYPE1
-	PROC=valve.py
-	ARG=1
 	cat "${file_to_process}" | grep -a "${RE}" > "${file_to_store}_temp1"
 elif [[ x${TYPE} == x2 ]]; then
 	RE=${TYPE2}
-	PROC=valve.py
-	ARG=2
 	cat "${file_to_process}" | grep -a "${RE}" > "${file_to_store}_temp1"
 elif [[ x${TYPE} == x3 ]]; then
 	RE=${TYPE3}
-	PROC=valve.py
-	ARG=3
 	cat "${file_to_process}" | grep -a "${RE}" | sed 's| b|,|' | sed 's|\\r\\n||' | tr -d \' > "${file_to_store}_temp1"
+elif [[ x${TYPE} == x4 ]]; then
+	RE=${TYPE4}
+	# Tail +2 to remove the header
+	cat "${file_to_process}" | tail +2 | grep -a "${RE}" > "${file_to_store}_temp1"
 else
 	echo "valve: Error"
 	exit 1
 fi
 
-cat "${file_to_process}" | grep -va "${RE}" | wc -l | read BADLINES
+# Note that the homogenizing of line termionations in the data fetcher can have
+# the side effect that newlines are inserted. This does not hurt, but makes them
+# count as bad lkineshere.
+cat "${file_to_process}" | grep -va "${RE}" | grep -v '^$' | wc -l | read BADLINES
 
 echo "valve: ENV $BINDIR $instrument_tz PARSING as type ${TYPE} with ${BADLINES} bad lines"
 
 # Parse into csv
-python3 ${BINDIR}/${PROC} "${file_to_store}_temp1" "${file_to_store}_temp2" $ARG "${station_name}" "${instrument_name}" "${instrument_tz}" > "${file_to_store}.lp"
+python3 ${BINDIR}/valve.py "${file_to_store}_temp1" "${file_to_store}_temp2" ${TYPE} "${station_name}" "${instrument_name}" "${instrument_tz}" 
 
 # Calculate valve states that are too close to a valve position change to
-# be taken into account. These are marked with "2" instaead of 0/1.
-
+# be taken into account. These are marked with "2" instead of 0/1.
 python3 ${BINDIR}/valve_state.py "${file_to_store}_temp2" "${file_to_store}.csv" 
 
+# Make lp lines
+python3 ${BINDIR}/valve_lp_maker.py "${file_to_store}.csv" > "${file_to_store}.lp"
 
