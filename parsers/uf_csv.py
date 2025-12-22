@@ -12,14 +12,10 @@ instrument_tz = sys.argv[7]
 measurement_col = sys.argv[8]
 index_col = sys.argv[9]
 
-if index_col != "no_index" and separator != ',':
+if index_col != "no_index":
     df = pandas.read_csv( infile, index_col=index_col, sep=separator )
-elif index_col != "no_index":
-    df = pandas.read_csv( infile, index_col=index_col )
-elif separator != ',':
-    df = pandas.read_csv( infile, sep=separator )
 else:
-    df = pandas.read_csv( infile )
+    df = pandas.read_csv( infile, sep=separator )
 
 if date_col == time_col:
     if instrument_tz == "UTC":
