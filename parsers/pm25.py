@@ -47,7 +47,9 @@ elif df.loc[0,2] == "ParticlePlus":
     l = len(constants)
     times2 = 5
     times1 = 16
-    native_pm25 = df[33]
+    # This is commented out in pm_pplus.py
+    # If needed, must also re-enable there
+    #native_pm25 = df[33]
 else:
     print( "ERROR" )
 
