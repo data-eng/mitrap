@@ -14,7 +14,7 @@ if file_type == "1":
     if instrument_tz == "UTC":
         df["datetime"] = pandas.to_datetime( df["date"] + " " + df["time"], format='%Y-%m-%d %H:%M:%S', utc=True )
     else:
-        df["datetime"] = pandas.to_datetime( df["date"] + " " + df["time"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize(tz = instrument_tz)
+        df["datetime"] = pandas.to_datetime( df["date"] + " " + df["time"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df = df.drop( ["date","time"], axis=1 )
 
 elif file_type == "2":
@@ -23,7 +23,7 @@ elif file_type == "2":
     if instrument_tz == "UTC":
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=True )
     else:
-        df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize(tz = instrument_tz)
+        df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df = df.drop( ["datetime1"], axis=1 )
 
 elif file_type == "3":
@@ -32,7 +32,7 @@ elif file_type == "3":
     if instrument_tz == "UTC":
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=True )
     else:
-        df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize(tz = instrument_tz)
+        df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df = df.drop( ["datetime1"], axis=1 )
 
 elif file_type == "4":
@@ -41,8 +41,8 @@ elif file_type == "4":
     if instrument_tz == "UTC":
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%d-%b-%Y %H:%M:%S', utc=True )
     else:
-        df["datetime"] = pandas.to_datetime( df["datetime1"], format='%d-%b-%Y %H:%M:%S', utc=False ).dt.tz_localize(tz = instrument_tz)
-    df["valve_state"] = df.valve1.apply( lambda v: 0 if "CS" else 1 )
+        df["datetime"] = pandas.to_datetime( df["datetime1"], format='%d-%b-%Y %H:%M:%S', utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
+    df["valve_state"] = df.valve1.apply( lambda v: 0 if v=="CS" else 1 )
     df = df.drop( ["datetime1","valve1"], axis=1 )
 
 else:
@@ -63,6 +63,7 @@ newdf = pandas.concat( [df["datetime"],dfmisc,dfv], axis=1 )
 
 # There shall be no duplicate datetimes
 newdf.drop_duplicates( subset="datetime", keep="last", inplace=True )
-
+# Drop the NaT rows
+newdf = newdf[ newdf.datetime == newdf.datetime ]
 newdf.set_index( "datetime" ).to_csv( outfile )
 
