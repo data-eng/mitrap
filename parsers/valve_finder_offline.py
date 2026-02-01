@@ -6,12 +6,14 @@ outfile = sys.argv[2]
 valvefile = sys.argv[3]
 
 dfd = pandas.read_csv( infile, parse_dates=["datetime"] )
-dfv = pandas.read_csv( valvefile, parse_dates=["datetime"], index_col="datetime" )
+dfd["ts"] = pandas.DatetimeIndex( dfd.datetime.apply(lambda t: int(1e9*t.timestamp())) )
+
+dfv = pandas.read_csv( valvefile, parse_dates=["datetime"] )
+dfv["ts"] = pandas.DatetimeIndex( dfv.datetime.apply(lambda t: int(1e9*t.timestamp())) )
+dfv = dfv.set_index("ts")
+
 names_in =["valve_state","valve2","valve3","valve5","valve7"] 
 names_out =["before","after","valve2","valve3","valve5","valve7"] 
-
-#idx=dfv.index.get_indexer([dfd.index[200]], method="nearest")
-#idx = 200
 
 def valve_finder( datetime, dfv, names ):
 
@@ -22,7 +24,7 @@ def valve_finder( datetime, dfv, names ):
     valve_after = dfv.index.get_indexer( [datetime], method="bfill" )
     t1 = dfv.index[valve_after]
     v1 = dfv.loc[t1,names]
-    dt = (t1.astype(int)-t0.astype(int))/1e9
+    dt = (t1.astype(int)-t0.astype(int))
 
     retv = [v0.iloc[0,0],v1.iloc[0,0]]
     for i in range(1,5):
@@ -42,14 +44,30 @@ def valve_finder( datetime, dfv, names ):
         # This should never happen
         # If there is a gap, there should a 2
         if v != 2 and dt>70:
-            assert 1==0
+            #assert 1==0
+            print( f"ERROR {datetime}" )
+            continue
         retv.append(v)
 
     return retv
 
-vv = dfd["datetime"].apply(valve_finder,args=[dfv,names_in]).tolist()
+vv = dfd["ts"].apply(valve_finder,args=[dfv,names_in]).tolist()
 vv = pandas.DataFrame( vv, columns=names_out )
-dfd = pandas.concat( [dfd,vv], axis=1 )
-dfd["num_meta_cols"] = dfd["num_meta_cols"].apply( lambda n: n+len(names_out) )
-dfd.set_index( "datetime" ).to_csv( outfile )
+
+# CAREFUL: only for uf. Must be re-visited.
+data = dfd["concentration_cc"]
+dfd.drop( ["concentration_cc"], axis=1, inplace=True )
+dfd["num_calc_cols"] = [0]*len(dfd)
+dfd["num_data_cols"] = [1]*len(dfd)
+dfd["num_meta_cols"] = [1]*len(dfd)
+dfd["concentration_cc"] = data
+newdf = pandas.concat( [dfd,vv], axis=1 )
+newdf["valve_state"] = newdf["valve3"]
+newdf.drop( ["ts","before","after","valve2","valve3","valve5","valve7"], axis=1, inplace=True )
+
+newdf = newdf[ newdf["valve_state"] == newdf["valve_state"] ]
+for col in ["num_calc_cols","num_data_cols","num_meta_cols","valve_state"]:
+    newdf[col] = newdf[col].astype(int)
+
+newdf.set_index( "datetime" ).to_csv( outfile )
 

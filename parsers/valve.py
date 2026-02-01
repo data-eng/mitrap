@@ -59,11 +59,23 @@ num_data_cols = len(dfv.columns)
 
 dfmisc = pandas.DataFrame( [[station_name,instrument_name,0,num_data_cols,0]]*len(dfv),
                            columns=["station_name","instrument_name","num_calc_cols","num_data_cols","num_meta_cols"] ) 
+
 newdf = pandas.concat( [df["datetime"],dfmisc,dfv], axis=1 )
 
 # There shall be no duplicate datetimes
-newdf.drop_duplicates( subset="datetime", keep="last", inplace=True )
-# Drop the NaT rows
+newdf.drop_duplicates( subset="datetime", keep="last", inplace=True ) 
+
+# if need be
+#newdf = newdf.set_index( "datetime" )
+#newdf = newdf.resample("1min").asfreq().ffill( limit=15 )
+#newdf = newdf.reset_index()
+
+# Drop the NaT/NaN rows
 newdf = newdf[ newdf.datetime == newdf.datetime ]
-newdf.set_index( "datetime" ).to_csv( outfile )
+newdf = newdf[ newdf.valve_state == newdf.valve_state ]
+
+for col in ["num_calc_cols","num_data_cols","num_meta_cols","valve_state"]:
+    newdf[col] = newdf[col].astype(int)
+
+newdf = newdf.set_index( "datetime" ).to_csv( outfile )
 

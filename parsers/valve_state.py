@@ -7,7 +7,8 @@ outfile = sys.argv[2]
 
 df = pandas.read_csv( infile, parse_dates=["datetime"],  )
 
-tt = (df.datetime.values.astype(numpy.int64) * 1e-9).astype(numpy.int64) 
+#tt = (df.datetime.values.astype(numpy.int64) * 1e-9).astype(numpy.int64) 
+tt = df.datetime.apply(lambda t: t.timestamp())
 vv = df.valve_state.astype(numpy.int64)
 
 # Up to 3 steps before and 20 after

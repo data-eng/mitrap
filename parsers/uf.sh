@@ -57,11 +57,11 @@ elif [[ "${instrument_name}" == "CPC 3750" ]]; then
 	INDEX_COL='no_index'
 
 elif [[ "${instrument_name}" == "CPC 3752" ]]; then
-
 	# Remove the preamble.
-	cat "${file_to_process}" | tail +21 > "${file_to_store}_temp1"
+	#cat "${file_to_process}" | tail +21 > "${file_to_store}_temp1"
+	cp "${file_to_process}" "${file_to_store}_temp1"
 
-	HEADER=$(cat "${file_to_process}.temp" | head -1)
+	HEADER=$(cat "${file_to_store}_temp1" | head -1)
 
 	if [[ "${HEADER}" == "Date-Time,Elapsed Time(m),Concentration (#/cm3),Counts,Dilution Factor,Aerosol Humidity (%),Aerosol Temperature (°C),Error," ]]; then
 		# Set the uf_csv arguments
@@ -110,9 +110,9 @@ fi
 # The datetime_fmt should assume date_col + " " + time_col.
 # The index_col will be dropped. Give "no_index" to not drop any column.
 
-python3 ${BINDIR}/uf_csv.py "${file_to_store}_temp1" "${file_to_store}_temp1.csv" "${SEP}" "${DATE_COL}" "${TIME_COL}" "${DATETIME_FMT}" "${instrument_tz}" "${MEAS_COL}" "${INDEX_COL}"
+python3 ${BINDIR}/uf_csv.py "${file_to_store}_temp1" "${file_to_store}_temp2.csv" "${SEP}" "${DATE_COL}" "${TIME_COL}" "${DATETIME_FMT}" "${instrument_tz}" "${MEAS_COL}" "${INDEX_COL}"
 
-bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp1.csv" "${file_to_store}.csv" "${station_name}"
+bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp2.csv" "${file_to_store}.csv" "${station_name}"
 
 python3 ${BINDIR}/uf_lp_maker.py "${file_to_store}.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
 
