@@ -1,53 +1,74 @@
 import sys
 import pandas
-import numpy
 
-infile_measurement = sys.argv[1]
-infile_valve_state = sys.argv[2]
-outfile = sys.argv[3]
+infile = sys.argv[1]
+outfile = sys.argv[2]
+valvefile = sys.argv[3]
 
+dfd = pandas.read_csv( infile, parse_dates=["datetime"] )
+dfd["ts"] = pandas.DatetimeIndex( dfd.datetime.apply(lambda t: int(1e9*t.timestamp())) )
 
-df = pandas.read_csv( infile, index_col="Sample #" )
+dfv = pandas.read_csv( valvefile, parse_dates=["datetime"] )
+dfv["ts"] = pandas.DatetimeIndex( dfv.datetime.apply(lambda t: int(1e9*t.timestamp())) )
+dfv = dfv.set_index("ts")
 
-##
-## DOES NOT WORK, WIP
-##
+names_in =["valve_state","valve2","valve3","valve5","valve7"] 
+names_out =["before","after","valve2","valve3","valve5","valve7"] 
 
+def valve_finder( datetime, dfv, names ):
 
-# Find the valve timepoints that box this timepoint
+    valve_before = dfv.index.get_indexer( [datetime], method="ffill" )
+    t0 = dfv.index[valve_before]
+    v0 = dfv.loc[t0,names]
 
-def helper( t1, t2 ):
-    if t1 > t2: return numpy.nan
-    else: return t2.value - t1.value
-def box( idx ):
-    t1 = min( df_valve.index, key=lambda x: helper(df_valve.loc[x,"datetime"],df.loc[idx,"datetime"]))
-    if t1 != t1:
-        # There is nothing to the left
-        return None,None,None,None
-    t2 = t1+1
-    if t2 < len(df_valve):
-        #return t1,df_valve.loc[t1,"datetime"],df_valve.loc[t1,"valve_state"],t2,df_valve.loc[t2,"datetime"],df_valve.loc[t2,"valve_state"]
-        return df_valve.loc[t1,"datetime"].value,df_valve.loc[t1,"valve_state"],df_valve.loc[t2,"datetime"].value,df_valve.loc[t2,"valve_state"]
-    else:
-        # The very last datapoint
-        return df_valve.loc[t1,"datetime"].value,df_valve.loc[t1,"valve_state"],df_valve.loc[t1,"datetime"].value,df_valve.loc[t1,"valve_state"]
+    valve_after = dfv.index.get_indexer( [datetime], method="bfill" )
+    t1 = dfv.index[valve_after]
+    v1 = dfv.loc[t1,names]
+    dt = (t1.astype(int)-t0.astype(int))/1e9
+    #print(t0,t1,dt)
 
-def valve_frac( idx ):
-    t1,v1,t2,v2 = box( idx )
-    # There is nothing to the left
-    if v1!=v1: retv == None
-    # Avoid unnecessary calculations for most timepoints
-    # and also avoid the division by zero at the last timepoint
-    elif v1==v2: retv = v1
-    else:
-        p1 = float(df.loc[idx,"datetime"].value - t1) / (t2-t1)
-        p2 = float(t2 - df.loc[idx,"datetime"].value) / (t2-t1)
-        retv = p1*v1 + p2*v2
+    retv = [v0.iloc[0,0],v1.iloc[0,0]]
+    for i in range(1,5):
+        if (v0.iloc[0,i]==2) or (v1.iloc[0,i]==2):
+            # Invalid value on either end, means invalid
+            v = 2
+        elif v0.iloc[0,i] == v1.iloc[0,i]:
+            # Both ends agree
+            v = v0.iloc[0,i]
+        else:
+            # 0->1 or 1->0 should never happen,
+            # there should always be a 2 between them
+            # But it can happen in edge cases of valve2, as the 
+            # safety margin is too short.
+            v = 2
+            assert i==0
+        # This should never happen
+        # If there is a gap, there should a 2
+        if v != 2 and dt>70:
+            #assert 1==0
+            print( f"ERROR {datetime}" )
+            continue
+        retv.append(v)
+
     return retv
 
-# We only provide the valve dataframe for off-line analytics.
-# For real-time viz, we use flux to find the valve fraction.
-if df_valve is not None:
-    df["valve_frac"] = df.index.to_series().apply(valve_frac)
+vv = dfd["ts"].apply(valve_finder,args=[dfv,names_in]).tolist()
+vv = pandas.DataFrame( vv, columns=names_out )
 
+# CAREFUL: only for uf. Must be re-visited.
+data = dfd["concentration_cc"]
+dfd.drop( ["concentration_cc"], axis=1, inplace=True )
+dfd["num_calc_cols"] = [0]*len(dfd)
+dfd["num_data_cols"] = [1]*len(dfd)
+dfd["num_meta_cols"] = [1]*len(dfd)
+dfd["concentration_cc"] = data
+newdf = pandas.concat( [dfd,vv], axis=1 )
+newdf["valve_state"] = newdf["valve3"]
+newdf.drop( ["ts","before","after","valve2","valve3","valve5","valve7"], axis=1, inplace=True )
+
+newdf = newdf[ newdf["valve_state"] == newdf["valve_state"] ]
+for col in ["num_calc_cols","num_data_cols","num_meta_cols","valve_state"]:
+    newdf[col] = newdf[col].astype(int)
+
+newdf.set_index( "datetime" ).to_csv( outfile )
 

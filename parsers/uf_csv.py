@@ -12,14 +12,10 @@ instrument_tz = sys.argv[7]
 measurement_col = sys.argv[8]
 index_col = sys.argv[9]
 
-if index_col != "no_index" and separator != ',':
+if index_col != "no_index":
     df = pandas.read_csv( infile, index_col=index_col, sep=separator )
-elif index_col != "no_index":
-    df = pandas.read_csv( infile, index_col=index_col )
-elif separator != ',':
-    df = pandas.read_csv( infile, sep=separator )
 else:
-    df = pandas.read_csv( infile )
+    df = pandas.read_csv( infile, sep=separator )
 
 if date_col == time_col:
     if instrument_tz == "UTC":
@@ -27,7 +23,7 @@ if date_col == time_col:
     elif instrument_tz == "FILE":
         df["datetime"] = pandas.to_datetime( df[date_col], format=datetime_fmt, utc=False )
     else:
-        df["datetime"] = pandas.to_datetime( df[date_col], format=datetime_fmt, utc=False ).dt.tz_localize(tz = instrument_tz)
+        df["datetime"] = pandas.to_datetime( df[date_col], format=datetime_fmt, utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df = df.drop( [date_col], axis=1 )
 
 else:
@@ -36,7 +32,7 @@ else:
     elif instrument_tz == "FILE":
         df["datetime"] = pandas.to_datetime( df[date_col] + " " + df[time_col], format=datetime_fmt, utc=False )
     else:
-        df["datetime"] = pandas.to_datetime( df[date_col] + " " + df[time_col], format=datetime_fmt, utc=False ).dt.tz_localize(tz = instrument_tz)
+        df["datetime"] = pandas.to_datetime( df[date_col] + " " + df[time_col], format=datetime_fmt, utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df = df.drop( [date_col,time_col], axis=1 )
                 
     
@@ -46,6 +42,9 @@ else:
 new_df = df[["datetime",measurement_col]]
 new_df = new_df.rename( columns={measurement_col: "concentration_cc"} )
 new_df = pandas.concat( [new_df,df.drop(["datetime",measurement_col],axis=1)], axis=1 )
+
+# Drop the NaT rows
+new_df = new_df[ new_df.datetime == new_df.datetime ]
 
 new_df.to_csv( outfile, index=False )
 
