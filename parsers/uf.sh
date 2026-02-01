@@ -100,6 +100,18 @@ elif [[ "${instrument_name}" == "CPC 3772" || "${instrument_name}" == "CPC 3773"
 	MEAS_COL='Conc Mean'
 	INDEX_COL='Sample #'
 
+elif [[ "${instrument_name}" == "CPC A20" ]]; then
+
+	cp "${file_to_process}" "${file_to_store}_temp1"
+
+	# Set the uf_csv arguments
+	SEP=','
+	DATE_COL='YYYY.MM.DD hh:mm:ss'
+	TIME_COL='YYYY.MM.DD hh:mm:ss'
+	DATETIME_FMT='%Y.%m.%d %H:%M:%S'
+	MEAS_COL='Concentration (#/cc)'
+	INDEX_COL='no_index'
+
 else
 	echo "Bad instrument name ${instrument_name}"
 	exit 1
