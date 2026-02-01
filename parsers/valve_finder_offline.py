@@ -24,7 +24,8 @@ def valve_finder( datetime, dfv, names ):
     valve_after = dfv.index.get_indexer( [datetime], method="bfill" )
     t1 = dfv.index[valve_after]
     v1 = dfv.loc[t1,names]
-    dt = (t1.astype(int)-t0.astype(int))
+    dt = (t1.astype(int)-t0.astype(int))/1e9
+    #print(t0,t1,dt)
 
     retv = [v0.iloc[0,0],v1.iloc[0,0]]
     for i in range(1,5):

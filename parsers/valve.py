@@ -9,7 +9,7 @@ instrument_name = sys.argv[5]
 instrument_tz = sys.argv[6]
 
 if file_type == "1":
-    df = pandas.read_csv( infile, names=["date","time","p_psi","PSI","p_pa","Pa","p_kpa","kPa","p_torr","torr","p_inhg","inHg","p_atm","atm","p_bar","bar","conc_3_percent","%3","conc_c3","C3","conc_5_percent","%5","conc_c5","C5","valve_state","valve"] )
+    df = pandas.read_csv( infile, names=["date","time","p_psi","PSI","p_pa","Pa","p_kpa","kPa","p_torr","torr","p_inhg","inHg","p_atm","atm","p_bar","bar","conc_3_percent","%3","conc_c3","C3","conc_5_percent","%5","conc_c5","C5","valve_state","valve"], low_memory=False )
     boring_columns = ["PSI","Pa","kPa","torr","inHg","atm","bar","%3","C3","%5","C5","valve"]
     if instrument_tz == "UTC":
         df["datetime"] = pandas.to_datetime( df["date"] + " " + df["time"], format='%Y-%m-%d %H:%M:%S', utc=True )
@@ -18,7 +18,7 @@ if file_type == "1":
     df = df.drop( ["date","time"], axis=1 )
 
 elif file_type == "2":
-    df = pandas.read_csv( infile, names=["datetime1","p_psi","PSI","p_pa","Pa","p_kpa","kPa","p_torr","torr","p_inhg","inHg","p_atm","atm","p_bar","bar","conc_3_percent","%3","conc_c3","C3","conc_5_percent","%5","conc_c5","C5","valve_state","valve","fan_state","fan"] )
+    df = pandas.read_csv( infile, names=["datetime1","p_psi","PSI","p_pa","Pa","p_kpa","kPa","p_torr","torr","p_inhg","inHg","p_atm","atm","p_bar","bar","conc_3_percent","%3","conc_c3","C3","conc_5_percent","%5","conc_c5","C5","valve_state","valve","fan_state","fan"], low_memory=False )
     boring_columns = ["PSI","Pa","kPa","torr","inHg","atm","bar","%3","C3","%5","C5","valve","fan"]
     if instrument_tz == "UTC":
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=True )
@@ -27,7 +27,7 @@ elif file_type == "2":
     df = df.drop( ["datetime1"], axis=1 )
 
 elif file_type == "3":
-    df = pandas.read_csv( infile, names=["datetime1","p_psi","PSI","p_pa","Pa","p_kpa","kPa","p_torr","torr","p_inhg","inHg","p_atm","atm","p_bar","bar","conc_3_percent","%3","conc_c3","C3","conc_5_percent","%5","conc_c5","C5","valve_state","valve"] )
+    df = pandas.read_csv( infile, names=["datetime1","p_psi","PSI","p_pa","Pa","p_kpa","kPa","p_torr","torr","p_inhg","inHg","p_atm","atm","p_bar","bar","conc_3_percent","%3","conc_c3","C3","conc_5_percent","%5","conc_c5","C5","valve_state","valve"], low_memory=False )
     boring_columns = ["PSI","Pa","kPa","torr","inHg","atm","bar","%3","C3","%5","C5","valve"]
     if instrument_tz == "UTC":
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=True )
@@ -36,7 +36,7 @@ elif file_type == "3":
     df = df.drop( ["datetime1"], axis=1 )
 
 elif file_type == "4":
-    df = pandas.read_csv( infile, names=["datetime1","valve1"] )
+    df = pandas.read_csv( infile, names=["datetime1","valve1"], low_memory=False )
     boring_columns = []
     if instrument_tz == "UTC":
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%d-%b-%Y %H:%M:%S', utc=True )
@@ -74,7 +74,14 @@ newdf.drop_duplicates( subset="datetime", keep="last", inplace=True )
 newdf = newdf[ newdf.datetime == newdf.datetime ]
 newdf = newdf[ newdf.valve_state == newdf.valve_state ]
 
-for col in ["num_calc_cols","num_data_cols","num_meta_cols","valve_state"]:
+bad_idx = []
+for idx in newdf.index:
+    try: newdf.loc[idx,"valve_state"] = int( newdf.loc[idx,"valve_state"] )
+    except: bad_idx.append( idx )
+print( f"Bad valve_state values: {bad_idx}" )
+newdf.drop( bad_idx, axis=0, inplace=True )
+
+for col in ["num_calc_cols","num_data_cols","num_meta_cols"]:
     newdf[col] = newdf[col].astype(int)
 
 newdf = newdf.set_index( "datetime" ).to_csv( outfile )
