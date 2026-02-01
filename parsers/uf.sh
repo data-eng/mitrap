@@ -76,7 +76,7 @@ elif [[ "${instrument_name}" == "CPC 3752" ]]; then
 		exit 1
 	fi
 
-elif [[ "${instrument_name}" == "CPC 3773" ]]; then
+elif [[ "${instrument_name}" == "CPC 3772" || "${instrument_name}" == "CPC 3773" ]]; then
 
 	# iconv to clean iso-8859-1 cubic-meters.
 	# Each entry has its own header (starting with "Sample #") followed by
@@ -90,7 +90,7 @@ elif [[ "${instrument_name}" == "CPC 3773" ]]; then
 	cat "${file_to_store}_temp1" | grep ^ERROR
 	# Make a clean temp1
 	cat "${file_to_store}_temp1" | grep -v ^ERROR > "${file_to_store}_temp2"
-	mv "${file_to_store}_temp2" "${file_to_store}_temp1"
+	cat "${file_to_store}_temp2" | cut -d, -f 1-12 > "${file_to_store}_temp1"
 
 	# Set the uf_csv arguments
 	SEP=','
