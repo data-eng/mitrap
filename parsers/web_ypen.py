@@ -41,9 +41,27 @@ for k in config.keys():
         ypen = config[k]["ypen"]
         name = config[k]["city"].replace( ' ', '\\ ' )
     except:
+        ypen = -1
+        
+    d = df[ (df["timestamp"]==nowstamp) & (df["station"]==str(ypen)) ]
+
+    try:
+        dd = d[ d["variable"]=="NOx" ]
+        myline = f"nox={dd.iloc[0,3]}"
+    except:
+        myline = ""
+    try:
+        dd = d[ d["variable"]=="NO2" ]
+        if len(myline) > 0: myline += ","
+        myline += f"no2={dd.iloc[0,3]}"
+    except:
         pass
-    d = df[ (df["timestamp"]==nowstamp) & (df["station"]==ypen) ]
-    if len(d) > 0:
-        idx = d.index[0]
-        print( f"noxco,installation={name},instrument=ypen nox={d.loc[idx,'nox']},no2={d.loc[idx,'no2']},co={d.loc[idx,'co']} {nowstamp}" )
+    try:
+        dd = d[ d["variable"]=="CO" ]
+        if len(myline) > 0: myline += ","
+        myline += f"co={dd.iloc[0,3]}"
+    except:
+        pass
+    if len(myline) > 0:
+        print( f"noxco,installation={name},instrument=ypen {myline} {nowstamp}" )
 
