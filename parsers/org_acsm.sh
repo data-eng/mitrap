@@ -25,25 +25,21 @@ temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
 
 echo "ENV org_acsm: $BINDIR $instrument_tz"
 
-# The installation name and instrument may include spaces and other invalid
-# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-# to clean them
-installation_name=$(escape_tag_value "$station_name")
-instrument_name=$(escape_tag_value "$instrument_name")
-
-python3 ${BINDIR}/org_acsm.py "${file_to_process}" "${installation_name}" "${instrument_name}" "${file_to_store}.csv" > "${file_to_process}.temp.lp"
+python3 ${BINDIR}/org_acsm.py "${file_to_process}" "${station_name}" "${instrument_name}" "${file_to_store}.csv" > "${file_to_process}.temp.lp"
 
 # ACSM files in new/ are complete files, not incremental.
 # To avoid re-loading all timepoints, spool the number of
 # lines in the CSV that have already been loaded.
 
-if [[ -f "${SPOOL}/acsm_${installation_name}" ]]; then
-    num_lines=$(cat "${SPOOL}/acsm_${installation_name}" | wc -l)
-else
-    num_lines=0
-fi
+#if [[ -f "${SPOOL}/acsm_${installation_name}" ]]; then
+#    num_lines=$(cat "${SPOOL}/acsm_${installation_name}" | wc -l)
+#else
+#    num_lines=0
+#fi
 
-wc -l "${file_to_process}.temp.lp" > "${SPOOL}/acsm_${installation_name}"
+#wc -l "${file_to_process}.temp.lp" > "${SPOOL}/acsm_${installation_name}"
 
-cat "${file_to_process}.temp.lp" | tail +${num_lines} > "${file_to_store}.lp"
+#cat "${file_to_process}.temp.lp" | tail +${num_lines} > "${file_to_store}.lp"
+mv "${file_to_process}.temp.lp" "${file_to_store}.lp"
+
 
