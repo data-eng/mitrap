@@ -102,7 +102,10 @@ elif [[ "${instrument_name}" == "CPC 3772" || "${instrument_name}" == "CPC 3773"
 
 elif [[ "${instrument_name}" == "CPC A20" ]]; then
 
-	cp "${file_to_process}" "${file_to_store}_temp1"
+	# This file can have nan lines, which have fewer
+	# columns (no "Total CPC errors", "System status error")
+	# making pandas.read_csv() explode
+	grep -v ',nan,' "${file_to_process}" > "${file_to_store}_temp1"
 
 	# Set the uf_csv arguments
 	SEP=','
