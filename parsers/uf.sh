@@ -127,7 +127,14 @@ fi
 
 python3 ${BINDIR}/uf_csv.py "${file_to_store}_temp1" "${file_to_store}_temp2.csv" "${SEP}" "${DATE_COL}" "${TIME_COL}" "${DATETIME_FMT}" "${instrument_tz}" "${MEAS_COL}" "${INDEX_COL}"
 
-bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp2.csv" "${file_to_store}.csv" "${station_name}"
+if [[ "${instrument_name}" == "CPC A20" ]]; then
+	# CPC A20 gives 1-sec data. Resample to 1min
+	python3 ${BINDIR}/resample.py "${file_to_store}_temp2.csv" "${file_to_store}_temp3.csv"  
+else
+	mv "${file_to_store}_temp2.csv" "${file_to_store}_temp3.csv"
+fi
+
+bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp3.csv" "${file_to_store}.csv" "${station_name}"
 
 python3 ${BINDIR}/uf_lp_maker.py "${file_to_store}.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
 
