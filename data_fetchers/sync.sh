@@ -30,8 +30,8 @@ WEBINFLUX="/mnt/influxlines/${DD}"
 mkdir -p $WEBINFLUX
 
 YPENINFLUX="${WEBINFLUX}/ypen.lp"
-LATEST=$(ls /mnt/web/ypen/*.csv | tail -1)
-echo "EXEC web_ypen.py ${LATEST} ${YPENINFLUX}"
+LATEST=$(ls /mnt/web/ypen/raw/*.xml | tail -1)
+echo "EXEC web_ypen.py ${LATEST}"
 python3 ${PROCDIR}/web_ypen.py ${LATEST} /mnt/web/ypen/csv/${DD}.csv > ${YPENINFLUX}
 /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN -p s --file ${YPENINFLUX}
 
@@ -79,7 +79,7 @@ for INST in ${INSTALLATIONS}; do
     TYPES0=""
     TYPES1=""
     for TYPE in $TYPES; do
-	FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
+	FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}\." | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
 	mykey="${INST}.${TYPE}.pri"
 	if [[ ${toml[$mykey]} == 0 ]]; then
 	   TYPES0="$TYPES0 $TYPE"
@@ -91,7 +91,7 @@ for INST in ${INSTALLATIONS}; do
     echo "Prioritized TYPES: $TYPES"
 
     for TYPE in $TYPES; do
-	FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}" | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
+	FIELDS=$(echo $KEYS | tr ' ' '\n' | grep "^${INST}.${TYPE}\." | sed "s/^${INST}.${TYPE}.//" | sort | tr '\n' '_')
 	# TZ is optional and defaults to STATION_TZ
 	if [[ "${FIELDS}" == "file_head_name_pri_tz_" ]]; then
 	    mykey="${INST}.${TYPE}.tz"
@@ -188,7 +188,7 @@ for INST in ${INSTALLATIONS}; do
 	    # Put the IFS back after changing it for the loop over all files
 	    IFS="$OIFS"
 	else
-	    echo "ERROR: ${INST}.${TYPE} should have sub-fields file, head, proc. No more, no less."
+	    echo "ERROR: ${INST}.${TYPE} bad sub-fields ${FIELDS}"
 	fi
     done
 done
