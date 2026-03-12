@@ -10,6 +10,11 @@ file_to_store=$2
 station_name=$3
 instrument_name=$4
 instrument_tz=$5
+bucket_name=$6
+
+if [[ x${bucket_name} == x ]]; then
+	bucket_name='mitrap006'
+fi
 
 temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
 
@@ -24,7 +29,9 @@ echo "ENV aeth_raw: $BINDIR $instrument_tz"
 # The datetime_fmt should assume date_col + " " + time_col.
 # The index_col will be dropped. Give "no_index" to not drop any column.
 
-python3 ${BINDIR}/raw.py "${file_to_process}" "${file_to_process}".temp1 "${station_name}" "${instrument_name}" "${instrument_tz}"
+python3 ${BINDIR}/aeth_raw.py "${file_to_process}" "${file_to_store}_temp1" "${station_name}" "${instrument_name}" "${instrument_tz}"
 
-python3 ${BINDIR}/aeth_lp_maker.py "${file_to_process}".temp1 > "${file_to_store}.lp"
+bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp1" "${file_to_store}.csv" "${station_name}" "${bucket_name}"
+
+python3 ${BINDIR}/bc_lp_maker.py "${file_to_store}.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
 

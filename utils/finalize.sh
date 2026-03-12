@@ -3,14 +3,15 @@
 CONFIG=$1
 DATADIR=$2
 PKGDIR=$3
+BUCKET=$4
 
 if [[ x"$3" == x ]]; then
-  echo "Missing arguments: $*"
+  echo "Usage: <toml> <indir> <outdir> <bucket>"
   exit 1
 fi
 
 temp=$(realpath "$0") && temp=$(dirname "${temp}")
-BINDIR=${temp}/..
+BINDIR=~/mitrap.git
 PROCDIR=${BINDIR}/parsers/
 
 
@@ -19,7 +20,7 @@ PROCDIR=${BINDIR}/parsers/
 declare -A toml
 shopt -s lastpipe
 
-cat ${CONFIG} | ${BINDIR}/toml2bash | while read KEY VALUE; do
+cat ${CONFIG} | ~debian/live/toml2bash | while read KEY VALUE; do
     toml["$KEY"]=$VALUE
 done
 
@@ -100,6 +101,7 @@ for STATION in ${STATIONS}; do
 	i=0
 	OIFS="$IFS"
 	IFS=$'\n'
+	echo "XXXX ${DATADIR}/${STATION}/${toml[$mykey]}"
 	for F in $(find ${DATADIR} -type f -wholename "${DATADIR}/${STATION}/${toml[$mykey]}")
 	do
 	    F=${F#${DATADIR}}
@@ -111,27 +113,13 @@ for STATION in ${STATIONS}; do
 
 	    # Remove DOS line terminations, also caring for files with \r only (eg, IGOR files)
 	    cat "${DATADIR}/${F}" | sed 's|\r$||' | sed 's|\r|\n|g' > "${ORIG_FILE}"
-	    echo "EXEC ${PROCDIR}/${TYPE}.sh ${ORIG_FILE} ${INFLUXFILE} ${STATION_NAME} ${INSTRUMENT} ${INSTRUMENT_TZ}"
-	    bash ${PROCDIR}/${TYPE}.sh "${ORIG_FILE}" "${INFLUXFILE}" "${STATION_NAME}" "${INSTRUMENT}" "${INSTRUMENT_TZ}"
-
-	    # Check that the timestamps are within this package's range
-	    my_first_ts=$(cat ${INFLUXFILE}.lp | head -1 | sed 's|^.* \([0-9]*\)$|\1|')
-	    my_last_ts=$(cat ${INFLUXFILE}.lp | tail -1 | sed 's|^.* \([0-9]*\)$|\1|')
-	    if [[ my_first_ts -gt end_ts ]]; then
-		echo "$F is out of range"
-		rm ${ORIG_FILE}
-		rm ${INFLUXFILE}.*
-	    elif [[ my_last_ts -lt start_ts ]]; then
-		echo "$F is out of range"
-		rm ${ORIG_FILE}
-		rm ${INFLUXFILE}.*
-	    fi
-	    # TODO: handle partially overlapping
+	    echo "EXEC ${PROCDIR}/${TYPE}.sh ${ORIG_FILE} ${INFLUXFILE} ${STATION_NAME} ${INSTRUMENT} ${INSTRUMENT_TZ} ${BUCKET}"
+	    bash ${PROCDIR}/${TYPE}.sh "${ORIG_FILE}" "${INFLUXFILE}" "${STATION_NAME}" "${INSTRUMENT}" "${INSTRUMENT_TZ}" "${BUCKET}"
 
             # Write Influx lines to DB
 	    # Careful: INFLUXFILE is the pathname without the suffix
             if [[ -s "${INFLUXFILE}.lp" ]]; then
-                echo "WRITE ${INFLUXFILE}.lp TO INFLUX"
+                echo "TODO: influx write -b ${BUCKET} -o mitrap --file ${INFLUXFILE}.lp"
             fi
 
 	    ((i++))
