@@ -1,0 +1,48 @@
+[mitrap004]
+
+city = "Rotterdam - Statenweg - CE"
+tz = "Europe/Amsterdam"
+start = "2025-07-23"
+end = "2025-12-09" 
+bucket = "pkg002"
+
+valve = { name = "Flow Meter Valve COM1", file = "valve/*Device1_log.txt", head=1, pri=0 }
+bc = { name = "MA 200", file = "MA200/MA200_Log_*.txt", head = 0, pri=1 }
+
+nanodust = { name = "Nanodust", file = "NanoDust/*1HzData.csv", head = 1, pri=1 }
+co2_modbus = { name = "GMP252", file = "CO2/*_co2_log.txt", head = 0, pri=1 }
+pm_pplus = { name = "ParticlePlus", file = "OPS/start_*.csv", head = 5, pri=1, tz = "UTC" }
+
+
+[mitrap005]
+
+city = "Rotterdam - Hoek van Holland - CE"
+tz = "Europe/Amsterdam"
+start = "2025-07-23"
+end = "2025-12-09" 
+bucket = "pkg002"
+
+valve = { name = "Flow Meter Valve COM1", file = "valve/*Device1_log.txt", head=1, pri=0 }
+
+nanodust = { name = "Nanodust", file = "NanoDust/*1HzData.csv", head = 1, pri=1, tz = "UTC" }
+co2_modbus = { name = "GMP252", file = "CO2/*_co2_log.txt", head = 0, pri=1 }
+ aeth and pm25 with custom scripts
+
+
+[mitrap009]
+
+city = "Rotterdam - Hoek van Holland - HR"
+tz = "Europe/Amsterdam"
+start = "2025-06-17"
+end = "2025-12-09" 
+bucket = "pkg002"
+
+co2_licor = { name = "LiCor", file = "CO2/*.txt", head = 0, pri=1 }
+
+org_acsm = { name = "ACSM", file = "ACSM/ExportData_new/Rotterdam_ACSM-140294_RTdata_*.itx", head = -1, pri=1 }
+
+inorg_xact = { name = "XACT", file = "Xact/Process_Data_CSV/Sample*csv", head = 0, pri=1 }
+
+valve = { name = "valve", file = "valve_switches_until_2025-12-01_0900.csv", head=1, pri=0 }
+uf = { name = "CPC 3752", file = "CPC/*Minute.csv", head=21, pri=1 }
+

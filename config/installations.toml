@@ -61,28 +61,22 @@ valve = { name = "Flow Meter Valve COM1", file = "CURRENT/RH-T_p_valve/*Device1_
 
 [mitrap004]
 
-city = "Rotterdam - Statenweg - CE"
-tz = "Europe/Amsterdam"
+city = "France - Dunkirk Port - CE"
+tz = "Europe/Paris"
 
-nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1, pri=1 }
-
-bc = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*.txt", head = 0, pri=1 }
-
+#nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1, pri=1 }
+valve = { name = "Flow Meter Valve COM1", file = "CURRENT/RH-T_p_valve/*Device1_log.txt", head = 1, pri=0 }
+bc = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*", head = 0, pri=1 }
 co2_modbus = { name = "GMP252", file = "CURRENT/CO2/*_co2_log.txt", head = 0, pri=1 }
-
-pm_pplus = { name = "ParticlePlus", file = "CURRENT/OPS/start_*.csv", head = 5, pri=1, tz = "UTC" }
 
 
 [mitrap005]
 
-city = "Rotterdam - Hoek van Holland - CE"
-tz = "Europe/Amsterdam"
+city = "France - Lille - CE"
+tz = "Europe/Paris"
 
 nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head = 1, pri=1, tz = "UTC" }
-
 co2_modbus = { name = "GMP252", file = "CURRENT/CO2/*_co2_log.txt", head = 0, pri=1 }
-
-pm_pplus = { name = "ParticlePlus", file = "CURRENT/OPS/start_*.csv", head = 5, pri=1 }
 
 
 [mitrap006]
@@ -104,20 +98,6 @@ valve = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/CO
 uf = { name = "CPC 3772", file = "sambashare/cpc_3772_Patision/patision_*.txt", head = 0, pri=1 }
 
 pm_grimm = { name = "Grimm OPC", file = "sambashare/GrimmOPC107/*", head = 0, pri=1 }
-
-
-[mitrap009]
-
-city = "Rotterdam - Hoek van Holland - HR"
-tz = "Europe/Amsterdam"
-
-co2_licor = { name = "LiCor", file = "mitrap009/CO2/*.txt", head = 0, pri=1 }
-
-org_acsm = { name = "ACSM", file = "mitrap009/ACSM/ExportData_new/Rotterdam_ACSM-140294_RTdata_*.itx", head = -1, pri=1 }
-
-inorg_xact = { name = "XACT", file = "mitrap009/Xact/Process_Data_CSV/Sample*csv", head = 0, pri=1 }
-
-uf = { name = "CPC 3752", file = "mitrap009/CPC/*Minute.csv", head = 21, pri = 1 }
 
 
 [mitrap010]
@@ -149,4 +129,20 @@ bc = { name = "AE 31", file = "HRbox/Denmark/*.csv", head = 0, pri=1 }
 mpss_aim = { name = "SMPS", file = "HRbox/data3/SMPS_*TXT", head=26, pri=1 }
 
 inorg_xact = { name = "XACT", file = "HRbox/data2/Xact/*/Sample*csv", head=0, pri=1 }
+
+
+[mitrap012]
+
+city = "Lille - HR"
+tz = "Europe/Paris"
+
+valve = { name = "Flow Meter Valve COM1", file = "VALVE/COM1_Log_*.txt", head=0, pri=0, tz="UTC" }
+uf = { name = "CPC 3752", file = "Lille/CPC/*Minute.csv", head = 21, pri = 1 }
+#uf = { name = "CPC 3750", file = "CPC/*.raw", head = 1, pri = 1, tz = "UTC" }
+aeth_raw = { name = "AE36", file = "Lille/AE33/*.raw", head = 1, pri = 1 }
+
+inorg_xact = { name = "XACT", file = "Lille/Xact/Process_Data_CSV/Sample*csv", head=0, pri=1 }
+
+#mpss3 = { name = "SMPS", file = "SMPS/*.inv", head=0, pri=1 }
+#mass = { name = "Cycl_conc", file = "MASS/*.raw", head=1, pri=1 }
 

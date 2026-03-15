@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 34,
+  "id": 11,
   "links": [],
   "panels": [
     {
@@ -47,7 +47,7 @@
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
+            "insertNulls": 300000,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -82,7 +82,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "conc_SPN"
+              "options": "SPN"
             },
             "properties": [
               {
@@ -94,7 +94,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "conc_TPN"
+              "options": "TPN"
             },
             "properties": [
               {
@@ -128,7 +128,12 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "agrw = if uint(v: $__interval) < uint(v: 5m) then 5m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"${Station}\")\n  |> group(columns:[\"_field\"])\n  |> aggregateWindow(every:agrw, fn:mean, createEmpty:true)\n",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "cepbemlo6msjke"
+          },
+          "hide": false,
+          "query": "agrw = if uint(v: $__interval) < uint(v: 2m) then 2m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\" or r._field == \"concentration_cc\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => r.valve_state != 2)\n  |> map(fn: (r) => ({\n      r with\n      id: if r.valve_state == 0 then \"Solid\" else if r.valve_state == 1 then \"Ambient\" else if r.valve_state == 2 then \"Uncertain\" else \"Valve missing\",\n      _value: r.concentration_cc,\n  }))\n  |> group(columns: [\"id\"])\n  |> keep(columns: [\"id\",\"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn: mean, createEmpty: true)\n\n",
           "refId": "A"
         }
       ],
@@ -161,7 +166,7 @@
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
+            "insertNulls": 120000,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -179,6 +184,7 @@
             }
           },
           "mappings": [],
+          "noValue": "Not available for this station",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -192,7 +198,83 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bluebcc"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "greenbcc"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "irbcc"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "redbcc"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "uvbcc"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -217,7 +299,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"aeth\" and r.installation == \"${Station}\" and r._field == \"bc6_ug\")\n    |> aggregateWindow(every: $__interval, fn:mean)\n    |> keep( columns: [ \"id\", \"_field\", \"_value\", \"_time\"] )",
+          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ma200\" and r.installation == \"${Station}\" and r._field == \"irbcc\")\n    |> aggregateWindow(every:$__interval, fn:mean, createEmpty:false)\n    |> map(fn: (r) => ({ r with _value: r._value / 1000.0 }) )\n    |> keep( columns: [ \"id\", \"_field\", \"_value\", \"_time\"] )",
           "refId": "A"
         }
       ],
@@ -306,7 +388,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"co2\" and r.installation == \"${Station}\" and r._field == \"value\")\n    |> aggregateWindow(every: $__interval, fn:mean)\n    |> keep(columns:[\"_time\",\"_field\",\"freq\",\"_value\"])",
+          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"co2\" and r.installation == \"${Station}\" and r._field == \"value\")\n    |> filter(fn: (r) => r._value > 50)\n    |> aggregateWindow(every: $__interval, fn:mean)\n    |> keep(columns:[\"_time\",\"_field\",\"freq\",\"_value\"])",
           "refId": "A"
         }
       ],
@@ -357,6 +439,7 @@
             }
           },
           "mappings": [],
+          "noValue": "Not available for this station",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -395,7 +478,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: $__interval, fn:mean)\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
           "refId": "A"
         }
       ],
@@ -499,48 +582,48 @@
   "tags": [
     "AQM",
     "CE",
-    "Rotterdam",
-    "Port"
+    "Traffic",
+    "France"
   ],
   "templating": {
     "list": [
       {
         "current": {
-          "text": "Rotterdam - Hoek van Holland - CE",
-          "value": "Rotterdam - Hoek van Holland - CE"
+          "text": "France - Lille - CE",
+          "value": "France - Lille - CE"
         },
         "description": "",
         "name": "Station",
         "options": [
           {
             "selected": true,
-            "text": "Rotterdam - Hoek van Holland - CE",
-            "value": "Rotterdam - Hoek van Holland - CE"
+            "text": "France - Lille - CE",
+            "value": "France - Lille - CE"
           }
         ],
-        "query": "Rotterdam - Hoek van Holland - CE",
+        "query": "France - Lille - CE",
         "type": "custom"
       },
       {
         "current": {
-          "text": "pkg002",
-          "value": "pkg002"
+          "text": "mitrap006",
+          "value": "mitrap006"
         },
         "hide": 2,
         "name": "bucket",
-        "query": "pkg002",
+        "query": "mitrap006",
         "skipUrlSync": true,
         "type": "constant"
       }
     ]
   },
   "time": {
-    "from": "2025-07-22T21:00:00.000Z",
-    "to": "2025-12-08T22:00:00.000Z"
+    "from": "now-12h",
+    "to": "now"
   },
   "timepicker": {},
-  "timezone": "browser",
-  "title": "AQM-CE: Rotterdam - Hoek van Holland (2025)",
-  "uid": "c87ebbeb-75b5-49c0-8047-039c05fd0b4d",
-  "version": 8
+  "timezone": "Europe/Paris",
+  "title": "AQM-CE: France - Lille",
+  "uid": "ef1cf8b3-9f01-4596-9d99-87297600c069",
+  "version": 19
 }

@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 12,
+  "id": 31,
   "links": [],
   "panels": [
     {
@@ -47,7 +47,7 @@
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": 300000,
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -82,7 +82,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "SPN"
+              "options": "conc_SPN"
             },
             "properties": [
               {
@@ -94,7 +94,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "TPN"
+              "options": "conc_SPN"
             },
             "properties": [
               {
@@ -128,7 +128,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "import \"strings\"\n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"nanodust\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"mode\" or r._field == \"pn\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => exists r.mode and exists r.pn)\n  |> map(fn: (r) => ({\n        _time: r._time,\n        _value: float(v: r.pn),\n        _field: strings.trim(v: r.mode, cutset: \" \\t\\n\")\n  }))\n  |> group(columns: [\"_field\"])\n\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 5m) then 5m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"${Station}\")\n  |> group(columns:[\"_field\"])\n  |> aggregateWindow(every:agrw, fn:mean, createEmpty:true)\n",
           "refId": "A"
         }
       ],
@@ -161,7 +161,7 @@
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": 120000,
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -192,83 +192,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "bluebcc"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "greenbcc"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "irbcc"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-orange",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "redbcc"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "uvbcc"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "purple",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
@@ -293,7 +217,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ma200\" and r.installation == \"${AQH_Station}\")\n    |> filter(fn: (r) => r._field == \"uvbcc\" or r._field == \"bluebcc\" or r._field == \"redbcc\" or r._field == \"greenbcc\" or r._field == \"irbcc\")\n     |> map(fn: (r) => ({\n      r with _value: r._value / 1000.0\n    }))\n    |> keep( columns: [ \"id\", \"_field\", \"_value\", \"_time\"] )",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 30m) then 30m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"bc\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\" or r._field == \"concentration_cc\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => r.valve_state != 2)\n  |> map(fn: (r) => ({\n      r with\n      id: if r.valve_state == 0 then \"Solid\" else if r.valve_state == 1 then \"Ambient\" else if r.valve_state == 2 then \"Uncertain\" else \"Valve missing\",\n      _value: r.concentration_cc,\n  }))\n  |> group(columns: [\"id\"])\n  |> keep(columns: [\"id\",\"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn: mean, createEmpty: true)\n  |> map(fn: (r) => ({ r with _value: if r._value > 0 then r._value else 1.0/0.0 }) )\n\n",
           "refId": "A"
         }
       ],
@@ -326,10 +250,10 @@
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": 30000,
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
-            "pointSize": 5,
+            "pointSize": 1,
             "scaleDistribution": {
               "type": "linear"
             },
@@ -382,7 +306,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "import \"math\"\n\nwin = 6 + 6\nshiftPrev = 6\npointInterval = 30s\n\nbase =\n  from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"co2\" and r.installation == \"${AQH_Station}\")\n    |> filter(fn: (r) => r._field == \"value\")\n    |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\n    |> keep(columns: [\"_time\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n\nrollMean =\n  base\n    |> movingAverage(n: win)\n    |> timeShift(duration: -180s)\n    |> rename(columns: {_value: \"mean_excl\"})\n\nrollE2 =\n  base\n    |> map(fn: (r) => ({ r with _value: r._value*r._value }))\n    |> movingAverage(n: win)\n    |> timeShift(duration: -180s)\n    |> rename(columns: {_value: \"e2_excl\"})\n\njoined1 = join(\n  tables: {o: base, m: rollMean},\n  on: [\"_time\"],\n  method: \"inner\"\n)\n\njoined2 = join(\n    tables: {jm: joined1, e: rollE2},\n    on: [\"_time\"],\n    method: \"inner\"\n)\n\njoined =\n  joined2\n  |> map(fn: (r) => {\n      std = math.sqrt(x: r.e2_excl - r.mean_excl*r.mean_excl)\n      outlier = if math.abs(x: r._value - r.mean_excl) > 3.0*std then true else false\n      return {_time: r._time, _value: r._value, outlier: outlier}\n    })\n    |> filter(fn: (r) => r.outlier == false)\n    |> drop(columns: [\"outlier\"]) \n\njoined\n",
+          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"co2\" and r.installation == \"${Station}\" and r._field == \"value\")\n    |> aggregateWindow(every: $__interval, fn:mean)\n    |> keep(columns:[\"_time\",\"_field\",\"freq\",\"_value\"])",
           "refId": "A"
         }
       ],
@@ -471,7 +395,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm\" and r.installation == \"${AQH_Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: $__interval, fn:mean)\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
           "refId": "A"
         }
       ],
@@ -523,6 +447,7 @@
           },
           "mappings": [],
           "max": 100,
+          "noValue": "Not available for this station",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -561,7 +486,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ypen\" and r.installation == \"${AQH_Station}\")\n        |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
+          "query": "from(bucket: \"pkg002\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ypen\" and r.installation == \"${Station}\")\n        |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
           "refId": "A"
         }
       ],
@@ -585,7 +510,7 @@
           "value": "Rotterdam - Statenweg - CE"
         },
         "description": "",
-        "name": "AQH_Station",
+        "name": "Station",
         "options": [
           {
             "selected": true,
@@ -598,125 +523,24 @@
       },
       {
         "current": {
-          "text": "MPSS",
-          "value": "MPSS"
+          "text": "pkg002",
+          "value": "pkg002"
         },
-        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
-        "hide": 2,
-        "name": "mpss_name",
-        "options": [],
-        "query": {
-          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"smps_data\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {
-          "text": "",
-          "value": ""
-        },
-        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com1\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
-        "hide": 2,
-        "name": "com1_name",
-        "options": [],
-        "query": {
-          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com1\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {
-          "text": "Flow Meter Valve COM2",
-          "value": "Flow Meter Valve COM2"
-        },
-        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
-        "hide": 2,
-        "name": "com2_name",
-        "options": [],
-        "query": {
-          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"com2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {
-          "text": "AE 31",
-          "value": "AE 31"
-        },
-        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"ae31\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
-        "hide": 2,
-        "name": "ae31_name",
-        "options": [],
-        "query": {
-          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"ae31\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {
-          "text": "",
-          "value": ""
-        },
-        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"grimm\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n",
-        "hide": 2,
-        "name": "grimm_name",
-        "options": [],
-        "query": {
-          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"grimm\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)\n"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {
-          "text": "mitrap006",
-          "value": "mitrap006"
-        },
-        "definition": "buckets()\n",
         "hide": 2,
         "name": "bucket",
-        "options": [],
-        "query": {
-          "query": "buckets()\n"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {
-          "text": "CO2",
-          "value": "CO2"
-        },
-        "definition": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"co2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)",
-        "hide": 2,
-        "name": "co2_name",
-        "options": [],
-        "query": {
-          "query": "from(bucket: \"mitrap006\")\n  |> range(start: -10d)\n  |> filter(fn: (r) => r._measurement == \"co2\" and exists r.instrument)\n  |> keep(columns: [\"instrument\", \"_time\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> keep(columns: [\"instrument\"])\n  |> limit(n:1)"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
+        "query": "pkg002",
+        "skipUrlSync": true,
+        "type": "constant"
       }
     ]
   },
   "time": {
-    "from": "now-6h",
-    "to": "now-1h"
+    "from": "2025-07-22T21:00:00.000Z",
+    "to": "2025-12-08T22:00:00.000Z"
   },
   "timepicker": {},
-  "timezone": "browser",
-  "title": "AQM-CE: Rotterdam - Statenweg",
-  "uid": "5d8543f5-887c-4232-81fc-2e510c048e4b",
-  "version": 7
+  "timezone": "Europe/Amsterdam",
+  "title": "AQM-CE: Rotterdam - Statenweg (2025)",
+  "uid": "9faf48e5-bdee-40a0-aacc-07ec09f1a684",
+  "version": 15
 }
