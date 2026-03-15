@@ -10,6 +10,11 @@ file_to_store=$2
 station_name=$3
 instrument_name=$4
 instrument_tz=$5
+bucket_name=$6
+
+if [[ x${bucket_name} == x ]]; then
+	bucket_name='mitrap006'
+fi
 
 temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
 
@@ -134,7 +139,7 @@ else
 	mv "${file_to_store}_temp2.csv" "${file_to_store}_temp3.csv"
 fi
 
-bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp3.csv" "${file_to_store}.csv" "${station_name}"
+bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp3.csv" "${file_to_store}.csv" "${station_name}" "${bucket_name}"
 
 python3 ${BINDIR}/uf_lp_maker.py "${file_to_store}.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
 
