@@ -975,7 +975,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"org\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"ppcc\")\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n  |> aggregateWindow(every: $__interval, fn:mean, createEmpty:false)",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 30m) then 30m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"org\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"ppcc\")\n  |> keep(columns: [\"_field\", \"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)",
           "refId": "A"
         }
       ],
@@ -1111,7 +1111,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"pkg002\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n    |> aggregateWindow(every: $__interval, fn:mean, createEmpty:false)",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\")\n  |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n//|> sort(columns: [\"_time\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n",
           "refId": "A"
         }
       ],
@@ -1159,12 +1159,12 @@
     ]
   },
   "time": {
-    "from": "2025-06-16T21:00:00.000Z",
-    "to": "2025-12-08T22:00:00.000Z"
+    "from": "2025-10-01T21:17:35.572Z",
+    "to": "2025-10-02T17:17:30.911Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "AQM-HR: Rotterdam - Hoek van Holland (2025)",
   "uid": "fdc76a77-e0b5-4eff-981e-eaea38e14a32",
-  "version": 9
+  "version": 13
 }

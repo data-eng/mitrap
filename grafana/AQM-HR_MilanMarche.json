@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 43,
+  "id": 22,
   "links": [],
   "panels": [
     {
@@ -47,7 +47,7 @@
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
+            "insertNulls": 2400000,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -99,7 +99,8 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "agrw = if uint(v: $__interval) < uint(v: 2m) then 2m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\" or r._field == \"concentration_cc\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => r.valve_state != 2)\n  |> map(fn: (r) => ({\n      r with\n      id: if r.valve_state == 0 then \"Solid\" else if r.valve_state == 1 then \"Ambient\" else if r.valve_state == 2 then \"Uncertain\" else \"Valve missing\",\n      _value: r.concentration_cc,\n  }))\n  |> group(columns: [\"id\"])\n  |> keep(columns: [\"id\",\"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn: mean, createEmpty: true)\n\n",
+          "hide": false,
+          "query": "agrw = if uint(v: $__interval) < uint(v: 30m) then 30m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\" or r._field == \"concentration_cc\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => r.valve_state != 2)\n  |> map(fn: (r) => ({\n      r with\n      id: if r.valve_state == 0 then \"Solid\" else if r.valve_state == 1 then \"Ambient\" else if r.valve_state == 2 then \"Uncertain\" else \"Valve missing\",\n      _value: r.concentration_cc,\n  }))\n  |> group(columns: [\"id\"])\n  |> keep(columns: [\"id\",\"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn: mean, createEmpty: true)\n\n",
           "refId": "A"
         }
       ],
@@ -278,7 +279,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"co2\" and r.installation == \"${Station}\" and r._field == \"value\")\n    |> filter(fn: (r) => r._value > 50)\n    |> aggregateWindow(every: $__interval, fn:mean)\n    |> keep(columns:[\"_time\",\"_field\",\"freq\",\"_value\"])",
+          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"co2\" and r.installation == \"${Station}\" and r._field == \"value\")\n    |> filter(fn: (r) => r._value > 50)\n    |> aggregateWindow(every: $__interval, fn:mean)\n    |> keep(columns:[\"_time\",\"_field\",\"_value\"])",
           "refId": "A"
         }
       ],
@@ -844,7 +845,6 @@
           },
           "mappings": [],
           "max": 100,
-          "noValue": "Not available for this station",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1121,47 +1121,47 @@
   "tags": [
     "AQM",
     "HR",
-    "Florence",
-    "Airport"
+    "Milan",
+    "Traffic"
   ],
   "templating": {
     "list": [
       {
         "current": {
-          "text": "Florence - Peretola - HR",
-          "value": "Florence - Peretola - HR"
+          "text": "Milan - Marche - HR",
+          "value": "Milan - Marche - HR"
         },
         "name": "Station",
         "options": [
           {
             "selected": true,
-            "text": "Florence - Peretola - HR",
-            "value": "Florence - Peretola - HR"
+            "text": "Milan - Marche - HR",
+            "value": "Milan - Marche - HR"
           }
         ],
-        "query": "Florence - Peretola - HR",
+        "query": "Milan - Marche - HR",
         "type": "custom"
       },
       {
         "current": {
-          "text": "pkg003",
-          "value": "pkg003"
+          "text": "mitrap006",
+          "value": "mitrap006"
         },
         "hide": 2,
         "name": "bucket",
-        "query": "pkg003",
+        "query": "mitrap006",
         "skipUrlSync": true,
         "type": "constant"
       }
     ]
   },
   "time": {
-    "from": "2025-10-31T23:00:00.000Z",
-    "to": "2026-02-28T22:59:59.000Z"
+    "from": "now-12h",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "Europe/Rome",
-  "title": "AQM-HR: Peretola, Florence (Nov 2025 - Feb 2026)",
-  "uid": "8e48b37f-1739-4ffc-bba5-8b927db0b98e",
-  "version": 12
+  "title": "AQM-HR: Milan Marche",
+  "uid": "6e951c05-43be-498b-9007-b2a7ec55da4d",
+  "version": 30
 }
