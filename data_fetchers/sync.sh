@@ -187,6 +187,10 @@ for INST in ${INSTALLATIONS}; do
                 if [[ -s "${INFLUXFILE}.lp" ]]; then
                     echo "WRITE ${INFLUXFILE}.lp TO INFLUX"
                     /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file ${INFLUXFILE}.lp
+		    echo "write stats"
+		    STATS_COUNT=$(cat "${INFLUXFILE}.lp" |wc -l)
+		    STATS_LINE=$(cat "${INFLUXFILE}.lp" | head -1 | sed 's|\\ |_|g' | cut -d ' ' -f 1)
+		    echo "${STATS_LINE} ${STATS_COUNT}" >> /mnt/spool/stats_$(date +%Y%m%d)
                 fi
 
 		((i++))
