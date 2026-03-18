@@ -54,6 +54,29 @@ if [[ a == b ]]; then
 fi
 
 
+##
+## Web data for Milan campaign
+##
+
+if [[ a == a ]]; then
+    # AU Web API files look like: "1764619803_HVID.json"
+    # Strip the station abbreviation and iterate through all stations
+    LATEST=$(ls /mnt/web/lombardia/raw/*.json | tail -1 )
+    echo "EXEC web_lombardia.py ${LATEST} /mnt/web/lombardia/csv/${DD}.csv >> ${WEBINFLUX}/lombardia.lp"
+    if [[ -f ${LATEST} ]]; then
+	    python3 ${PROCDIR}/web_lombardia.py ${LATEST} /mnt/web/lombardia/csv/${DD}.csv >> "${WEBINFLUX}/lombardia.lp"
+	    errorcode=$?
+	    # Only keep .query files if they need to be re-done
+	    if [[ $errorcode == 0 ]]; then
+		    rm ${LATEST%json}query
+		    /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file "${WEBINFLUX}/lombardia.lp"
+	    else
+		    rm "${WEBINFLUX}/lombardia.lp"
+	    fi 
+    fi
+fi
+
+
 # fetch MI-TRAP data
 
 #ping -c 1 mitrap-pc.ipta.demokritos.gr >/dev/null

@@ -3,5 +3,6 @@
 35 * * * * /home/debian/live/data_fetchers/ypen.sh
 45 * * * * /home/debian/live/data_fetchers/ypen.sh
 55 * * * * /home/debian/live/data_fetchers/ypen.sh
-10 * * * * /home/debian/live/data_fetchers/dk.sh
+12 * * * * /home/debian/live/data_fetchers/lombardia.sh
 17 * * * * /home/debian/live/data_fetchers/sync.sh
+50 00 * * * /home/debian/live/post_processing/count.sh
