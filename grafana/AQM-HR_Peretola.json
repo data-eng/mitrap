@@ -1108,7 +1108,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\")\n  |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n//|> sort(columns: [\"_time\"])\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\" and r.calibration == \"0\")\n  |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n",
           "refId": "A"
         }
       ],
@@ -1163,5 +1163,5 @@
   "timezone": "Europe/Rome",
   "title": "AQM-HR: Peretola, Florence (Nov 2025 - Feb 2026)",
   "uid": "8e48b37f-1739-4ffc-bba5-8b927db0b98e",
-  "version": 12
+  "version": 15
 }

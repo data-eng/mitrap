@@ -31,16 +31,24 @@ echo "ENV inorg_xact: $BINDIR $instrument_tz"
 installation_name=$(escape_tag_value "$station_name")
 instrument_name=$(escape_tag_value "$instrument_name")
 
-datetime=$(cat "${file_to_process}" | tail -1 | cut -d, -f 2)
-timestamp_unix=$(TZ="${instrument_tz}" date -d "${datetime}" +%s%N)
+cat "${file_to_process}" | tail +3 |\
+(while read line ; do
+	datetime=$(echo $line | cut -d, -f 2)
+	timestamp_unix=$(TZ="${instrument_tz}" date -d "${datetime}" +%s%N)
 
-S16=$(cat "${file_to_process}" | tail -1 | cut -d, -f 32)
-K19=$(cat "${file_to_process}" | tail -1 | cut -d, -f 38)
-Fe26=$(cat "${file_to_process}" | tail -1 | cut -d, -f 52)
-Cu29=$(cat "${file_to_process}" | tail -1 | cut -d, -f 58)
+	# Sample type is 1 if this is a normal measurement and 2 if
+	# this is a calibration measurement
+	sample_type=$(echo $line | cut -d, -f 23)
+	cal=$((sample_type-1))
 
-write_query="inorg,installation=${installation_name},instrument=${instrument_name} S16=${S16},K19=${K19},Fe26=${Fe26},Cu29=${Cu29} ${timestamp_unix}"
-echo $write_query >> "${file_to_store}.lp"
+	S16=$(echo $line | cut -d, -f 32)
+	K19=$(echo $line | cut -d, -f 38)
+	Fe26=$(echo $line | cut -d, -f 52)
+	Cu29=$(echo $line | cut -d, -f 58)
+
+	write_query="inorg,installation=${installation_name},instrument=${instrument_name},calibration=${cal} S16=${S16},K19=${K19},Fe26=${Fe26},Cu29=${Cu29} ${timestamp_unix}"
+	echo $write_query >> "${file_to_store}.lp"
+done)
 
 exit 0
 

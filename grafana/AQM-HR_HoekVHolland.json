@@ -1052,7 +1052,11 @@
               },
               {
                 "id": "custom.axisPlacement",
-                "value": "right"
+                "value": "left"
+              },
+              {
+                "id": "unit",
+                "value": "S16"
               }
             ]
           },
@@ -1068,6 +1072,14 @@
                   "fixedColor": "semi-dark-orange",
                   "mode": "fixed"
                 }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "unit",
+                "value": ""
               }
             ]
           },
@@ -1083,6 +1095,37 @@
                   "fixedColor": "semi-dark-green",
                   "mode": "fixed"
                 }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "unit",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "K19"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-blue",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "unit",
+                "value": ""
               }
             ]
           }
@@ -1111,7 +1154,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\")\n  |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n//|> sort(columns: [\"_time\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\" and r.calibration == \"0\")\n  |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n",
           "refId": "A"
         }
       ],
@@ -1159,12 +1202,12 @@
     ]
   },
   "time": {
-    "from": "2025-10-01T21:17:35.572Z",
-    "to": "2025-10-02T17:17:30.911Z"
+    "from": "2025-06-30T21:00:00.000Z",
+    "to": "2025-12-08T22:00:00.000Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "AQM-HR: Rotterdam - Hoek van Holland (2025)",
   "uid": "fdc76a77-e0b5-4eff-981e-eaea38e14a32",
-  "version": 13
+  "version": 15
 }

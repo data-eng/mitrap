@@ -1068,6 +1068,10 @@
               {
                 "id": "custom.axisPlacement",
                 "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "S16"
               }
             ]
           },
@@ -1083,6 +1087,14 @@
                   "fixedColor": "semi-dark-orange",
                   "mode": "fixed"
                 }
+              },
+              {
+                "id": "unit",
+                "value": "Cu29"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
               }
             ]
           },
@@ -1098,6 +1110,37 @@
                   "fixedColor": "semi-dark-green",
                   "mode": "fixed"
                 }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "unit",
+                "value": ""
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "K19"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-blue",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "unit",
+                "value": ""
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
               }
             ]
           }
@@ -1126,7 +1169,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\")\n  |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n//|> sort(columns: [\"_time\"])\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\" and r.calibration == \"0\")\n  |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n",
           "refId": "A"
         }
       ],
@@ -1174,12 +1217,12 @@
     ]
   },
   "time": {
-    "from": "2026-01-13T16:55:06.425Z",
-    "to": "2026-01-13T19:12:54.942Z"
+    "from": "2026-01-28T11:14:20.566Z",
+    "to": "2026-02-20T02:20:56.932Z"
   },
   "timepicker": {},
   "timezone": "Europe/Copenhagen",
   "title": "AQM-HR: Copenhagen - Jagtvej (Oct 2025 - Feb 2026)",
   "uid": "b4efa824-b740-4c4e-981b-5cedbbce5097",
-  "version": 15
+  "version": 21
 }

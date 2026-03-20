@@ -103,7 +103,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"concentration_cc\")\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\n   |> map(fn: (r) => ({\n      r with\n      _field: if r._field == \"concentration_cc\" then \"concentration\"\n              else r._field\n  }))\n  |> keep(columns: [\"_field\", \"_value\", \"_time\"])\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 30m) then 30m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"uf\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\" or r._field == \"concentration_cc\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => r.valve_state != 2)\n  |> map(fn: (r) => ({\n      r with\n      id: if r.valve_state == 0 then \"Solid\" else if r.valve_state == 1 then \"Ambient\" else if r.valve_state == 2 then \"Uncertain\" else \"Valve missing\",\n      _value: r.concentration_cc,\n  }))\n  |> group(columns: [\"id\"])\n  |> keep(columns: [\"id\",\"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn: mean, createEmpty: true)\n\n",
           "refId": "A"
         }
       ],
@@ -1111,7 +1111,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\")\n  |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n//|> sort(columns: [\"_time\"])\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"inorg\" and r.installation == \"${Station}\" and r.calibration == \"0\")\n  |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n",
           "refId": "A"
         }
       ],
@@ -1159,12 +1159,12 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "AQM-HR: France - Lille",
   "uid": "53456ae0-ba91-40c7-b4d1-fd3211d15cb8",
-  "version": 37
+  "version": 39
 }
