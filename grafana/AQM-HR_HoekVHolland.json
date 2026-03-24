@@ -1158,7 +1158,7 @@
           "refId": "A"
         }
       ],
-      "title": "Elemental concentration (μg/m³)",
+      "title": "Elemental concentration (ng/m³)",
       "type": "timeseries"
     }
   ],
@@ -1209,5 +1209,5 @@
   "timezone": "browser",
   "title": "AQM-HR: Rotterdam - Hoek van Holland (2025)",
   "uid": "fdc76a77-e0b5-4eff-981e-eaea38e14a32",
-  "version": 15
+  "version": 16
 }

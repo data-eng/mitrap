@@ -1138,7 +1138,7 @@
           "refId": "A"
         }
       ],
-      "title": "Elemental concentration (μg/m³)",
+      "title": "Elemental concentration (ng/m³)",
       "type": "timeseries"
     }
   ],
@@ -1189,5 +1189,5 @@
   "timezone": "browser",
   "title": "AQM-HR: Athens - Patission (2025)",
   "uid": "fc4fe0b8-096e-4b91-86fe-c9a635285f7d",
-  "version": 22
+  "version": 23
 }

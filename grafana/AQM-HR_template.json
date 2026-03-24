@@ -1163,7 +1163,7 @@
           "refId": "A"
         }
       ],
-      "title": "Elemental concentration (μg/m³)",
+      "title": "Elemental concentration (ng/m³)",
       "type": "timeseries"
     }
   ],

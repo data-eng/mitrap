@@ -1173,7 +1173,7 @@
           "refId": "A"
         }
       ],
-      "title": "Elemental concentration (μg/m³)",
+      "title": "Elemental concentration (ng/m³)",
       "type": "timeseries"
     }
   ],
@@ -1217,12 +1217,12 @@
     ]
   },
   "time": {
-    "from": "2026-01-28T11:14:20.566Z",
-    "to": "2026-02-20T02:20:56.932Z"
+    "from": "2025-11-30T23:00:00.000Z",
+    "to": "2026-02-20T22:59:59.000Z"
   },
   "timepicker": {},
   "timezone": "Europe/Copenhagen",
   "title": "AQM-HR: Copenhagen - Jagtvej (Oct 2025 - Feb 2026)",
   "uid": "b4efa824-b740-4c4e-981b-5cedbbce5097",
-  "version": 21
+  "version": 22
 }

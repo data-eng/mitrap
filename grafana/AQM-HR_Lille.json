@@ -1115,7 +1115,7 @@
           "refId": "A"
         }
       ],
-      "title": "Elemental concentration (μg/m³)",
+      "title": "Elemental concentration (ng/m³)",
       "type": "timeseries"
     }
   ],
@@ -1159,12 +1159,12 @@
     ]
   },
   "time": {
-    "from": "now-30d",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "AQM-HR: France - Lille",
   "uid": "53456ae0-ba91-40c7-b4d1-fd3211d15cb8",
-  "version": 39
+  "version": 41
 }

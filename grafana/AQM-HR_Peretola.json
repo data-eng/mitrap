@@ -1112,7 +1112,7 @@
           "refId": "A"
         }
       ],
-      "title": "Elemental concentration (μg/m³)",
+      "title": "Elemental concentration (ng/m³)",
       "type": "timeseries"
     }
   ],
@@ -1163,5 +1163,5 @@
   "timezone": "Europe/Rome",
   "title": "AQM-HR: Peretola, Florence (Nov 2025 - Feb 2026)",
   "uid": "8e48b37f-1739-4ffc-bba5-8b927db0b98e",
-  "version": 15
+  "version": 16
 }

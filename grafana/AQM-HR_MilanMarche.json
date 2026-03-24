@@ -1167,7 +1167,7 @@
           "refId": "A"
         }
       ],
-      "title": "Elemental concentration (μg/m³)",
+      "title": "Elemental concentration (ng/m³)",
       "type": "timeseries"
     }
   ],
@@ -1218,5 +1218,5 @@
   "timezone": "Europe/Rome",
   "title": "AQM-HR: Milan Marche",
   "uid": "6e951c05-43be-498b-9007-b2a7ec55da4d",
-  "version": 36
+  "version": 37
 }

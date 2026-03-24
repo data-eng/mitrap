@@ -1131,7 +1131,7 @@
           "refId": "A"
         }
       ],
-      "title": "Elemental concentration (μg/m³)",
+      "title": "Elemental concentration (ng/m³)",
       "type": "timeseries"
     }
   ],
@@ -1175,12 +1175,12 @@
     ]
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "Europe/Athens",
   "title": "AQM-HR: Athens - Patission",
   "uid": "c02285f1-8bee-4803-9a0b-616da99b333b",
-  "version": 108
+  "version": 109
 }
