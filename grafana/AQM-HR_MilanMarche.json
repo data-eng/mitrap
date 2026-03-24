@@ -844,21 +844,33 @@
             }
           },
           "mappings": [],
-          "max": 100,
+          "max": 150,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "co"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "max"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 9,
@@ -1199,12 +1211,12 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "Europe/Rome",
   "title": "AQM-HR: Milan Marche",
   "uid": "6e951c05-43be-498b-9007-b2a7ec55da4d",
-  "version": 34
+  "version": 36
 }

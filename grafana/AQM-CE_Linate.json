@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": @ID_INT@,
+  "id": 18,
   "links": [],
   "panels": [
     {
@@ -575,26 +575,26 @@
   "tags": [
     "AQM",
     "CE",
-    "@CAMPAIGN_STR@",
-    "@CATEGORY_STR@"
+    "Milan",
+    "Airport"
   ],
   "templating": {
     "list": [
       {
         "current": {
-          "text": "@STATION_STR@",
-          "value": "@STATION_STR@"
+          "text": "Milan - Linate - CE",
+          "value": "Milan - Linate - CE"
         },
         "description": "",
         "name": "Station",
         "options": [
           {
             "selected": true,
-            "text": "@STATION_STR@",
-            "value": "@STATION_STR@"
+            "text": "Milan - Linate - CE",
+            "value": "Milan - Linate - CE"
           }
         ],
-        "query": "@STATION_STR@",
+        "query": " Milan - Linate - CE",
         "type": "custom"
       },
       {
@@ -615,8 +615,8 @@
     "to": "now"
   },
   "timepicker": {},
-  "timezone": "@TZ@",
-  "title": "@TITLE_STR@"
+  "timezone": "Europe/Rome",
+  "title": "AQM-CE: Milan - Linate",
   "uid": "dbbfdb69-193a-4ad4-a82c-bf28056906ea",
   "version": 16
 }
