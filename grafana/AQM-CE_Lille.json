@@ -478,8 +478,8 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: 30s, fn: mean, createEmpty: false)\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
-          "refId": "A"
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: $__interval, fn:mean)\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
+          "refId": "NoValve"
         }
       ],
       "title": "PM2.5 mass concentration (µg/m³)",
@@ -589,19 +589,19 @@
     "list": [
       {
         "current": {
-          "text": "France - Lille - CE",
-          "value": "France - Lille - CE"
+          "text": "Lille - CE",
+          "value": "Lille - CE"
         },
         "description": "",
         "name": "Station",
         "options": [
           {
             "selected": true,
-            "text": "France - Lille - CE",
-            "value": "France - Lille - CE"
+            "text": "Lille - CE",
+            "value": "Lille - CE"
           }
         ],
-        "query": "France - Lille - CE",
+        "query": "Lille - CE",
         "type": "custom"
       },
       {
@@ -625,5 +625,5 @@
   "timezone": "Europe/Paris",
   "title": "AQM-CE: France - Lille",
   "uid": "ef1cf8b3-9f01-4596-9d99-87297600c069",
-  "version": 19
+  "version": 22
 }
