@@ -1,35 +1,57 @@
+import sys
+import pandas 
+import numpy
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-created on tue may 28 15:56:28 2024
+infile = sys.argv[1]
+outfile = sys.argv[2]
 
-@author: stergios
-"""
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-filename = '/home/stergios/Dropbox/yah/MITRAP/MPSS_DEM_DIAM.csv'
+df = pandas.read_csv( infile )
 
-a = pd.read_table(filename, delimiter=',', header=None)
-a_diam = a.values[0,:].astype(float)
-DeltalnD = np.median(np.log10(a_diam[1:]/a_diam[:-1]))
-filename2 = '/home/stergios/Dropbox/yah/MITRAP/Florence_MPSS_DIAM.csv'
+# Target diameters
 
-b = pd.read_table(filename2, delimiter=',', header=None)
-b_diam = b.values[0,:].astype(float)
-b_inv =  b.values[1,:].astype(float)
+# mitrap006 diams
+target_diam = numpy.array( [9.824,11.848,13.428,15.223,17.263,19.584,22.226,25.237,28.672,32.595,37.084,42.228,48.137,54.94,62.795,71.895,82.478,94.843,109.365,126.521,146.929,171.387,200.941,236.958,281.232,307.184] )
 
-DeltalnDb = np.median(np.log10(b_diam[1:]/b_diam[:-1]))
+DeltalnD = numpy.median(numpy.log10(target_diam[1:]/target_diam[:-1]))
 
-#y = np.zeros((np.size(df_MPSS_raw.values[:,0]),np.size(delta.Dp)))
-y = np.zeros(np.size(a_diam))
+# Find where to read CSV shape
+data_col_pos = df.columns.to_list().index("data_cols")
+meta_col_pos = df.columns.to_list().index("meta_cols")
+assert data_col_pos == 4
+assert meta_col_pos == 5
 
-y = np.interp(a_diam, b_diam, b_inv)
+num_data_cols = df.iloc[0,data_col_pos]
+data_cols = [i for i in range(meta_col_pos+1,meta_col_pos+num_data_cols+1)]
 
-y_sum = np.sum(y * DeltalnD)
-b_sum = np.sum(b_inv*DeltalnDb)
+head = df.columns.to_list()[meta_col_pos+1:meta_col_pos+num_data_cols+1]
+diam = numpy.array( [float(d.replace("_",".").replace("nm","")) for d in head] )
+data = df.values[:,meta_col_pos+1:meta_col_pos+num_data_cols+1].astype(float)
 
-plt.plot(a_diam, y, b_diam, b_inv,'r')
-plt.show()
+DeltalnDb = numpy.median(numpy.log10(diam[1:]/diam[:-1]))
+
+interp_data = []
+interp_err = []
+
+for i in range(data.shape[0]):
+    intp = numpy.interp(target_diam, diam, data[i,:])
+    interp_data.append( intp )
+    rel_err = (numpy.sum(intp*DeltalnD)-numpy.sum(data[i,:]*DeltalnDb)) / numpy.sum(data[i,:]*DeltalnDb)
+    interp_err.append( rel_err )
+     
+df_calc= pandas.DataFrame( interp_data,columns=["interp_nm"+str(d).replace(".","_") for d in target_diam] )
+df_err = pandas.DataFrame( interp_err, columns=["inter_err"] )
+
+preamble = ["datetime","station_name","instrument_name","calc_cols","data_cols","meta_cols"]
+df_old_data = df.drop( preamble, axis=1 )
+df_preamble = df[ preamble ]
+
+newdf = pandas.concat( [df[preamble],df_calc,df_old_data,df_err], axis=1 )
+newdf["calc_cols"] = [len(target_diam)]*newdf.shape[0]
+newdf["meta_cols"] = df["meta_cols"].apply( lambda n: n+1 )
+
+newdf.to_csv( outfile, index=False )
+
+#import matplotlib.pyplot as plt
+#plt.plot(a_diam, y, b_diam, b_inv,'r')
+#plt.show()
 
