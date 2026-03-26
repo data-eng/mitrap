@@ -74,8 +74,8 @@ python3 ${BINDIR}/mpss_aim.py "${file_to_store}_temp3" "${file_to_store}_temp4" 
 bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp4" "${file_to_store}.csv" "${station_name}" "${bucket_name}"
 
 python3 ${BINDIR}/mpss_interpolate.py "${file_to_store}.csv" "${file_to_store}_i20.csv" 24
-python3 ${BINDIR}/mpss_interpolate.py "${file_to_store}.csv" "${file_to_store}_i20.csv" 32
+python3 ${BINDIR}/mpss_interpolate.py "${file_to_store}.csv" "${file_to_store}_i32.csv" 32
 python3 ${BINDIR}/mpss_interpolate.py "${file_to_store}.csv" "${file_to_store}_006.csv" mitrap006
 
-#python3 ${BINDIR}/mpss_lp_maker.py "${file_to_store}.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
+python3 ${BINDIR}/mpss_lp_maker.py "${file_to_store}_i32.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
 
