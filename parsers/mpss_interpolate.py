@@ -24,9 +24,13 @@ data_cols = [i for i in range(meta_col_pos+1,meta_col_pos+num_data_cols+1)]
 
 head = df.columns.to_list()[meta_col_pos+1:meta_col_pos+num_data_cols+1]
 diam = numpy.array( [float(d.replace("_",".").replace("nm","")) for d in head] )
-data = df.values[:,meta_col_pos+1:meta_col_pos+num_data_cols+1].astype(float)
 
 DeltalnDb = numpy.median(numpy.log10(diam[1:]/diam[:-1]))
+
+# clip(0) zeroes out negative values.
+# Small negative values can happen and are generally inoffensive,
+# but the interpolation can exaggerate them.
+data = df.values[:,meta_col_pos+1:meta_col_pos+num_data_cols+1].astype(float).clip(0)
 
 
 ##
