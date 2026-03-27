@@ -1,14 +1,6 @@
 #!/bin/bash
 
-escape_tag_value() {
-  local val="$1"
-  val="${val//\\/\\\\}"   # escape backslashes
-  val="${val//,/\\,}"     # escape commas
-  val="${val// /\\ }"     # escape spaces
-  echo "$val" | tr -cd '[:print:]' # remove funny codepoints
-}
-
-convert_custom_time_to_unix_ns() {
+convert_custom_time_to_iso() {
   local base_date="$1"
   local float_time="$2"
 
@@ -17,12 +9,8 @@ convert_custom_time_to_unix_ns() {
   local minutes=$(awk -v f="$min_fraction" 'BEGIN { printf "%d", f * 60 }')
   local seconds_fraction=$(awk -v f="$min_fraction" 'BEGIN { printf "%.6f", (f * 60) - int(f * 60) }')
   local seconds=$(awk -v f="$seconds_fraction" 'BEGIN { printf "%d", f * 60 }')
-
-  local datetime="${base_date} $(printf "%02d:%02d:%02d" "$hour" "$minutes" "$seconds")"
-
-  epoch=$(date -d "$datetime" +%s)
-
-  echo "${epoch}000000000"
+  local normal_time=$(printf "%02d:%02d:%02d" "$hour" "$minutes" "$seconds")
+  echo "${base_date} ${normal_time}+00:00"
 }
 
 clean_nm() {
@@ -46,41 +34,39 @@ clean_nm() {
 }
 
 
-if [[ x"$5" == x ]]; then
-  echo "Missing arguments: $*"
-  exit 1
-fi
-
 file_to_process=$1
 file_to_store=$2
 station_name=$3
 instrument_name=$4
 instrument_tz=$5
+bucket_name=$6
 
-# The installation name and instrument may include spaces and other invalid
-# (as dictated by InfluxDB) characters, and we cannot put "<tags>", so we have
-# to clean them
-installation_name=$(escape_tag_value "$station_name")
-instrument_name=$(escape_tag_value "$instrument_name")
+if [[ x${bucket_name} == x ]]; then
+	bucket_name='mitrap006'
+fi
+
+temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
+
+echo "ENV mpss_inv: $BINDIR $instrument_tz"
 
 
 filename=$(basename "$file_to_process")
 date_str=$(echo "$filename" | grep -oP '\d{8}')  # Extract YYYYMMDD
 date_fmt="${date_str:0:4}-${date_str:4:2}-${date_str:6:2}"
 
-exec 3< "$file_to_process" 
-
+cat "$file_to_process" | sed 's|\r$||' |\
 while true; do
-  read -r line1 <&3 || break
-  read -r line2 <&3 || break
- 
+  read -r line1 || break
+  read -r line2 || break
+
   # Parse line 1 nanometer (nm) headers
   read -ra fields1 <<< "$line1"
   read -ra fields2 <<< "$line2"
 
   # Both lines should have the same number of columns
   if [[ ${#fields1[@]} -ne ${#fields2[@]} ]]; then
-    continue
+      echo "ERROR: Mismatch between header line and data"
+      continue
   fi
 
   # Extract fixed columns
@@ -91,14 +77,32 @@ while true; do
 
   # Assert common columns match
   if [[ "$time1" != "$time2" || "$temp1" != "$temp2" || "$press1" != "$press2" || "$other1" != "$other2" ]]; then
-    continue
+      echo "ERROR: Mismatch between header line and metadata"
+      continue
   fi
 
-  timestamp_unix=$(convert_custom_time_to_unix_ns "$date_fmt" "$time1")
+  # Assert the diameters are always the same
+  # (storing the header the first time around)
+  diameters_now=""
+  for ((i = 4; i < ${#fields1[@]}; i++)); do
+    diameters_now="${diameters_now},nm_${fields1[$i]}"
+  done
+  if [[ x${diameters} == x ]]; then
+      diameters=${diameters_now}
+      num_diameters=$((${#fields1[@]}-4))
+      echo "datetime,station_name,instrument_name,num_data_cols,num_meta_cols${diameters},temperature,pressure,other,lineage" > "${file_to_store}_temp4"
+  elif [[ x${header} != x${header_now} ]]; then
+      echo ${header}
+      echo ${header_now}
+      continue
+  fi
 
-  fields="temp_C=${temp1},pressure_hPa=${press1},other=${other1}"
+  datetime=$(convert_custom_time_to_iso "$date_fmt" "$time1")
+  
+  meta_fields="${temp1},${press1},${other1}"
 
-  # Loop over nm fields
+  # Loop over data fields
+  fields=""
   for ((i = 4; i < ${#fields1[@]}; i++)); do
 
     nm_raw="${fields1[$i]}"
@@ -108,12 +112,16 @@ while true; do
     val=$(echo "$val" | tr -d '\n' | tr -d '\r')
 
     nm_name=$(clean_nm "$nm_raw")
-    fields="${fields},${nm_name}=${val}"
+    fields="${fields},${val}"
   done
 
-  write_query="smps_data,installation=${installation_name},instrument=${instrument_name} ${fields} ${timestamp_unix}"
-  echo $write_query >> "${file_to_store}.lp"
+  echo "${datetime},${station_name},${instrument_name},${num_diameters},3${fields},${meta_fields},${file_to_process}" >> "${file_to_store}_temp4"
 
-  done
+done
 
-exec 3<&-
+bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp4" "${file_to_store}.csv" "${station_name}" "${bucket_name}"
+
+python3 ${BINDIR}/mpss_interpolate.py "${file_to_store}.csv" "${file_to_store}_i32.csv" 32
+
+python3 ${BINDIR}/mpss_lp_maker.py "${file_to_store}_i32.csv" > "${file_to_store}.lp"
+

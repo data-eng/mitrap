@@ -77,5 +77,5 @@ python3 ${BINDIR}/mpss_interpolate.py "${file_to_store}.csv" "${file_to_store}_i
 python3 ${BINDIR}/mpss_interpolate.py "${file_to_store}.csv" "${file_to_store}_i32.csv" 32
 python3 ${BINDIR}/mpss_interpolate.py "${file_to_store}.csv" "${file_to_store}_006.csv" mitrap006
 
-python3 ${BINDIR}/mpss_lp_maker.py "${file_to_store}_i32.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
+python3 ${BINDIR}/mpss_lp_maker.py "${file_to_store}_i32.csv" > "${file_to_store}.lp"
 
