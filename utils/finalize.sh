@@ -4,14 +4,20 @@ CONFIG=$1
 DATADIR=$2
 PKGDIR=$3
 BUCKET=$4
+KEEPFILENAMES=$5
 
-if [[ x"$3" == x ]]; then
-  echo "Usage: <toml> <indir> <outdir> <bucket>"
+if [[ x"$5" == x ]]; then
+  echo "Usage: <toml> <indir> <outdir> <bucket> <keep filenames T|F>"
+  exit 1
+fi
+
+if [[ "$5" != t && "$5" != f ]]; then
+  echo "Usage: <keep filenames> must be t or f"
   exit 1
 fi
 
 temp=$(realpath "$0") && temp=$(dirname "${temp}")
-BINDIR=~/mitrap.git
+BINDIR=~/live/
 PROCDIR=${BINDIR}/parsers/
 
 
@@ -105,12 +111,18 @@ for STATION in ${STATIONS}; do
 	for F in $(find ${DATADIR} -type f -wholename "${DATADIR}/${STATION}/${toml[$mykey]}")
 	do
 	    F=${F#${DATADIR}}
-	    echo "Doing file $F"
+	    echo "Doing file $F as ${STATION_DIR}/${TYPE}_${i}"
 
             INFLUXFILE="${STATION_DIR}/${TYPE}_${i}"
 	    ORIG_SUFF=$(echo $F|sed 's|.*\.\([^.]*\)$|\1|')
-	    ORIG_FILE="${STATION_DIR}/${TYPE}_${i}_orig.${ORIG_SUFF}"
-
+	    ORIG_BASE=$(basename $F)
+	    if [[ ${KEEPFILENAMES} == t ]]; then
+		    ORIG_FILE="${STATION_DIR}/${ORIG_BASE}"
+		    echo AAAA
+	    else
+		    ORIG_FILE="${STATION_DIR}/${TYPE}_${i}_orig.${ORIG_SUFF}"
+		    echo BBBB
+	    fi
 	    # Remove DOS line terminations, also caring for files with \r only (eg, IGOR files)
 	    cat "${DATADIR}/${F}" | sed 's|\r$||' | sed 's|\r|\n|g' > "${ORIG_FILE}"
 	    echo "EXEC ${PROCDIR}/${TYPE}.sh ${ORIG_FILE} ${INFLUXFILE} ${STATION_NAME} ${INSTRUMENT} ${INSTRUMENT_TZ} ${BUCKET}"
