@@ -34,7 +34,7 @@ df_val = pandas.DataFrame( values, columns=header )
 
 df_meta = df.drop( diameters, axis=1 ).drop( ["datetime","Unnamed: 395"], axis=1 )
 
-df_fixed = pandas.DataFrame( [[station_name,instrument_name,0,df_val.shape[1],df_meta.shape[1]]]*df_val.shape[0], columns=["station_name","instrument_name","calc_cols","data_cols","meta_cols"] )
+df_fixed = pandas.DataFrame( [[station_name,instrument_name,0,df_val.shape[1],df_meta.shape[1]]]*df_val.shape[0], columns=["station_name","instrument_name","num_calc_cols","num_data_cols","num_meta_cols"] )
 
 newdf = pandas.concat( [df["datetime"], df_fixed, df_val, df_meta], axis=1 )
 newdf.to_csv( outfile, index=False )

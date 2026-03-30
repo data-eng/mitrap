@@ -14,8 +14,8 @@ target_setting = sys.argv[3]
 df = pandas.read_csv( infile )
 
 # Find where to read CSV shape
-data_col_pos = df.columns.to_list().index("data_cols")
-meta_col_pos = df.columns.to_list().index("meta_cols")
+data_col_pos = df.columns.to_list().index("num_data_cols")
+meta_col_pos = df.columns.to_list().index("num_meta_cols")
 assert data_col_pos == 4
 assert meta_col_pos == 5
 
@@ -96,13 +96,13 @@ df_err = pandas.DataFrame( interp_err, columns=["inter_err"] )
 ## Output
 ##
 
-preamble = ["datetime","station_name","instrument_name","calc_cols","data_cols","meta_cols"]
+preamble = ["datetime","station_name","instrument_name","num_calc_cols","num_data_cols","num_meta_cols"]
 df_old_data = df.drop( preamble, axis=1 )
 df_preamble = df[ preamble ]
 
 newdf = pandas.concat( [df[preamble],df_calc,df_old_data,df_err], axis=1 )
-newdf["calc_cols"] = [len(target_diam)]*newdf.shape[0]
-newdf["meta_cols"] = df["meta_cols"].apply( lambda n: n+1 )
+newdf["num_calc_cols"] = [len(target_diam)]*newdf.shape[0]
+newdf["num_meta_cols"] = df["num_meta_cols"].apply( lambda n: n+1 )
 
 newdf.to_csv( outfile, index=False )
 
