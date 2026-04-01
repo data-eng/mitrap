@@ -77,6 +77,16 @@ if [[ a == a ]]; then
 fi
 
 
+if [[ a == a ]]; then
+    LATEST=$(ls /mnt/web/airqino/raw/*.txt | tail -1)
+    echo "EXEC web_airqino.py ${LATEST} /mnt/web/airqino/csv/${DD}.csv >> ${WEBINFLUX}/airqino.lp"
+    if [[ -f ${LATEST} ]]; then
+	    python3 ${PROCDIR}/web_airqino.py ${LATEST} /mnt/web/airqino/csv/${DD}.csv >> "${WEBINFLUX}/airqino.lp"
+	    /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file "${WEBINFLUX}/airqino.lp"
+    fi
+fi
+
+
 # fetch MI-TRAP data
 
 #ping -c 1 mitrap-pc.ipta.demokritos.gr >/dev/null
@@ -87,7 +97,6 @@ fi
 for inst in ${INSTALLATIONS}; do
 	rsync -av --delete ${inst}@mitrap-pc.ipta.demokritos.gr:/sensor_data/MITRAP-DATA/${inst} /mnt/incoming/
 done
-
 
 
 # Process files

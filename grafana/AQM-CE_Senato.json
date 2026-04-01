@@ -65,6 +65,7 @@
             }
           },
           "mappings": [],
+          "noValue": "Not available",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -441,7 +442,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: $__interval, fn:mean)\n  |> keep(columns: [\"id\", \"_field\", \"_value\", \"_time\"])\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 60m) then 60m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pm\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"pm25\")\n  |> aggregateWindow(every: agrw, fn:mean)\n  |> keep(columns: [\"_field\", \"_value\", \"_time\"])\n",
           "refId": "NoValve"
         }
       ],
@@ -592,12 +593,12 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "Europe/Rome",
   "title": "AQM-CE: Milan Senato",
   "uid": "7bfedc1d-aed8-4492-a417-8e0bce4be600",
-  "version": 22
+  "version": 24
 }
