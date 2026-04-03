@@ -67,9 +67,17 @@ fi
 
 # Parse decimal date format into datetime
 
-python3 ${BINDIR}/date_formatter.py "${file_to_store}_temp2" "${file_to_store}_temp3" 'End Year' 'End Date' decimal "${instrument_tz}"
 
-python3 ${BINDIR}/mpss_aim.py "${file_to_store}_temp3" "${file_to_store}_temp4" "${station_name}" "${instrument_name}" hoekvanholland
+if [[ ${station_name} == "Copenhagen - Jagtvej - HR" ]]; then
+	python3 ${BINDIR}/date_formatter.py "${file_to_store}_temp2" "${file_to_store}_temp3" 'Date' 'Start Time' '%d/%m/%Y %H:%M:%S' "${instrument_tz}"
+	diameters="jagtvej1"
+else
+	#Hoek van Holland
+	python3 ${BINDIR}/date_formatter.py "${file_to_store}_temp2" "${file_to_store}_temp3" 'End Year' 'End Date' decimal "${instrument_tz}"
+	diameters="hoekvanholland"
+fi
+
+python3 ${BINDIR}/mpss_aim.py "${file_to_store}_temp3" "${file_to_store}_temp4" "${station_name}" "${instrument_name}" ${diameters}
 
 bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp4" "${file_to_store}.csv" "${station_name}" "${bucket_name}"
 
