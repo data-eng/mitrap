@@ -78,12 +78,19 @@ fi
 
 
 if [[ a == a ]]; then
-    LATEST=$(ls /mnt/web/airqino/raw/*.txt | tail -1)
+    LATEST=$(ls /mnt/web/airqino/raw/SMART801-*.txt | tail -1)
     echo "EXEC web_airqino.py ${LATEST} /mnt/web/airqino/csv/${DD}.csv >> ${WEBINFLUX}/airqino.lp"
     if [[ -f ${LATEST} ]]; then
 	    python3 ${PROCDIR}/web_airqino.py ${LATEST} /mnt/web/airqino/csv/${DD}.csv >> "${WEBINFLUX}/airqino.lp"
-	    /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file "${WEBINFLUX}/airqino.lp"
     fi
+
+    LATEST=$(ls /mnt/web/airqino/raw/SMART802-*.txt | tail -1)
+    echo "EXEC web_airqino802.py ${LATEST} /mnt/web/airqino/csv/${DD} >> ${WEBINFLUX}/airqino.lp"
+    if [[ -f ${LATEST} ]]; then
+	    python3 ${PROCDIR}/web_airqino802.py ${LATEST} /mnt/web/airqino/csv/${DD} >> "${WEBINFLUX}/airqino.lp"
+    fi
+
+    /usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file "${WEBINFLUX}/airqino.lp"
 fi
 
 
