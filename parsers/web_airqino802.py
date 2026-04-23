@@ -37,6 +37,7 @@ for meas in ["co","no2"]:
     for idx in newdf.index:
         stn = newdf.loc[idx,"station_name"].replace(" ","\\ ")
         ins = newdf.loc[idx,"instrument_name"].replace(" ","\\ ")
-        val = newdf.loc[idx,meas]
+        # Different unit. Divide by 10.
+        val = newdf.loc[idx,meas] / 10.0
         print( f"noxco,installation={stn},instrument={ins} {meas}={val} {int(1e9*idx.timestamp())}" )
 
