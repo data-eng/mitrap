@@ -105,6 +105,28 @@ elif [[ "${instrument_name}" == "CPC 3772" || "${instrument_name}" == "CPC 3773"
 	MEAS_COL='Conc Mean'
 	INDEX_COL='Sample #'
 
+elif [[ "${instrument_name}" == "CPC 3775" ]]; then
+	# These file have line like this:
+	# Start Date,06/20/26,,,,,
+	# and then a header:
+	# Time,Concentration (#/cm3),Count (#),Analog 1,Analog 2,
+	# (cm3 in iso-8859-1 cubic-meters)
+	# and then many lines with time only:
+	# 11:45:17,7121,35599,0,0,
+	# There are also lots of other lines and empties.
+	# The time might roll over to the early minutes of the following day.
+	echo 'date,time,concentration,count,analog 1,analog2,empty_column' > "${file_to_store}_temp1"
+	cat "${file_to_process}" | awk 'BEGIN { FS=","; OFS=","; } /^Start Date/ { split($2,d,"/"); starttime="20" d[3] " " d[1] " " d[2] " 00 00 00" ; base=mktime(starttime); } /^[0-2][0-9]:[0-5][0-9]:[0-6][0-9],/ { split($1,t,":"); total=base+(t[1]*3600)+(t[2]*60)+t[3]; $1=strftime("%Y-%m-%d,%H:%M:%S", total) ; print }' >> "${file_to_store}_temp1"
+
+	# Set the uf_csv arguments
+	SEP=','
+	DATE_COL='date'
+	TIME_COL='time'
+	DATETIME_FMT='%Y-%m-%d %H:%M:%S'
+	MEAS_COL='concentration'
+	INDEX_COL='no_index'
+	RESAMPLE=1
+
 elif [[ "${instrument_name}" == "CPC A20" ]]; then
 
 	# This file can have nan lines, which have fewer
@@ -119,6 +141,7 @@ elif [[ "${instrument_name}" == "CPC A20" ]]; then
 	DATETIME_FMT='%Y.%m.%d %H:%M:%S'
 	MEAS_COL='Concentration (#/cc)'
 	INDEX_COL='no_index'
+	RESAMPLE=1
 
 else
 	echo "Bad instrument name ${instrument_name}"
@@ -132,14 +155,15 @@ fi
 
 python3 ${BINDIR}/uf_csv.py "${file_to_store}_temp1" "${file_to_store}_temp2.csv" "${SEP}" "${DATE_COL}" "${TIME_COL}" "${DATETIME_FMT}" "${instrument_tz}" "${MEAS_COL}" "${INDEX_COL}"
 
-if [[ "${instrument_name}" == "CPC A20" ]]; then
-	# CPC A20 gives 1-sec data. Resample to 1min
-	python3 ${BINDIR}/resample.py "${file_to_store}_temp2.csv" "${file_to_store}_temp3.csv"  
+if [[ x"${RESAMPLE}" == x1 ]]; then
+	# Some instruments give 1-sec data. Resample to 1min
+	python3 ${BINDIR}/resample.py "${file_to_store}_temp2.csv" "${file_to_store}_temp3.csv"
+	grep -v 'concentration_cc=nan' "${file_to_store}_temp3.csv" > "${file_to_store}_temp4.csv"
 else
-	mv "${file_to_store}_temp2.csv" "${file_to_store}_temp3.csv"
+	mv "${file_to_store}_temp2.csv" "${file_to_store}_temp4.csv"
 fi
 
-bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp3.csv" "${file_to_store}.csv" "${station_name}" "${bucket_name}"
+bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp4.csv" "${file_to_store}.csv" "${station_name}" "${bucket_name}"
 
 python3 ${BINDIR}/uf_lp_maker.py "${file_to_store}.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
 

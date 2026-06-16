@@ -153,3 +153,15 @@ inorg_xact = { name = "XACT", file = "Lille/Xact/Process_Data_CSV/Sample*csv", h
 #mpss3 = { name = "SMPS", file = "SMPS/*.inv", head=0, pri=1 }
 #mass = { name = "Cycl_conc", file = "MASS/*.raw", head=1, pri=1 }
 
+
+[mitrap013]
+
+city = "Zurich - HR"
+tz = "Europe/Zurich"
+category = "Traffic"
+start = "2026-04-09"
+
+valve = { name = "Flow Meter Valve COM1", file = "Public/Valve/valve*.dat", head=0, pri=0 }
+uf = { name = "CPC 3775", file = "Public/CPC3775/Alt*.txt", head=0, pri=1 }
+bc = { name = "AE33", file = "Public/AE33/Measurement_NoRun_S0002_Idx*csv", head=1, pri=1 }
+
