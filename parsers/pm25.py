@@ -3,6 +3,11 @@ import numpy
 import pandas
 
 
+# Diameters are split in three: up to 0.5um count x2, up to 2.5um count x1, larger do not count at all.
+# The times2 index should be the index of the first # diam above 0.5um,
+# so that indexing on this only gets diam below 0.5
+# Similarly for times1, so that times2:times1 gets diams below 2.5 not in 0:time2
+
 # 31 bin edges, diameters 
 grimm_bin_edges = [0.25,0.28,0.3,0.35,0.4,0.45,0.5,0.58,0.65,0.7,0.8,1,1.3,1.6,2,2.5,3,3.5,4,5,6.5,7.5,8.5,10,12.5,15,17.5,20,25,30,32]
 
@@ -19,6 +24,9 @@ pplus_bins = [0.30, 0.35, 0.40, 0.45, 0.50,
               3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.25, 10.0]
 pplus_dCnt = ['dCnt_1', 'dCnt_2', 'dCnt_3', 'dCnt_4', 'dCnt_5', 'dCnt_6', 'dCnt_7', 'dCnt_8', 'dCnt_9', 'dCnt_10', 'dCnt_11', 'dCnt_12', 'dCnt_13', 'dCnt_14', 'dCnt_15', 'dCnt_16', 'dCnt_17', 'dCnt_18', 'dCnt_19', 'dCnt_20', 'dCnt_21', 'dCnt_22', 'dCnt_23', 'dCnt_24', 'dCnt_25', 'dCnt_26', 'dCnt_27', 'dCnt_28', 'dCnt_29', 'dCnt_30']
 
+opc_bins = [0.253,0.298,0.352,0.414,0.488,0.576,
+            0.679,0.800,0.943,1.112,1.310,1.545,1.821,2.146,2.530,
+            2.982,3.515,4.144,4.884,5.757,6.787,8.000,9.430,11.12,13.10,15.45,18.21,21.46,25.30,29.82,35.15]
 
 # The following factors out calculations over constants
 # Calculate the volume for each bin as val * pi * diam^3 / 6
@@ -49,9 +57,15 @@ elif df.loc[0,2] == "ParticlePlus":
     times1 = 16
     # This is commented out in pm_pplus.py
     # If needed, must also re-enable there
-    #native_pm25 = df[33]
+    native_pm25 = df[33]
+elif df.loc[0,2] == "OPC":
+    col_names.extend( opc_bins )
+    constants = numpy.power( numpy.array(opc_bins), 3 ) * numpy.pi / 6 * 1.6E-3
+    l = len(constants)
+    times2 = 6
+    times1 = 15
 else:
-    print( "ERROR" )
+    print( f"ERROR: Unknown instrument {df.loc[0,2]}" )
 
 # These must now be multiplied by the values (particle counts) in the data
 

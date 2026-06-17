@@ -166,5 +166,6 @@ uf = { name = "CPC 3775", file = "Public/CPC3775/Alt*.txt", head=0, pri=1 }
 bc = { name = "AE33", file = "Public/AE33/Measurement_NoRun_S0002_Idx*csv", head=1, pri=1 }
 #mpss_raw = { name = "MPSS", file = "Public/MPSS/*.raw", head=1, pri=1 }
 
+pm_opc = { name = "OPC", file = "Public/OPC/*-C.dat", head=15, pri=1 }
 inorg_xc = { name = "XACT", file = "Public/Xact/??_??_2026*txt", head=-1, pri=1 }
 
