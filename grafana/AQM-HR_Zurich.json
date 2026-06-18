@@ -859,6 +859,7 @@
           },
           "mappings": [],
           "max": 100,
+          "noValue": "Not available for this station",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1136,8 +1137,8 @@
   "tags": [
     "AQM",
     "HR",
-    "Traffic",
-    "Zurich"
+    "Zurich",
+    "Railway"
   ],
   "templating": {
     "list": [
@@ -1178,5 +1179,5 @@
   "timezone": "Europe/Zurich",
   "title": "AQM-HR: Zurich",
   "uid": "3deac4a2-713a-4a06-9abc-a6a43d038222",
-  "version": 28
+  "version": 30
 }
