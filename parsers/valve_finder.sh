@@ -2,6 +2,10 @@
 
 source /home/mitrap/.influx.env
 
+# Only for finalize, to be able to read pkg* buckets
+MITRAP_READ_TOKEN=${MITRAP_READ_ALL}
+
+
 file_to_process=$1
 file_to_store=$2
 station_name=$3
