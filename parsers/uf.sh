@@ -63,8 +63,7 @@ elif [[ "${instrument_name}" == "CPC 3750" ]]; then
 
 elif [[ "${instrument_name}" == "CPC 3752" ]]; then
 	# Remove the preamble.
-	#cat "${file_to_process}" | tail +21 > "${file_to_store}_temp1"
-	cp "${file_to_process}" "${file_to_store}_temp1"
+	cat "${file_to_process}" | tail +21 > "${file_to_store}_temp1"
 
 	HEADER=$(cat "${file_to_store}_temp1" | head -1)
 
