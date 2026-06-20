@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 12,
+  "id": 45,
   "links": [],
   "panels": [
     {
@@ -294,6 +294,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
+          "hide": true,
           "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"ma200\" and r.installation == \"${Station}\" and r._field == \"irbcc\")\n    |> aggregateWindow(every:$__interval, fn:mean, createEmpty:false)\n    |> map(fn: (r) => ({ r with _value: r._value / 1000.0 }) )\n    |> keep( columns: [ \"id\", \"_field\", \"_value\", \"_time\"] )",
           "refId": "Without Valve"
         },
@@ -303,7 +304,7 @@
             "uid": "cepbemlo6msjke"
           },
           "hide": false,
-          "query": "agrw = if uint(v: $__interval) < uint(v: 30m) then 30m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"bc\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\" or r._field == \"concentration_cc\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => r.valve_state != 2)\n  |> map(fn: (r) => ({\n      r with\n      id: if r.valve_state == 0 then \"Solid\" else if r.valve_state == 1 then \"Ambient\" else if r.valve_state == 2 then \"Uncertain\" else \"Valve missing\",\n      _value: r.concentration_cc,\n  }))\n  |> group(columns: [\"id\"])\n  |> keep(columns: [\"id\",\"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn: mean, createEmpty: true)\n  |> map(fn: (r) => ({ r with _value: if r._value > 0 then r._value else 1.0/0.0 }) )\n\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 30m) then 30m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"bc\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"valve_state\" or r._field == \"concentration_cc\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> filter(fn: (r) => r.valve_state != 2)\n  |> map(fn: (r) => ({\n      r with\n      id: if r.valve_state == 0 then \"Solid\" else if r.valve_state == 1 then \"Ambient\" else if r.valve_state == 2 then \"Uncertain\" else \"Valve missing\",\n      _value: r.concentration_cc,\n  }))\n  |> group(columns: [\"id\"])\n  |> keep(columns: [\"id\",\"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn: mean, createEmpty: true)\n  |> map(fn: (r) => ({ r with _value: if r._value > 0 and r._value < 100 then r._value else 1.0/0.0 }) )\n\n",
           "refId": "With Valve"
         }
       ],
@@ -392,7 +393,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"co2\" and r.installation == \"${Station}\" and r._field == \"value\")\n    |> filter(fn: (r) => r._value > 50)\n    |> aggregateWindow(every: $__interval, fn:mean)\n    |> keep(columns:[\"_time\",\"_field\",\"freq\",\"_value\"])",
+          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"co2\" and r.installation == \"${Station}\" and r._field == \"value\")\n    |> filter(fn: (r) => r._value > 50)\n    |> aggregateWindow(every: $__interval, fn:mean)\n    |> keep(columns:[\"_time\",\"_field\",\"_value\"])",
           "refId": "A"
         }
       ],
@@ -584,9 +585,9 @@
   "schemaVersion": 41,
   "tags": [
     "AQM",
+    "Dunkirk",
     "CE",
-    "Port",
-    "France"
+    "Port"
   ],
   "templating": {
     "list": [
@@ -609,24 +610,24 @@
       },
       {
         "current": {
-          "text": "mitrap006",
-          "value": "mitrap006"
+          "text": "pkg002",
+          "value": "pkg002"
         },
         "hide": 2,
         "name": "bucket",
-        "query": "mitrap006",
+        "query": "pkg002",
         "skipUrlSync": true,
         "type": "constant"
       }
     ]
   },
   "time": {
-    "from": "now-6h",
-    "to": "now-1h"
+    "from": "2025-12-07T23:00:00.000Z",
+    "to": "2026-04-18T22:00:00.000Z"
   },
   "timepicker": {},
-  "timezone": "browser",
-  "title": "AQM-CE: France - Dunkirk Port",
-  "uid": "5d8543f5-887c-4232-81fc-2e510c048e4b",
-  "version": 24
+  "timezone": "Europe/Paris",
+  "title": "AQM-CE: France - Dunkirk Port  (Dec 2025 - Jun 2026)",
+  "uid": "7b25f0bd-f41d-4005-8cec-babdefe7bf85",
+  "version": 7
 }
