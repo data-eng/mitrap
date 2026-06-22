@@ -33,8 +33,11 @@ TYPE4='^[0-3][0-9]-[A-Z][a-z][a-z]-[12][0-9][0-9][0-9] [0-2][0-9]:[0-5][0-9]:[0-
 # 14-Jul-2025 11:15:00,AMB
 # 14-Jul-2025 11:30:00,CS
 
+TYPE5='^[12][0-9][0-9][0-9]-[01][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9] nan,PSI,nan,Pa,nan,kPa,nan,torr,nan,inHg,nan,atm,nan,bar,0.0,%3,0.0,C3,0.0,%5,0.0,C5,[01],valve.*$'
+# Like TYPE3, but without the b'
+
 cat "${file_to_process}" |\
-	sed "s@${TYPE1}@1@" | sed "s@${TYPE2}@2@" | sed "s@${TYPE3}@3@" | sed "s@${TYPE4}@4@" |\
+	sed "s@${TYPE1}@1@" | sed "s@${TYPE2}@2@" | sed "s@${TYPE3}@3@" | sed "s@${TYPE4}@4@" | sed "s@${TYPE5}@5@" |\
 	sed 's|^...*$|0|' | sort | uniq -c |\
 	sed 's|^[[:space:]]*\([0-9][0-9]*\)[[:space:]][[:space:]]*\([0-9][0-0]*\)[[:space:]]*$|\1 \2|' |\
 	sort -rn | head -1 | cut -d ' ' -f 2 | read TYPE
@@ -55,6 +58,9 @@ elif [[ x${TYPE} == x4 ]]; then
 	RE=${TYPE4}
 	# Tail +2 to remove the header
 	cat "${file_to_process}" | tail +2 | grep -a "${RE}" > "${file_to_store}_temp1"
+elif [[ x${TYPE} == x5 ]]; then
+	RE=${TYPE5}
+	cat "${file_to_process}" | grep -a "${RE}" | sed 's| nan,PSI|,nan,PSI|' > "${file_to_store}_temp1"
 else
 	echo "valve: Error"
 	exit 1

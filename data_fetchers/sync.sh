@@ -94,7 +94,27 @@ if [[ a == a ]]; then
 fi
 
 
-# fetch MI-TRAP data
+##
+## Web data for Zurich
+##
+
+if [[ a == a ]]; then
+    ZUERDIR=/mnt/web/zueriluft
+    # Rename without whitespaces.
+    for ZUERFILE in ${ZUERDIR}/*; do dest=${ZUERFILE//mitrap013_ /} ;  dest=${dest#${ZUERDIR}/} ; if [[ ! -f /mnt/web/zueriluft_orig/$dest ]] ; then cp -p "$ZUERFILE" /mnt/web/zueriluft_orig/$dest ; fi ; done
+    LATEST=$(ls -tr /mnt/web/zueriluft_orig | tail -2)
+    for ONEFILE in $LATEST; do
+    	echo "EXEC web_zueriluft ${ONEFILE} /mnt/web/zueriluft_out/${ONEFILE}"
+    	bash ${PROCDIR}/web_zueriluft.sh /mnt/web/zueriluft_orig/${ONEFILE} /mnt/web/zueriluft_out/${ONEFILE}
+    	/usr/bin/influx write --bucket mitrap006 --org mitrap --token $MITRAP_WRITE_TOKEN --file "/mnt/web/zueriluft_out/${ONEFILE}.lp"
+    done
+fi
+
+
+##
+## fetch MI-TRAP data
+##
+
 
 #ping -c 1 mitrap-pc.ipta.demokritos.gr >/dev/null
 #if [ $? == 1 ]; then

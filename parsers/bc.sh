@@ -38,6 +38,27 @@ if [[ "${instrument_name}" == "MA 200" ]]; then
 	# The values in the file will be multiplied by the number given here.
 	MEAS_UNIT='1E-3'
 
+elif [[ "${instrument_name}" == "AE33" ]]; then
+
+	# Some lines have as time '.000000E+1'
+	# Good times look like: 
+	#  20260615T183306.0+0200
+	#  Chop off the .0+0200 at the end.
+	cat "${file_to_process}" | grep -v '^.00000' | sed 's/^\(........T......\).0.0200,/\1,/' > "${file_to_store}_temp1" 
+
+	SEP=','
+	DATE_COL='Time'
+	TIME_COL='Time'
+	DATETIME_FMT='%Y%m%dT%H%M%S'
+	MEAS_COL='AE33BC6'
+	MEAS_UNIT='1E-3'
+	RESAMPLE=1
+
+	# TODO: Some files do not have MEAS_COL. Ignore.
+	# For this installation, all Measurement_NoRun_S0002_*
+	# seem to be good and all Measurement_NoRun_S0001_*
+	# seem to be bad.
+
 elif [[ "${instrument_name}" == "AE43" ]]; then
 
 	# Almost a CSV, funny header then CSV. Better chop off the preamble and
@@ -61,11 +82,19 @@ fi
 
 # If there is single datetime column, give date_col==time_col.
 # The datetime_fmt should assume date_col + " " + time_col.
-# The index_col will be dropped. Give "no_index" to not drop any column.
  
+echo python3 ${BINDIR}/bc.py "${file_to_store}_temp1" "${file_to_store}_temp2" "${SEP}" "${DATE_COL}" "${TIME_COL}" "${DATETIME_FMT}" "${instrument_tz}" "${MEAS_COL}" "${MEAS_UNIT}"
 python3 ${BINDIR}/bc.py "${file_to_store}_temp1" "${file_to_store}_temp2" "${SEP}" "${DATE_COL}" "${TIME_COL}" "${DATETIME_FMT}" "${instrument_tz}" "${MEAS_COL}" "${MEAS_UNIT}"
 
-bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp2" "${file_to_store}.csv" "${station_name}" "${bucket_name}"
+if [[ x"${RESAMPLE}" == x1 ]]; then
+	# Some instruments give 1-sec data. Resample to 1min
+	python3 ${BINDIR}/resample.py "${file_to_store}_temp2" "${file_to_store}_temp3"
+	grep -v 'concentration_cc=nan' "${file_to_store}_temp3" > "${file_to_store}_temp4"
+else
+	mv "${file_to_store}_temp2" "${file_to_store}_temp4"
+fi
 
-python3 ${BINDIR}/bc_lp_maker.py "${file_to_store}.csv" "${station_name}" "${instrument_name}" > "${file_to_store}.lp"
+bash ${BINDIR}/valve_finder.sh "${file_to_store}_temp4" "${file_to_store}.csv" "${station_name}" "${bucket_name}"
+
+python3 ${BINDIR}/bc_lp_maker.py "${file_to_store}.csv" "${station_name}" "${instrument_name}" | grep -v 'concentration_cc=nan' > "${file_to_store}.lp"
 

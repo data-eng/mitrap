@@ -26,7 +26,7 @@ elif file_type == "2":
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df = df.drop( ["datetime1"], axis=1 )
 
-elif file_type == "3":
+elif (file_type == "3") or (file_type == "5"):
     df = pandas.read_csv( infile, names=["datetime1","p_psi","PSI","p_pa","Pa","p_kpa","kPa","p_torr","torr","p_inhg","inHg","p_atm","atm","p_bar","bar","conc_3_percent","%3","conc_c3","C3","conc_5_percent","%5","conc_c5","C5","valve_state","valve"], low_memory=False )
     boring_columns = ["PSI","Pa","kPa","torr","inHg","atm","bar","%3","C3","%5","C5","valve"]
     if instrument_tz == "UTC":

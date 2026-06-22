@@ -1,34 +1,34 @@
 
 [mitrap000]
 
-city = "Copenhagen - Taarnby - CE"
-tz = "Europe/Copenhagen"
+city = "Zurich - Schimmelstrasse - CE"
+tz = "Europe/Zurich"
+category = "Traffic"
+start = 2026-05-21
+end = 2026-07-21
 
-co2_com1 = { name = "GMP252", file = "CO2/Data/COM1_Log_*.txt", head = 0 , pri=1, tz = "UTC" }
+co2_com1 = { name = "GMP252", file = "CO2/Data/COM1_Log_*.txt", head = 0 , pri=1 }
+#nanodust = { name = "Nanodust", file = "Nanodust/AirPN10_Software/Test/*1HzData.csv", head = 1, pri=1 }
 
-pm_ops = { name = "OPS", file = "OPS/Piraeus*.csv", head = 15, pri=1 } 
-
-nanodust = { name = "Nanodust", file = "Nanodust/AirPN10_Software/Test/*1HzData.csv", head = 1, pri=1 }
-
-bc = { name = "MA 200", file = "MA200/MA200_Log_*.txt", head = 0, pri=1, tz = "UTC" }
-
-valve = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0, pri=1 }
+valve = { name = "Flow Meter Valve COM1", file = "MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head=0, pri=0 }
+pm_ops = { name = "OPS", file = "OPS/AIM_wiedikon_*.csv", head = 15, pri=1 } 
+#bc = { name = "MA 200", file = "MA200/MA200_Log_*.txt", head = 0, pri=1 }
 
 
 [mitrap001]
 
-city = "Aarhus - Port - CE"
-tz = "Europe/Copenhagen"
+city = "Zurich - Rosengartenstrasse - CE"
+geolocation = "47.385213 N, 8.526188 E"
+tz = "Europe/Zurich"
+start = 2026-05-21
+end = 2026-07-21
 
-co2_com1 = { name = "GMP252", file = "mitrap1/CO2/Data/COM1_Log_*.txt", head = 0, pri=1, tz = "UTC" }
+co2_com1 = { name = "GMP252", file = "mitrap1/CO2/Data/COM1_Log_*.txt", head = 0, pri=1 }
+nanodust = { name = "Nanodust", file = "mitrap1/Nanodust/AirPN10_Software/data/*1HzData.csv", head=1, pri=1 }
 
-pm_pplus = { name = "OPS", file = "mitrap1/PM_Monitor/ParticlePlus94_PM_MITRAP_*.csv", head = 5, pri=1, tz = "UTC" }
-
-nanodust = { name = "Nanodust", file = "mitrap1/Nanodust/AirPN10_Software/data/*1HzData.csv", head = 1, pri=1 }
-
-bc = { name = "MA 200", file = "mitrap1/MA200/MA200_Log_*.txt", head = 0, pri=1, tz = "UTC" }
-
-valve = { name = "Flow Meter Valve COM1", file = "mitrap1/MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head = 0, pri=1 }
+valve = { name = "Flow Meter Valve COM1", file = "mitrap1/MStack_Flow_Meter_Valve_RHT/COM1_Log_*", head=0, pri=0 }
+pm_pplus = { name = "OPS", file = "mitrap1/PM_Monitor/Zurich_Rosengartenstrasse_*.csv", head=5, pri=1 }
+#bc = { name = "MA 200", file = "mitrap1/MA200/MA200_Log_*.txt", head = 0, pri=1 }
 
 
 [mitrap002]
@@ -152,4 +152,22 @@ inorg_xact = { name = "XACT", file = "Lille/Xact/Process_Data_CSV/Sample*csv", h
 
 #mpss3 = { name = "SMPS", file = "SMPS/*.inv", head=0, pri=1 }
 #mass = { name = "Cycl_conc", file = "MASS/*.raw", head=1, pri=1 }
+
+
+[mitrap013]
+
+city = "Zurich - HR"
+geolocation = "47.3907239 N 8.4916059 E"
+tz = "Europe/Zurich"
+category = "Railway"
+start = "2026-03-23"
+end = "2026-07-21"
+
+valve = { name = "Flow Meter Valve COM1", file = "Public/Valve/valve*.dat", head=0, pri=0 }
+uf = { name = "CPC 3775", file = "Public/CPC3775/Alt*.txt", head=0, pri=1 }
+bc = { name = "AE33", file = "Public/AE33/Measurement_NoRun_S0002_Idx*csv", head=1, pri=1 }
+#mpss_raw = { name = "MPSS", file = "Public/MPSS/*.raw", head=1, pri=1 }
+
+pm_opc = { name = "OPC", file = "Public/OPC/*-C.dat", head=15, pri=1 }
+inorg_xc = { name = "XACT", file = "Public/Xact/??_??_2026*txt", head=-1, pri=1 }
 
