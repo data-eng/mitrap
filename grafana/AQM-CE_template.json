@@ -413,15 +413,28 @@
             "steps": [
               {
                 "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "co"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "max",
+                "value": 1
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -547,7 +560,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"noxco\" and r.installation == \"${Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 1h) then 1h else $__interval \n//agrw = $__interval \n\nfrom(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"noxco\" and r.installation == \"${Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n//    |> sort(columns: [\"_time\"])\n    |> aggregateWindow(every:agrw, fn:mean, createEmpty:true)",
           "refId": "noxco"
         }
       ],
