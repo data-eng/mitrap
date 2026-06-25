@@ -61,7 +61,7 @@ elif [[ "${instrument_name}" == "CPC 3750" ]]; then
 	MEAS_COL='concentration[#/cm3]'
 	INDEX_COL='no_index'
 
-elif [[ "${instrument_name}" == "CPC 3752" ]]; then
+elif [[ "${instrument_name}" == "CPC 3752" || "${instrument_name}" == "CPC 375010" ]]; then
 	# Remove the preamble.
 	cat "${file_to_process}" | tail +21 > "${file_to_store}_temp1"
 
@@ -78,6 +78,9 @@ elif [[ "${instrument_name}" == "CPC 3752" ]]; then
 	else
 		echo "Bad file ${file_to_process}"
 		exit 1
+	fi
+	if [[ "${instrument_name}" == "CPC 375010" ]]; then
+		DATETIME_FMT='%Y-%m-%d %H:%M'
 	fi
 
 elif [[ "${instrument_name}" == "CPC 3772" || "${instrument_name}" == "CPC 3773" ]]; then
