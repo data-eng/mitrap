@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 22,
+  "id": 54,
   "links": [],
   "panels": [
     {
@@ -733,7 +733,7 @@
       "targets": [
         {
           "hide": false,
-          "query": "import \"strings\"\nimport \"array\"\n\naggrw = if uint(v: $__interval) < uint(v: 2h) then 2h else $__interval \nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 7200000000000 then { // 2h in nanoseconds\n    timeRangeStart: time(v: int(v: v.timeRangeStop) - 7200000000000),\n    timeRangeStop:  v.timeRangeStop\n  }\n  else {\n    timeRangeStart: v.timeRangeStart,\n    timeRangeStop:  v.timeRangeStop\n  }\n\nall_data_0 = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"${interp}\" and r.installation == \"${Station}\" and r.valve == \"0\")\n  |> keep(columns: [\"_value\",\"_field\",\"_time\"])\n  |> aggregateWindow(every: aggrw, fn: sum, createEmpty: false)\n  \nall_data_1 = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"${interp}\" and r.installation == \"${Station}\" and r.valve == \"1\")\n  |> keep(columns: [\"_value\",\"_field\",\"_time\"])\n  |> aggregateWindow(every: aggrw, fn: sum, createEmpty: false)\n  \nall_data_1\n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(\n            v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"),\n            t: \"_\", u: \".\"\n          ))\n  }))\n  |> map(fn: (r) => ({ r with hourly_valve_off: r._value }))\n  |> keep(columns: [\"nm\", \"hourly_valve_off\"])\n  |> sort(columns: [\"nm\"])\n",
+          "query": "import \"strings\"\nimport \"array\"\n\naggrw = if uint(v: $__interval) < uint(v: 12h) then 12h else $__interval \nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 2*60*60*1000000000 then { \n    timeRangeStart: time(v: int(v: v.timeRangeStop) - 2*60*60*1000000000),\n    timeRangeStop:  v.timeRangeStop\n  }\n  else {\n    timeRangeStart: v.timeRangeStart,\n    timeRangeStop:  v.timeRangeStop\n  }\n\nall_data_0 = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"${interp}\" and r.installation == \"${Station}\" and r.valve == \"0\")\n  |> keep(columns: [\"_value\",\"_field\",\"_time\"])\n  |> aggregateWindow(every: aggrw, fn: sum, createEmpty: false)\n  \nall_data_1 = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"${interp}\" and r.installation == \"${Station}\" and r.valve == \"1\")\n  |> keep(columns: [\"_value\",\"_field\",\"_time\"])\n  |> aggregateWindow(every: aggrw, fn: sum, createEmpty: false)\n  \nall_data_1\n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(\n            v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"),\n            t: \"_\", u: \".\"\n          ))\n  }))\n  |> map(fn: (r) => ({ r with hourly_valve_off: r._value }))\n  |> keep(columns: [\"nm\", \"hourly_valve_off\"])\n  |> sort(columns: [\"nm\"])\n",
           "refId": "Valve-Off"
         },
         {
@@ -742,7 +742,7 @@
             "uid": "cepbemlo6msjke"
           },
           "hide": false,
-          "query": "import \"strings\"\nimport \"array\"\n\naggrw = if uint(v: $__interval) < uint(v: 2h) then 2h else $__interval \nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 7200000000000 then { // 2h in nanoseconds\n    timeRangeStart: time(v: int(v: v.timeRangeStop) - 7200000000000),\n    timeRangeStop:  v.timeRangeStop\n  }\n  else {\n    timeRangeStart: v.timeRangeStart,\n    timeRangeStop:  v.timeRangeStop\n  }\n\nall_data_0 = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"${interp}\" and r.installation == \"${Station}\" and r.valve == \"0\")\n  |> keep(columns: [\"_value\",\"_field\",\"_time\"])\n  |> aggregateWindow(every: aggrw, fn: sum, createEmpty: false)\n  \nall_data_1 = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"${interp}\" and r.installation == \"${Station}\" and r.valve == \"1\")\n  |> keep(columns: [\"_value\",\"_field\",\"_time\"])\n  |> aggregateWindow(every: aggrw, fn: sum, createEmpty: false)\n\nall_data_0\n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(\n            v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"),\n            t: \"_\", u: \".\"\n          ))\n  }))\n  |> map(fn: (r) => ({ r with hourly_valve_on: r._value }))\n  |> keep(columns: [\"nm\", \"hourly_valve_on\"])\n  |> sort(columns: [\"nm\"])\n",
+          "query": "import \"strings\"\nimport \"array\"\n\naggrw = if uint(v: $__interval) < uint(v: 12h) then 12h else $__interval \nrangeMs = int(v: v.timeRangeStop) - int(v: v.timeRangeStart)\n\nopts =\n  if rangeMs < 2*60*60*1000000000 then { \n    timeRangeStart: time(v: int(v: v.timeRangeStop) - 2*60*60*1000000000),\n    timeRangeStop:  v.timeRangeStop\n  }\n  else {\n    timeRangeStart: v.timeRangeStart,\n    timeRangeStop:  v.timeRangeStop\n  }\n\nall_data_0 = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"${interp}\" and r.installation == \"${Station}\" and r.valve == \"0\")\n  |> keep(columns: [\"_value\",\"_field\",\"_time\"])\n  |> aggregateWindow(every: aggrw, fn: sum, createEmpty: false)\n  \nall_data_1 = from(bucket: \"${bucket}\")\n  |> range(start: opts.timeRangeStart, stop: opts.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"${interp}\" and r.installation == \"${Station}\" and r.valve == \"1\")\n  |> keep(columns: [\"_value\",\"_field\",\"_time\"])\n  |> aggregateWindow(every: aggrw, fn: sum, createEmpty: false)\n\nall_data_0\n  |> map(fn: (r) => ({\n      r with\n      nm: float(v: strings.replaceAll(\n            v: strings.replaceAll(v: r._field, t: \"nm\", u: \"\"),\n            t: \"_\", u: \".\"\n          ))\n  }))\n  |> map(fn: (r) => ({ r with hourly_valve_on: r._value }))\n  |> keep(columns: [\"nm\", \"hourly_valve_on\"])\n  |> sort(columns: [\"nm\"])\n",
           "refId": "Valve-On"
         }
       ],
@@ -847,7 +847,6 @@
             }
           },
           "mappings": [],
-          "max": 240,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -869,7 +868,8 @@
                 "value": "right"
               },
               {
-                "id": "max"
+                "id": "max",
+                "value": 1
               }
             ]
           }
@@ -898,7 +898,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"mitrap006\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"noxco\" and r.installation == \"${Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 1h) then 1h else $__interval \n//agrw = $__interval \n\nfrom(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"noxco\" and r.installation == \"${Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n//    |> sort(columns: [\"_time\"])\n    |> aggregateWindow(every:agrw, fn:mean, createEmpty:true)",
           "refId": "A"
         }
       ],
@@ -987,7 +987,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "agrw = if uint(v: $__interval) < uint(v: 30m) then 30m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"org\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"ppcc\")\n  |> keep(columns: [\"_field\", \"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 30m) then 30m else $__interval \n\nfrom(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"org\" and r.installation == \"${Station}\")\n  |> filter(fn: (r) => r._field == \"ppcc\")\n  |> keep(columns: [\"_field\", \"_value\", \"_time\"])\n  |> aggregateWindow(every: agrw, fn:mean, createEmpty: true)\n  |> map(fn: (r) => ({ r with _value: if r._value > 0 then r._value else 1.0/0.0 }) )\n",
           "refId": "A"
         }
       ],
@@ -1202,47 +1202,52 @@
       },
       {
         "current": {
-          "text": "mitrap006",
-          "value": "mitrap006"
+          "text": "pkg003",
+          "value": "pkg003"
         },
         "hide": 2,
         "name": "bucket",
-        "query": "mitrap006",
+        "query": "pkg003",
         "skipUrlSync": true,
         "type": "constant"
       },
       {
         "allowCustomValue": false,
         "current": {
-          "text": "mpss_006",
-          "value": "mpss_006"
+          "text": "mpss",
+          "value": "mpss"
         },
         "label": "Interpolation",
         "name": "interp",
         "options": [
           {
-            "selected": true,
-            "text": "Athens (26 diamerters)",
+            "selected": false,
+            "text": "Athens (26 diameters)",
             "value": "mpss_006"
           },
           {
             "selected": false,
             "text": "Peretola (32 diameters)",
             "value": "mpss_p32"
+          },
+          {
+            "selected": true,
+            "text": "Native (32 diameters)",
+            "value": "mpss"
           }
         ],
-        "query": "Athens (26 diamerters) : mpss_006 , Peretola (32 diameters)  : mpss_p32 ",
+        "query": "Athens (26 diameters) : mpss_006 , Peretola (32 diameters) : mpss_p32 , Native (32 diameters) : mpss",
         "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-2d",
-    "to": "now"
+    "from": "2026-03-03T23:00:00.000Z",
+    "to": "2026-06-22T22:00:00.000Z"
   },
   "timepicker": {},
   "timezone": "Europe/Rome",
-  "title": "AQM-HR: Milan Marche",
-  "uid": "6e951c05-43be-498b-9007-b2a7ec55da4d",
-  "version": 49
+  "title": "AQM-HR: Milan Marche  (Mar - Jun 2026)",
+  "uid": "d3be9ff2-aba0-4638-8567-d6e0dc32e902",
+  "version": 11
 }

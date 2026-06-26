@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 17,
+  "id": 53,
   "links": [],
   "panels": [
     {
@@ -514,7 +514,8 @@
                 "value": "right"
               },
               {
-                "id": "max"
+                "id": "max",
+                "value": 1
               }
             ]
           }
@@ -543,7 +544,7 @@
       "pluginVersion": "12.0.1",
       "targets": [
         {
-          "query": "from(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"noxco\" and r.installation == \"${Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n    |> sort(columns: [\"_time\"])\n",
+          "query": "agrw = if uint(v: $__interval) < uint(v: 1h) then 1h else $__interval \n//agrw = $__interval \n\nfrom(bucket: \"${bucket}\")\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"noxco\" and r.installation == \"${Station}\")\n    |> keep(columns: [\"_time\",\"_field\",\"_value\"])\n//    |> sort(columns: [\"_time\"])\n    |> aggregateWindow(every:agrw, fn:mean, createEmpty:true)",
           "refId": "noxco"
         }
       ],
@@ -580,24 +581,24 @@
       },
       {
         "current": {
-          "text": "mitrap006",
-          "value": "mitrap006"
+          "text": "pkg003",
+          "value": "pkg003"
         },
         "hide": 2,
         "name": "bucket",
-        "query": "mitrap006",
+        "query": "pkg003",
         "skipUrlSync": true,
         "type": "constant"
       }
     ]
   },
   "time": {
-    "from": "now-2d",
-    "to": "now"
+    "from": "2026-03-03T23:00:00.000Z",
+    "to": "2026-06-22T22:00:00.000Z"
   },
   "timepicker": {},
   "timezone": "Europe/Rome",
-  "title": "AQM-CE: Milan Senato",
-  "uid": "7bfedc1d-aed8-4492-a417-8e0bce4be600",
-  "version": 25
+  "title": "AQM-CE: Milan - Senato  (Mar - Jun 2026)",
+  "uid": "27d71e57-7021-416d-9419-f6c0b482748d",
+  "version": 8
 }
