@@ -36,8 +36,10 @@ TYPE4='^[0-3][0-9]-[A-Z][a-z][a-z]-[12][0-9][0-9][0-9] [0-2][0-9]:[0-5][0-9]:[0-
 TYPE5='^[12][0-9][0-9][0-9]-[01][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9] nan,PSI,nan,Pa,nan,kPa,nan,torr,nan,inHg,nan,atm,nan,bar,0.0,%3,0.0,C3,0.0,%5,0.0,C5,[01],valve.*$'
 # Like TYPE3, but without the b'
 
+TYPE6='^[0-3][0-9]\.[01][0-9]\.2[0-9]	[0-2][0-9]:[0-9][0-9]:00	[A-Z][A-Z]*	[0-2][0-9]:[0-9][0-9]:[0-9][0-9].$'
+
 cat "${file_to_process}" |\
-	sed "s@${TYPE1}@1@" | sed "s@${TYPE2}@2@" | sed "s@${TYPE3}@3@" | sed "s@${TYPE4}@4@" | sed "s@${TYPE5}@5@" |\
+	sed "s@${TYPE1}@1@" | sed "s@${TYPE2}@2@" | sed "s@${TYPE3}@3@" | sed "s@${TYPE4}@4@" | sed "s@${TYPE5}@5@" | sed "s@${TYPE6}@6@" |\
 	sed 's|^...*$|0|' | sort | uniq -c |\
 	sed 's|^[[:space:]]*\([0-9][0-9]*\)[[:space:]][[:space:]]*\([0-9][0-0]*\)[[:space:]]*$|\1 \2|' |\
 	sort -rn | head -1 | cut -d ' ' -f 2 | read TYPE
@@ -61,14 +63,17 @@ elif [[ x${TYPE} == x4 ]]; then
 elif [[ x${TYPE} == x5 ]]; then
 	RE=${TYPE5}
 	cat "${file_to_process}" | grep -a "${RE}" | sed 's| nan,PSI|,nan,PSI|' > "${file_to_store}_temp1"
+elif [[ x${TYPE} == x6 ]]; then
+	RE=${TYPE6}
+	cat "${file_to_process}" | grep -a "${RE}" > "${file_to_store}_temp1"
 else
 	echo "valve: Error"
 	exit 1
 fi
 
-# Note that the homogenizing of line termionations in the data fetcher can have
+# Note that the homogenizing of line terminations in the data fetcher can have
 # the side effect that newlines are inserted. This does not hurt, but makes them
-# count as bad lkineshere.
+# count as bad lines here.
 cat "${file_to_process}" | grep -va "${RE}" | grep -v '^$' | wc -l | read BADLINES
 
 echo "valve: ENV $BINDIR $instrument_tz PARSING as type ${TYPE} with ${BADLINES} bad lines"

@@ -16,6 +16,7 @@ if file_type == "1":
     else:
         df["datetime"] = pandas.to_datetime( df["date"] + " " + df["time"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df = df.drop( ["date","time"], axis=1 )
+    resample = False
 
 elif file_type == "2":
     df = pandas.read_csv( infile, names=["datetime1","p_psi","PSI","p_pa","Pa","p_kpa","kPa","p_torr","torr","p_inhg","inHg","p_atm","atm","p_bar","bar","conc_3_percent","%3","conc_c3","C3","conc_5_percent","%5","conc_c5","C5","valve_state","valve","fan_state","fan"], low_memory=False )
@@ -25,6 +26,7 @@ elif file_type == "2":
     else:
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df = df.drop( ["datetime1"], axis=1 )
+    resample = False
 
 elif (file_type == "3") or (file_type == "5"):
     df = pandas.read_csv( infile, names=["datetime1","p_psi","PSI","p_pa","Pa","p_kpa","kPa","p_torr","torr","p_inhg","inHg","p_atm","atm","p_bar","bar","conc_3_percent","%3","conc_c3","C3","conc_5_percent","%5","conc_c5","C5","valve_state","valve"], low_memory=False )
@@ -34,6 +36,7 @@ elif (file_type == "3") or (file_type == "5"):
     else:
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%Y-%m-%d %H:%M:%S', utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df = df.drop( ["datetime1"], axis=1 )
+    resample = False
 
 elif file_type == "4":
     df = pandas.read_csv( infile, names=["datetime1","valve1"], low_memory=False )
@@ -44,9 +47,24 @@ elif file_type == "4":
         df["datetime"] = pandas.to_datetime( df["datetime1"], format='%d-%b-%Y %H:%M:%S', utc=False ).dt.tz_localize( tz = instrument_tz, ambiguous='NaT' )
     df["valve_state"] = df.valve1.apply( lambda v: 0 if v=="CS" else 1 )
     df = df.drop( ["datetime1","valve1"], axis=1 )
+    resample = False
+
+elif file_type == "6":
+    df = pandas.read_csv( infile, names=["date","start_time","Valve_position","Switch_time"], sep="\t", low_memory=False )
+    boring_columns = []
+    if instrument_tz == "UTC":
+        df["datetime"] = pandas.to_datetime(df["date"] + " " + df["start_time"], format='%d.%m.%y %H:%M:%S' )
+
+    df["valve_state"] = df["Valve_position"].map( {"BYPASS": 1, "CS":0} )
+    df = df.drop( ["date","start_time","Valve_position","Switch_time"], axis=1 )
+
+    # This file records valve switch times, not state every minute.
+    # Needs up-sampling to 1min
+    resample = True
 
 else:
     df = None
+    resample = False
 
 
 for col in boring_columns:
@@ -65,10 +83,11 @@ newdf = pandas.concat( [df["datetime"],dfmisc,dfv], axis=1 )
 # There shall be no duplicate datetimes
 newdf.drop_duplicates( subset="datetime", keep="last", inplace=True ) 
 
-# if need be
-#newdf = newdf.set_index( "datetime" )
-#newdf = newdf.resample("1min").asfreq().ffill( limit=15 )
-#newdf = newdf.reset_index()
+if resample:
+    newdf = newdf.set_index( "datetime" )
+    newdf = newdf.resample("1min").asfreq().ffill( limit=15 )
+    newdf = newdf.reset_index()
+    newdf["valve_state"] = newdf["valve_state"].apply(int)
 
 # Drop the NaT/NaN rows
 newdf = newdf[ newdf.datetime == newdf.datetime ]
