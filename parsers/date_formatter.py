@@ -33,7 +33,10 @@ def make_tz( datetime_str, datetime_fmt, tz ):
 
 if datetime_fmt == "decimal":
     all_dt = [make_decimal(df.loc[i,date_col], df.loc[i,time_col], instrument_tz) for i in df.index]
-    df = df.drop( ["Start Date","End Date","Start Year","End Year"], axis=1 )
+    try: df = df.drop( ["Start Date","End Date","Start Year","End Year"], axis=1 )
+    except: pass
+    try: df = df.drop( ["Year","Start_DOY","End_DOY"], axis=1 )
+    except: pass
 elif date_col == time_col:
     all_dt = [make_utc(df.loc[i,date_col], datetime_fmt) for i in df.index]
     df = df.drop( [date_col], axis=1 )
