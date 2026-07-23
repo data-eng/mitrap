@@ -74,6 +74,18 @@ elif [[ "${instrument_name}" == "AE43" ]]; then
 	MEAS_COL='BC6'
 	MEAS_UNIT='1E-3'
 
+elif [[ "${instrument_name}" == "SN813" ]]; then
+	# AE33 variation. It is a TSV with different column names
+
+	cat  "${file_to_process}" | tr '\t' ',' > "${file_to_store}_temp1"
+	SEP=','
+	DATE_COL="time"
+	TIME_COL="time"
+	DATETIME_FMT='%Y-%m-%dT%H:%M:%SZ'
+	MEAS_COL='ebc_w6'
+	MEAS_UNIT='1'
+
+
 else
 	echo "Bad instrument name ${instrument_name}"
 	exit 1
