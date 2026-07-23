@@ -19,8 +19,6 @@ station_name=$3
 instrument_name=$4
 instrument_tz=$5
 
-instrument_tz="Europe/Amsterdam"
-
 temp=$(realpath "$0") && BINDIR=$(dirname "$temp")
 
 echo "ENV inorg_xact: $BINDIR $instrument_tz"
