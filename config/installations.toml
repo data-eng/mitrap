@@ -171,3 +171,21 @@ bc = { name = "AE33", file = "Public/AE33/Measurement_NoRun_S0002_Idx*csv", head
 pm_opc = { name = "OPC", file = "Public/OPC/*-C.dat", head=15, pri=1 }
 inorg_xc = { name = "XACT", file = "Public/Xact/??_??_2026*txt", head=-1, pri=1 }
 
+
+[mitrap014]
+
+city = "Prague - Holesovice - HR"
+geolocation = "50.108887 N 14.443652 E"
+tz = "Europe/Prague"
+category = "Traffic"
+start = "2026-07-14"
+end = "2026-11-14"
+
+valve = { name = "Switching Valve", file = "CURRENT/Switching_valve/*.txt", head=1, pri=0, tz="UTC" }
+mpss_aim11 = { name = "MPSS", file = "CURRENT/MPSS/*.txt", head=-1, pri=1, tz="UTC" }
+bc = { name = "SN813", file = "CURRENT/AE33/*.txt", head=1, pri=1, tz="UTC" }
+
+co2_modbus = { name = "CO2", file = "CURRENT/CO2/*.txt", head=0, pri=1, tz="UTC" }
+inorg_xact = { name = "XACT", file = "CURRENT/Xact/*.csv", head=-1, pri=1 }
+org_csv = { name = "ACSM", file = "CURRENT/ACSM/*nativeData.txt", head=1, pri=1, tz="UTC" }
+
