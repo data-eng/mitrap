@@ -40,8 +40,11 @@ if datetime_fmt == "decimal":
 elif date_col == time_col:
     all_dt = [make_utc(df.loc[i,date_col], datetime_fmt) for i in df.index]
     df = df.drop( [date_col], axis=1 )
-else:
+elif instrument_tz == "UTC":
     all_dt = [make_utc(df.loc[i,date_col]+" "+df.loc[i,time_col], datetime_fmt) for i in df.index]
+    df = df.drop( [date_col,time_col], axis=1 )
+else:
+    all_dt = [make_tz(df.loc[i,date_col]+" "+df.loc[i,time_col], datetime_fmt, instrument_tz) for i in df.index]
     df = df.drop( [date_col,time_col], axis=1 )
 
 newdf = pandas.concat( [pandas.DataFrame(all_dt,columns=["datetime"]),df], axis=1 )
