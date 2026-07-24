@@ -33,32 +33,37 @@ pm_pplus = { name = "OPS", file = "mitrap1/PM_Monitor/Zurich_Rosengartenstrasse_
 
 [mitrap002]
 
-city = "Milan - Senato - CE"
-geolocation = "45.470948 N 9.197218 E"
-tz = "Europe/Rome"
+city = "Prague - Vysocany - CE"
+geolocation = "50.111078 N 14.503109 E"
+tz = "Europe/Prague"
 category = "Traffic"
-start = "2026-03-12"
-end = "2026-06-17"
+start = "2026-07-01"
+end = "2026-11-10"
 
 co2_modbus = { name = "CO2", file = "CURRENT/CO2/*_co2_log.txt", head = 0, pri=1, tz="UTC" }
 nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head=1, pri=1, tz="UTC" }
+pm_trakpro = { name = "TrakPro", file = "CURRENT/OPS/Mi-TRAP-DustTrak*txt", head=0, pri=1 }
+
 valve = { name = "Flow Meter Valve COM1", file = "CURRENT/RH-T_p_valve/*Device1_log.txt", head=0, pri=0, tz="UTC" }
-bc = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*.txt", head=0, pri=1, tz="UTC" }
+bc = { name = "MA 350", file = "CURRENT/MA/MA350-*csv", head=1, pri=1, tz="UTC" }
 
 
 [mitrap003]
 
-city = "Milan - Linate - CE"
-geolocation = "45.436359 N 9.282072 E"
-tz = "Europe/Rome"
+city = "Prague - Dobroviz - CE"
+geolocation = "50.114133 N 14.221627 E"
+tz = "Europe/Prague"
 category = "Airport"
-start = "2026-03-23"
-end = "2026-06-28"
+start = "2026-07-01"
+end = "2026-11-10"
 
 co2_modbus = { name = "CO2", file = "CURRENT/CO2/*_co2_log.txt", head=0, pri=1, tz="UTC" }
 nanodust = { name = "Nanodust", file = "CURRENT/NanoDust/*1HzData.csv", head=1, pri=1, tz="UTC" }
+pm_trakpro = { name = "TrakPro", file = "CURRENT/OPS/Mi-TRAP-DT-*txt", head=0, pri=1 }
+
 valve = { name = "Flow Meter Valve COM1", file = "CURRENT/RH-T_p_valve/*Device1_log.txt", head=1, pri=0, tz="UTC" }
-bc = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*.txt", head=0, pri=1, tz="UTC" }
+#bc = { name = "MA 200", file = "CURRENT/MA/MA200_Log_*.txt", head=0, pri=1, tz="UTC" }
+bc = { name = "MA 350", file = "CURRENT/MA/MA350-*csv", head=1, pri=1, tz="UTC" }
 
 
 [mitrap004]
