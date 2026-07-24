@@ -38,6 +38,17 @@ if [[ "${instrument_name}" == "MA 200" ]]; then
 	# The values in the file will be multiplied by the number given here.
 	MEAS_UNIT='1E-3'
 
+elif [[ "${instrument_name}" == "MA 350" ]]; then
+	cp "${file_to_process}" "${file_to_store}_temp1"
+	SEP=','
+	DATE_COL='Date / time local'
+	TIME_COL='Date / time local'
+	DATETIME_FMT='%Y-%m-%dT%H:%M:%S'
+	MEAS_COL='IR BCc'
+	# Unit conversion, where needed.
+	# The values in the file will be multiplied by the number given here.
+	MEAS_UNIT='1E-3'
+
 elif [[ "${instrument_name}" == "AE33" ]]; then
 
 	# Some lines have as time '.000000E+1'
